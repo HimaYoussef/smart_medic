@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/LogItem.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
+import 'package:smart_medic/core/utils/Style.dart';
 
 // Stateful widget to display patient logs
 class PatientLogsView extends StatefulWidget {
@@ -48,15 +49,11 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Date header for the logs
-                  const Text(
+                  Text(
                     '22/10/2024',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: getTitleStyle(color: AppColors.white, fontSize: 20),
                   ),
-                  const SizedBox(height: 8), // Spacing before the log items
+                  const SizedBox(height: 25), // Spacing before the log items
                   const Divider(
                       color: Colors.white), // Divider for visual separation
 

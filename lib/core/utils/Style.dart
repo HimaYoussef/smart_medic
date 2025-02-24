@@ -9,7 +9,7 @@ TextStyle getTitleStyle(
       fontSize: fontSize,
       color: color,
       fontWeight: fontWeight,
-      fontFamily: GoogleFonts.cairo().fontFamily,
+      fontFamily: GoogleFonts.inter().fontFamily,
     );
 
 TextStyle getbodyStyle(
@@ -20,7 +20,7 @@ TextStyle getbodyStyle(
       fontSize: fontSize,
       color: color,
       fontWeight: fontWeight,
-      fontFamily: GoogleFonts.cairo().fontFamily,
+      fontFamily: GoogleFonts.inter().fontFamily,
     );
 
 TextStyle getsmallStyle(
@@ -31,5 +31,5 @@ TextStyle getsmallStyle(
       fontSize: fontSize,
       color: color,
       fontWeight: fontWeight,
-      fontFamily: GoogleFonts.cairo().fontFamily,
+      fontFamily: GoogleFonts.inter().fontFamily,
     );

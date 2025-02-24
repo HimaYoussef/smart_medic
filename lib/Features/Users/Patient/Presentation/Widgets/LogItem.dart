@@ -1,5 +1,7 @@
 // Importing required Flutter packages for creating the log item.
 import 'package:flutter/material.dart';
+import 'package:smart_medic/core/utils/Colors.dart';
+import 'package:smart_medic/core/utils/Style.dart';
 
 // LogItem widget displays a single log entry with time, text, BPM, and checkbox icon.
 class LogItem extends StatelessWidget {
@@ -25,20 +27,14 @@ class LogItem extends StatelessWidget {
           // Displaying time and log text in one row.
           Text(
             '$time - $text',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.white,
-            ),
+            style: getbodyStyle(color: AppColors.white, fontSize: 18),
           ),
           // Display BPM if available.
           if (bpm != null) ...[
             const Spacer(),
             Text(
               'BPM: $bpm', // Display BPM.
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-              ),
+              style: getbodyStyle(color: AppColors.white, fontSize: 18),
             ),
           ],
           // Display checkbox or clock icon based on the task status.

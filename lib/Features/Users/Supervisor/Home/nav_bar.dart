@@ -16,8 +16,8 @@ class _Supervisor_HomeViewState extends State<Supervisor_HomeView> {
   int currentIndex = 1; // Home is selected by default
 
   final List<Widget> screens = [
-    const Supervisor_Awareness_View(), // Awareness Page
     const Supervior_Main_view(), // Home Page
+    const Supervisor_Awareness_View(), // Awareness Page
     const Supervior_Profile_view(), // Profile Page
   ];
 
@@ -63,12 +63,12 @@ class _Supervisor_HomeViewState extends State<Supervisor_HomeView> {
               },
               items: [
                 BottomNavigationBarItem(
-                  icon: _buildNavItem('assets/Awareness.svg', 0),
-                  label: 'Awareness',
+                  icon: _buildNavItem('assets/Home.svg', 0),
+                  label: 'Home',
                 ),
                 BottomNavigationBarItem(
-                  icon: _buildNavItem('assets/Home.svg', 1),
-                  label: 'Home',
+                  icon: _buildNavItem('assets/Awareness.svg', 1),
+                  label: 'Awareness',
                 ),
                 BottomNavigationBarItem(
                   icon: _buildNavItem('assets/Profile.svg', 2),

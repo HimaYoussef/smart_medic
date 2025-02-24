@@ -1,33 +1,34 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 
 class CustomBoxIcon extends StatelessWidget {
-  const CustomBoxIcon({
-    super.key,
-    this.onTap,
-  });
+  final VoidCallback onTap;
+  final double iconSize; // Added iconSize parameter
 
-  final void Function()? onTap;
+  const CustomBoxIcon({super.key, required this.onTap, this.iconSize = 24});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            spreadRadius: 2,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 5,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Center(
+          child: Icon(
+            Icons.add,
+            size: iconSize, // Bigger plus (+) icon
+            color: AppColors.color1,
           ),
-        ],
-      ),
-      child: Center(
-        child: IconButton(
-          icon: Icon(Icons.add, size: 50, color: AppColors.color1),
-          onPressed: onTap,
         ),
       ),
     );
