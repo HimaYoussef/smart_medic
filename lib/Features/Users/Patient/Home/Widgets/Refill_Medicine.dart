@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:smart_medic/Home.dart';
+import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 
@@ -104,7 +104,7 @@ class _nameState extends State<Refill_Medicine> {
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
                                 Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => Home(),
+                                  builder: (context) => PatientHomeView(),
                                 ));
                               }
                             },

@@ -12,6 +12,10 @@ import 'package:smart_medic/core/utils/Style.dart';
 import 'package:smart_medic/core/widgets/custom_dialogs.dart';
 
 class SignUpScreen extends StatefulWidget {
+  final String role;
+
+  const SignUpScreen({super.key, required this.role});
+
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
@@ -37,7 +41,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             title: 'Verify Email',
             desc: 'Please verify your email',
             btnOkOnPress: () {
-              pushTo(context, LoginScreen());
+              if (widget.role == 'Patient') {
+                pushTo(context, LoginScreen(role: 'Patient'));
+              } else if (widget.role == 'Supervisor') {
+                pushTo(context, LoginScreen(role: 'Supervisor'));
+              }
             },
           ).show();
           context.read<AuthCubit>().Verify(_emailController.text);
@@ -92,8 +100,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   color: AppColors.color1,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Icon(Icons.medical_services,
-                                    color: AppColors.white, size: 30),
+                                child: Icon(
+                                  Icons.medical_services,
+                                  color: AppColors.white,
+                                  size: 30,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -101,7 +112,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               child: Text(
                                 'Hello!',
                                 style: TextStyle(
-                                    fontSize: 24, fontWeight: FontWeight.bold),
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 32),
@@ -232,8 +245,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
-                                              content: Text(
-                                                  'Passwords do not match')),
+                                            content:
+                                                Text('Passwords do not match'),
+                                          ),
                                         );
                                         return;
                                       }
@@ -274,7 +288,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                  builder: (context) => LoginScreen()),
+                                builder: (context) =>
+                                    LoginScreen(role: widget.role),
+                              ),
                             );
                           },
                           child: Text(

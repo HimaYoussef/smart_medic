@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view/Login.dart';
+import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Supervision_view.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
 import 'package:smart_medic/core/functions/routing.dart';
@@ -175,7 +176,7 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                     title: const Text('Log out'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      pushAndRemoveUntil(context, LoginScreen());
+                      pushAndRemoveUntil(context, RoleSelectionScreen());
 
                       _signOut();
                     },

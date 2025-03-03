@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
+import 'package:smart_medic/core/functions/routing.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 
@@ -9,7 +12,25 @@ class Supervior_Profile_view extends StatefulWidget {
   @override
   State<Supervior_Profile_view> createState() => _nameState();
 }
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
+User? user;
+String? UserID;
+
+Future<void> _getUser() async {
+  user = FirebaseAuth.instance.currentUser;
+  print(user?.displayName);
+  UserID = user?.uid;
+}
+
+@override
+void initState() {
+  _getUser();
+}
+
+Future _signOut() async {
+  await _auth.signOut();
+}
 class _nameState extends State<Supervior_Profile_view> {
   @override
   Widget build(BuildContext context) {
@@ -119,6 +140,16 @@ class _nameState extends State<Supervior_Profile_view> {
                     title: const Text('Change Language'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {},
+                  ),
+                   ListTile(
+                    leading: Icon(Icons.logout, color: AppColors.color1),
+                    title: const Text('Log out'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      pushAndRemoveUntil(context, RoleSelectionScreen());
+
+                      _signOut();
+                    },
                   ),
                 ],
               ),

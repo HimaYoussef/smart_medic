@@ -4,6 +4,7 @@ import 'package:smart_medic/Features/Auth/Presentation/view/Sign_up.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view_model/auth_cubit.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view_model/auth_states.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
+import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
 import 'package:smart_medic/core/functions/email_validation.dart';
 import 'package:smart_medic/core/functions/routing.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
@@ -11,26 +12,31 @@ import 'package:smart_medic/core/utils/Style.dart';
 import 'package:smart_medic/core/widgets/custom_dialogs.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String role;
+
+  const LoginScreen({super.key, required this.role});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // bool _isLoggedIn = false;
-  // Map _userObj = {};
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool isVisable = true;
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthCubit, AuthStates>(
       listener: (context, state) {
         if (state is LoginSuccessState) {
-          pushAndRemoveUntil(context, const PatientHomeView());
+          if (widget.role == 'Patient') {
+            pushAndRemoveUntil(context, const PatientHomeView());
+          } else if (widget.role == 'Supervisor') {
+            pushAndRemoveUntil(context, const SupervisorHomeView());
+          }
         } else if (state is LoginErrorState) {
           Navigator.pop(context);
           showErrorDialog(context, state.error);
@@ -44,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Column(
               children: [
                 Expanded(flex: 1, child: Container(color: AppColors.color1)),
-                Expanded(flex: 2, child: Container(color: Colors.grey[200])),
+                Expanded(flex: 2, child: Container(color: AppColors.white)),
               ],
             ),
             SingleChildScrollView(
@@ -53,11 +59,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 100),
-                    Text("Login",
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.white)),
+                    Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.white,
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -105,9 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               textAlign: TextAlign.start,
                               decoration: InputDecoration(
                                 labelText: 'Email',
-                                floatingLabelBehavior: FloatingLabelBehavior
-                                    .always, // Keeps label on top
-
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
                                 hintText: 'Enter your Email Address',
                                 hintStyle: getbodyStyle(color: Colors.grey),
                                 fillColor: AppColors.TextField,
@@ -127,13 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 25.0),
                             TextFormField(
                               textAlign: TextAlign.start,
-                              style: TextStyle(color: AppColors.black),
                               obscureText: isVisable,
                               keyboardType: TextInputType.visiblePassword,
                               decoration: InputDecoration(
                                 labelText: 'Password',
-                                floatingLabelBehavior: FloatingLabelBehavior
-                                    .always, // Keeps label on top
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
                                 hintText: 'Enter your Password',
                                 hintStyle: getbodyStyle(color: Colors.grey),
                                 fillColor: AppColors.TextField,
@@ -153,8 +158,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               controller: _passwordController,
                               validator: (value) {
-                                if (value!.isEmpty)
+                                if (value!.isEmpty) {
                                   return 'Please Enter Your password';
+                                }
                                 return null;
                               },
                             ),
@@ -202,16 +208,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: getbodyStyle(color: AppColors.black),
                           ),
                           TextButton(
-                              onPressed: () {
-                                Navigator.of(context)
-                                    .pushReplacement(MaterialPageRoute(
-                                  builder: (context) => SignUpScreen(),
-                                ));
-                              },
-                              child: Text(
-                                'SIGN UP',
-                                style: getbodyStyle(color: AppColors.color1),
-                              ))
+                            onPressed: () {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => SignUpScreen(role: widget.role),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'SIGN UP',
+                              style: getbodyStyle(color: AppColors.color1),
+                            ),
+                          )
                         ],
                       ),
                     ),

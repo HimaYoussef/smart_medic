@@ -89,7 +89,7 @@ class MainApp extends StatelessWidget {
             ),
             fontFamily: GoogleFonts.cairo().fontFamily,
           ),
-          home: LoginScreen(),
+          home: RoleSelectionScreen(),
           builder: (context, child) {
             return Directionality(
               textDirection: TextDirection.ltr,

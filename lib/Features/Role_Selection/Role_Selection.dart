@@ -37,8 +37,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 SizedBox(height: screenHeight * 0.03),
                 _buildRoleCard('Patient', 'assets/patient.png', screenWidth),
                 SizedBox(height: screenHeight * 0.02),
-                _buildRoleCard(
-                    'Supervisor', 'assets/supervisor.png', screenWidth),
+                _buildRoleCard('Supervisor', 'assets/supervisor.png', screenWidth),
                 SizedBox(height: screenHeight * 0.05),
                 SizedBox(
                   width: screenWidth * 0.6,
@@ -49,7 +48,8 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginScreen()),
+                                builder: (context) => LoginScreen(role: selectedRole),
+                              ),
                             );
                           }
                         : null,
@@ -86,7 +86,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              /// Align checkbox at the **top-left**
               Align(
                 alignment: Alignment.topLeft,
                 child: Checkbox(
@@ -99,8 +98,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   ),
                 ),
               ),
-
-              /// Properly sized image
               SizedBox(
                 width: screenWidth * 0.45,
                 height: screenWidth * 0.35,
@@ -110,9 +107,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               Text(
                 role,
                 style: getbodyStyle(
-                    color: AppColors.black,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
+                  color: AppColors.black,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),

@@ -54,8 +54,7 @@ class AuthCubit extends Cubit<AuthStates> {
 
       }
       emit(LoginSuccessState());
-    } 
-    on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       if (e.code == 'verification') {
         emit(LoginErrorState(error: 'verification failed'));
       } else {
