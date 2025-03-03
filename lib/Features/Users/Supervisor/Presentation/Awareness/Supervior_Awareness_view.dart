@@ -17,7 +17,7 @@ class _nameState extends State<Supervisor_Awareness_View> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA), // Light gray background
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0, // Removes shadow from AppBar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -33,15 +33,11 @@ class _nameState extends State<Supervisor_Awareness_View> {
         ),
         centerTitle: true,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16), // Align with design
-            child: SvgPicture.asset(
-              'assets/pills.svg', // Path to pills icon
-              height: 24,
-              width: 24,
-              colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn),
-            ),
-          ),
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
         ],
       ),
       body: Padding(

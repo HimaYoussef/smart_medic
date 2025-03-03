@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Add_Supervisor.dart';
+import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/SupervisorCard.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 
@@ -19,10 +20,18 @@ class SupervisorsScreen extends StatelessWidget {
             fontWeight: FontWeight.bold, // Bold title
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         centerTitle: true,
-        elevation: 0, // Removes shadow for a clean UI
+        elevation: 0,
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
+        ], // Removes shadow for a clean UI
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -65,59 +74,11 @@ class SupervisorsScreen extends StatelessWidget {
             ),
           );
         },
-        child: const Icon(Icons.add, color: Colors.white), // Plus icon
+        child: const Icon(Icons.add, color: Colors.white),
+        shape: const CircleBorder(), // Ensures it remains a perfect circle
       ),
     );
   }
 }
 
 // Custom Supervisor Card Widget
-class SupervisorCard extends StatelessWidget {
-  final String name;
-  final String email;
-  final String type;
-
-  const SupervisorCard({
-    super.key,
-    required this.name,
-    required this.email,
-    required this.type,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: AppColors.color1, // Matches image design
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: AssetImage('assets/avatar2.png'), // Avatar image
-        ),
-        title: Text(
-          'Name: $name',
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Gmail: $email',
-              style: getsmallStyle(color: Colors.white),
-            ),
-            Text(
-              'Type: $type',
-              style: getsmallStyle(color: Colors.white),
-            ),
-          ],
-        ),
-        trailing: const Icon(
-          Icons.arrow_forward_ios,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-}

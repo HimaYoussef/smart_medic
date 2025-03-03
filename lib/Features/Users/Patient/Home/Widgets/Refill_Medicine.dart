@@ -79,7 +79,7 @@ class _nameState extends State<Refill_Medicine> {
                       decoration: InputDecoration(
                         hintText: 'Enter The Num of pills added',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,

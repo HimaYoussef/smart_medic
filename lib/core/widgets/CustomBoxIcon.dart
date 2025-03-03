@@ -13,11 +13,11 @@ class CustomBoxIcon extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black12.withOpacity(0.18),
               blurRadius: 5,
               spreadRadius: 2,
             ),

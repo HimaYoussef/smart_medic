@@ -16,9 +16,9 @@ class _PatientLogsViewState extends State<PatientLogsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0, // Removes AppBar shadow for a cleaner look
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -29,7 +29,14 @@ class _PatientLogsViewState extends State<PatientLogsView> {
           style: TextStyle(
               color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        centerTitle: true, // Centers the title in the AppBar
+        centerTitle: true,
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
+        ], // Centers the title in the AppBar
       ),
       body: Padding(
         padding:

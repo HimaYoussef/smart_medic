@@ -29,11 +29,12 @@ class _Add_new_Medicine extends State<Add_new_Medicine> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 235, 235, 235), // Light grey background
+      backgroundColor:
+          const Color.fromARGB(255, 235, 235, 235), // Light grey background
 
       /// **App Bar with Back Button**
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.white,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
@@ -93,7 +94,7 @@ class _Add_new_Medicine extends State<Add_new_Medicine> {
                       decoration: InputDecoration(
                         hintText: 'Enter the name of the Medicine',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: const Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -125,7 +126,7 @@ class _Add_new_Medicine extends State<Add_new_Medicine> {
                       decoration: InputDecoration(
                         hintText: 'Enter the amount of dosages',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: const Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -157,7 +158,7 @@ class _Add_new_Medicine extends State<Add_new_Medicine> {
                       decoration: InputDecoration(
                         hintText: 'Enter the number of pills',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: const Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -183,7 +184,6 @@ class _Add_new_Medicine extends State<Add_new_Medicine> {
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
-                                // TODO: Handle form submission
                               }
                             },
                             style: ElevatedButton.styleFrom(

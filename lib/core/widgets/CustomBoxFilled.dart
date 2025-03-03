@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_medic/core/utils/Colors.dart';
 
 class CustomBoxFilled extends StatelessWidget {
   const CustomBoxFilled({
@@ -12,11 +13,11 @@ class CustomBoxFilled extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: Colors.black12.withOpacity(0.18),
             blurRadius: 6,
             spreadRadius: 2,
           ),

@@ -20,7 +20,8 @@ final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
 // Controllers for input fields
 final TextEditingController _SuperVisorNameController = TextEditingController();
-final TextEditingController _SuperVisorEmailController = TextEditingController();
+final TextEditingController _SuperVisorEmailController =
+    TextEditingController();
 
 // Default selected value for supervisor type
 String _SuperVisor_Type = SuperVisor_type[0];
@@ -29,13 +30,22 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 235, 235, 235), // Light grey background
+      backgroundColor:
+          const Color.fromARGB(255, 235, 235, 235), // Light grey background
+      // Light grey background
       appBar: AppBar(
         backgroundColor: Colors.transparent, // Transparent AppBar
         leading: GestureDetector(
           onTap: () => Navigator.pop(context), // Navigates back on tap
           child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
         ),
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(15),
@@ -89,7 +99,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                       decoration: InputDecoration(
                         hintText: 'Enter The name of the Supervisor',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: const Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -120,7 +130,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                       decoration: InputDecoration(
                         hintText: 'Enter The Email of the Supervisor',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: const Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -151,7 +161,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 248, 248, 248),
+                          color: AppColors.TextField,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: DropdownButton<String>(
@@ -196,10 +206,12 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.color1, // Primary button color
+                            backgroundColor:
+                                AppColors.color1, // Primary button color
                             elevation: 2, // Light shadow effect
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15), // Rounded button
+                              borderRadius:
+                                  BorderRadius.circular(15), // Rounded button
                             ),
                           ),
                           child: Text(

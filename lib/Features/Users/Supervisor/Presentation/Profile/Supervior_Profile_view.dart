@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
+import 'package:smart_medic/core/utils/Style.dart';
 
 class Supervior_Profile_view extends StatefulWidget {
   const Supervior_Profile_view({super.key});
@@ -13,76 +14,83 @@ class _nameState extends State<Supervior_Profile_view> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Profile',
-          style: TextStyle(color: Colors.black),
+          style: getTitleStyle(
+              color: AppColors.black, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         centerTitle: true,
         elevation: 0,
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Profile Card
+            // Updated Profile Card (Matches Image)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black12, blurRadius: 6, spreadRadius: 2),
+                    color: Colors.black12,
+                    blurRadius: 1,
+                  ),
                 ],
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Stack(
+              child: Row(
                 children: [
+                  // Profile Image
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(50), // Rounded image
+                    child: Image.asset(
+                      'assets/avatar2.png', // Replace with actual profile image
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 10), // Spacing
+
+                  // User Details
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 8), // Space from top
-                      Center(
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.grey[300],
-                          child: const Icon(Icons.person,
-                              size: 40, color: Colors.black),
-                        ),
+                      Text(
+                        'Name : Mayada',
+                        style: getbodyStyle(
+                            color: AppColors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Ahmed Ali',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const Text(
-                        'Ahmed@gmail.com',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      const Text(
-                        'Age 22',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      Text(
+                        'Age : 21',
+                        style: getbodyStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12),
                       ),
                     ],
                   ),
-                  // Edit Icon Positioned Exactly at Top Right Edge
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.black54),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Edit_Profile(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  Spacer(),
+                  CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.color1,
+                      child: Icon(
+                        Icons.notifications_sharp,
+                        color: AppColors.white,
+                      ))
                 ],
               ),
             ),
@@ -91,7 +99,7 @@ class _nameState extends State<Supervior_Profile_view> {
             // Settings Options
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(

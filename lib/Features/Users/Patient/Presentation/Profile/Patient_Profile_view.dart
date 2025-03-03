@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Supervision_view.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
+import 'package:smart_medic/core/utils/Style.dart';
 
-// Stateful widget representing the patient's profile screen
 class PatientProfileView extends StatefulWidget {
   const PatientProfileView({super.key});
 
@@ -11,84 +11,86 @@ class PatientProfileView extends StatefulWidget {
   State<PatientProfileView> createState() => _PatientProfileViewState();
 }
 
-// State class to manage the PatientProfileView UI
 class _PatientProfileViewState extends State<PatientProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200], // Light grey background for contrast
+      backgroundColor: AppColors.white, // Light grey background
       appBar: AppBar(
         title: const Text(
           'Profile',
           style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: Colors.white,
-        centerTitle: true, // Centers the title in the AppBar
-        elevation: 0, // Removes AppBar shadow for a cleaner look
+        backgroundColor: AppColors.white,
+        centerTitle: true,
+        elevation: 0,
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0), // Adds padding around the content
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Profile Card
+            // Updated Profile Card (Matches Image)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16), // Rounded edges
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black12, blurRadius: 6, spreadRadius: 2),
-                ], // Adds a subtle shadow for depth
+                    color: Colors.black12,
+                    blurRadius: 1,
+                  ),
+                ],
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Stack(
+              child: Row(
                 children: [
+                  // Profile Image
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(50), // Rounded image
+                    child: Image.asset(
+                      'assets/avatar2.png', // Replace with actual profile image
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 10), // Spacing
+
+                  // User Details
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 8), // Spacing from the top
-                      Center(
-                        child: CircleAvatar(
-                          radius: 40, // Avatar size
-                          backgroundColor:
-                              Colors.grey[300], // Placeholder color
-                          child: const Icon(Icons.person,
-                              size: 40,
-                              color: Colors.black), // Default user icon
-                        ),
+                      Text(
+                        'Name : Mayada',
+                        style: getbodyStyle(
+                            color: AppColors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Ahmed Ali', // User's name
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const Text(
-                        'Ahmed@gmail.com', // Email address
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      const Text(
-                        'Age 22', // User's age
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      Text(
+                        'Age : 21',
+                        style: getbodyStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12),
                       ),
                     ],
                   ),
-                  // Edit Icon Positioned at the Top Right
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.black54),
-                      onPressed: () {
-                        // Navigates to the Edit Profile screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Edit_Profile(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  Spacer(),
+                  CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.color1,
+                      child: Icon(
+                        Icons.notifications_sharp,
+                        color: AppColors.white,
+                      ))
                 ],
               ),
             ),
@@ -97,12 +99,15 @@ class _PatientProfileViewState extends State<PatientProfileView> {
             // Settings Section
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16), // Rounded edges
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black12, blurRadius: 6, spreadRadius: 2),
-                ], // Adds a subtle shadow
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -112,7 +117,7 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                     title: const Text('Dark Mode'),
                     trailing: Switch(value: false, onChanged: (value) {}),
                   ),
-                  const Divider(), // Divider for separation
+                  const Divider(),
 
                   // Supervisor Section
                   ListTile(
@@ -121,7 +126,6 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                     title: const Text('Supervisor'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      // Navigates to the Supervisors screen
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -130,7 +134,7 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                       );
                     },
                   ),
-                  const Divider(), // Divider for separation
+                  const Divider(),
 
                   // Language Change Option
                   ListTile(

@@ -14,15 +14,22 @@ class _Logs_viewState extends State<Logs_view> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         title: const Text(
           'Profile',
           style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         centerTitle: true,
         elevation: 0,
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

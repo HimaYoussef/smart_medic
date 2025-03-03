@@ -23,10 +23,13 @@ showLoadingDialog(BuildContext context) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset('assets/Sports.json', width: 150, height: 150),
+          Lottie.asset(
+            'assets/Health.json',
+            width: 250,
+            height: 250,
+          ),
         ],
       );
     },
   );
 }
-

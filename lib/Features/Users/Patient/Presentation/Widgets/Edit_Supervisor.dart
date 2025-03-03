@@ -28,17 +28,26 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 235, 235, 235), // Light gray background
+      backgroundColor:
+          const Color.fromARGB(255, 235, 235, 235), // Light gray background
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // Transparent app bar
+        backgroundColor: AppColors.white, // Transparent app bar
         leading: GestureDetector(
           onTap: () => Navigator.pop(context), // Navigate back on tap
           child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
         ),
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(15), // Outer padding
-        child: SingleChildScrollView( // Allows scrolling if content overflows
+        child: SingleChildScrollView(
+          // Allows scrolling if content overflows
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20), // Rounded corners
@@ -50,10 +59,11 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
               child: Padding(
                 padding: const EdgeInsets.all(10), // Inner padding
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // Align elements to the left
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Align elements to the left
                   children: [
                     const Gap(20), // Adds spacing
-                    
+
                     // Title
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -68,7 +78,7 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
                         ),
                       ],
                     ),
-                    
+
                     const Gap(30), // Spacing
 
                     // Name Field
@@ -88,7 +98,7 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Name',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: const Color.fromARGB(255, 248, 248, 248),
+                        fillColor:  AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -99,7 +109,7 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
                         return null;
                       },
                     ),
-                    
+
                     const SizedBox(height: 25.0),
 
                     // Email Field
@@ -120,7 +130,7 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Email',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: const Color.fromARGB(255, 248, 248, 248),
+                        fillColor:  AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -133,7 +143,7 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
                         return null;
                       },
                     ),
-                    
+
                     const SizedBox(height: 25),
 
                     // Age Field
@@ -153,7 +163,7 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Age',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: const Color.fromARGB(255, 248, 248, 248),
+                        fillColor:  AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -182,10 +192,12 @@ class _Edit_Profile extends State<Edit_SuperVisor> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.color1, // Primary button color
+                              backgroundColor:
+                                  AppColors.color1, // Primary button color
                               elevation: 2, // Slight elevation for depth effect
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15), // Rounded corners
+                                borderRadius: BorderRadius.circular(
+                                    15), // Rounded corners
                               ),
                             ),
                             child: Text(

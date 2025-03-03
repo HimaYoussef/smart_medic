@@ -41,7 +41,7 @@ class SupervisionCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.white,
                 backgroundImage:
                     AssetImage(avatar), // Use local assets for avatar
               ),

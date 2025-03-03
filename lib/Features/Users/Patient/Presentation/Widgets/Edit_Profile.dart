@@ -29,16 +29,23 @@ class _Edit_Profile extends State<Edit_Profile> {
     return Scaffold(
       // Set the background color of the screen.
       backgroundColor: Color.fromARGB(255, 235, 235, 235),
-      
+
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.white,
         leading: GestureDetector(
           // Add a back button that navigates to the previous screen.
           onTap: () => Navigator.pop(context),
           child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
         ),
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          )
+        ],
       ),
-      
+
       body: Padding(
         padding: const EdgeInsets.all(15),
         child: SingleChildScrollView(
@@ -47,9 +54,10 @@ class _Edit_Profile extends State<Edit_Profile> {
               borderRadius: BorderRadius.circular(20),
               color: AppColors.white,
             ),
-            height: 550,
+            height: 580,
             child: Form(
-              key: _formKey, // Linking the form with the form key for validation.
+              key:
+                  _formKey, // Linking the form with the form key for validation.
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
@@ -87,7 +95,7 @@ class _Edit_Profile extends State<Edit_Profile> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Name',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -117,7 +125,7 @@ class _Edit_Profile extends State<Edit_Profile> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Email',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -149,7 +157,7 @@ class _Edit_Profile extends State<Edit_Profile> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Age',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: Color.fromARGB(255, 248, 248, 248),
+                        fillColor: AppColors.TextField,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
