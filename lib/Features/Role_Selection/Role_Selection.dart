@@ -63,7 +63,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                       "Next",
                       style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
-                    
                   ),
                 ),
               ],
@@ -82,7 +81,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 4,
         child: Container(
-          width: screenWidth * 0.6, 
+          width: screenWidth * 0.6,
           padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,

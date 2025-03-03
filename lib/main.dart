@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view/Login.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view_model/auth_cubit.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
-import 'package:smart_medic/Home.dart';
 import 'dart:async';
 
 import 'package:smart_medic/core/utils/Colors.dart';
@@ -21,7 +20,6 @@ Future<void> main() async {
           appId: 'com.example.smart_medic',
           messagingSenderId: '352505676305',
           projectId: 'smartmedicbox-2025'));
-  WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
   );
@@ -91,7 +89,7 @@ class MainApp extends StatelessWidget {
             ),
             fontFamily: GoogleFonts.cairo().fontFamily,
           ),
-          home: RoleSelectionScreen(),
+          home: LoginScreen(),
           builder: (context, child) {
             return Directionality(
               textDirection: TextDirection.ltr,

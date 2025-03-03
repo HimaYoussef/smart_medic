@@ -74,7 +74,7 @@ class _HomeState extends State<Home> {
                 child: ElevatedButton(
                   onPressed: () {
                     /// **Navigates to the Supervisor Home View**
-                    pushTo(context, Supervisor_HomeView());
+                    pushTo(context, SupervisorHomeView());
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.color1, // Uses primary app color

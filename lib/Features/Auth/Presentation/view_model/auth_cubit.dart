@@ -48,11 +48,14 @@ class AuthCubit extends Cubit<AuthStates> {
     emit(LoginLoadingState());
     try {
       User user = FirebaseAuth.instance.currentUser!;
-      if (!user.emailVerified) {
-        user.sendEmailVerification();
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+              print('Verification email has been sent.');
+
       }
       emit(LoginSuccessState());
-    } on FirebaseAuthException catch (e) {
+    } 
+    on FirebaseAuthException catch (e) {
       if (e.code == 'verification') {
         emit(LoginErrorState(error: 'verification failed'));
       } else {
@@ -61,7 +64,8 @@ class AuthCubit extends Cubit<AuthStates> {
     }
   }
 
-  registerUser(String name, String email, String password) async {
+  registerUser(String name, String email, String password,
+      String Confirmpassword) async {
     emit(RegisterLoadingState());
     try {
       final credential =

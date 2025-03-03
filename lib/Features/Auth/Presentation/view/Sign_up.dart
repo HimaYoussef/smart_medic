@@ -1,10 +1,10 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view/Login.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view_model/auth_cubit.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view_model/auth_states.dart';
+import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/core/functions/email_validation.dart';
 import 'package:smart_medic/core/functions/routing.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
@@ -23,8 +23,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   final TextEditingController _displayNameController = TextEditingController();
-  final TextEditingController _Verify_emailController = TextEditingController();
-  bool _isLoading = false;
 
   bool isVisible = true;
 
@@ -33,12 +31,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return BlocListener<AuthCubit, AuthStates>(
       listener: (context, state) {
         if (state is RegisterSuccessState) {
-          pushAndRemoveUntil(context, const LoginScreen());
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.warning,
+            title: 'Verify Email',
+            desc: 'Please verify your email',
+            btnOkOnPress: () {
+              pushTo(context, LoginScreen());
+            },
+          ).show();
+          context.read<AuthCubit>().Verify(_emailController.text);
         } else if (state is RegisterErrorState) {
           Navigator.pop(context);
           showErrorDialog(context, state.error);
-        } else {
-          showLoadingDialog(context);
         }
       },
       child: Scaffold(
@@ -47,7 +52,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             Column(
               children: [
                 Expanded(flex: 1, child: Container(color: AppColors.color1)),
-                Expanded(flex: 2, child: Container(color: AppColors.white)),
+                Expanded(flex: 2, child: Container(color: Colors.grey[200])),
               ],
             ),
             SingleChildScrollView(
@@ -87,11 +92,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   color: AppColors.color1,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Icon(
-                                  Icons.medical_services,
-                                  color: AppColors.white,
-                                  size: 30,
-                                ),
+                                child: Icon(Icons.medical_services,
+                                    color: AppColors.white, size: 30),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -99,22 +101,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               child: Text(
                                 'Hello!',
                                 style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                    fontSize: 24, fontWeight: FontWeight.bold),
                               ),
                             ),
                             const SizedBox(height: 32),
-                            // Full Name Field
                             TextFormField(
                               keyboardType: TextInputType.name,
                               controller: _displayNameController,
                               textAlign: TextAlign.start,
                               decoration: InputDecoration(
                                 labelText: 'Full Name',
-                                floatingLabelBehavior: FloatingLabelBehavior
-                                    .always, // Keeps label on top
-
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
                                 hintText: 'Enter your Full Name',
                                 hintStyle: getbodyStyle(color: Colors.grey),
                                 fillColor: AppColors.TextField,
@@ -128,16 +126,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               },
                             ),
                             const SizedBox(height: 20),
-                            // Email Field
                             TextFormField(
                               keyboardType: TextInputType.emailAddress,
                               controller: _emailController,
                               textAlign: TextAlign.start,
                               decoration: InputDecoration(
                                 labelText: 'Email',
-                                floatingLabelBehavior: FloatingLabelBehavior
-                                    .always, // Keeps label on top
-
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
                                 hintText: 'Enter your Email Address',
                                 hintStyle: getbodyStyle(color: Colors.grey),
                                 fillColor: AppColors.TextField,
@@ -155,16 +151,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               },
                             ),
                             const SizedBox(height: 20),
-                            // Password Field
                             TextFormField(
                               obscureText: isVisible,
                               controller: _passwordController,
+                              keyboardType: TextInputType.visiblePassword,
                               textAlign: TextAlign.start,
                               decoration: InputDecoration(
                                 labelText: 'Password',
-                                floatingLabelBehavior: FloatingLabelBehavior
-                                    .always, // Keeps label on top
-
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
                                 hintText: 'Enter Your Password',
                                 hintStyle: getbodyStyle(color: Colors.grey),
                                 fillColor: AppColors.TextField,
@@ -175,11 +170,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       isVisible = !isVisible;
                                     });
                                   },
-                                  icon: Icon(
-                                    isVisible
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                  ),
+                                  icon: Icon(isVisible
+                                      ? Icons.visibility_off
+                                      : Icons.visibility),
                                 ),
                               ),
                               validator: (value) {
@@ -191,18 +184,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 return null;
                               },
                             ),
-
                             const SizedBox(height: 20),
-                            // Confirm Password Field
                             TextFormField(
                               obscureText: isVisible,
                               controller: _confirmPasswordController,
+                              keyboardType: TextInputType.visiblePassword,
                               textAlign: TextAlign.start,
                               decoration: InputDecoration(
                                 labelText: 'Confirm Password',
-                                floatingLabelBehavior: FloatingLabelBehavior
-                                    .always, // Keeps label on top
-
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
                                 hintText: 'Confirm Your Password',
                                 hintStyle: getbodyStyle(color: Colors.grey),
                                 fillColor: AppColors.TextField,
@@ -213,11 +204,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       isVisible = !isVisible;
                                     });
                                   },
-                                  icon: Icon(
-                                    isVisible
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                  ),
+                                  icon: Icon(isVisible
+                                      ? Icons.visibility_off
+                                      : Icons.visibility),
                                 ),
                               ),
                               validator: (value) {
@@ -231,14 +220,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                             const SizedBox(height: 20),
                             Container(
-                              padding: const EdgeInsets.only(top: 15.0),
+                              padding: const EdgeInsets.only(top: 10.0),
                               child: SizedBox(
                                 width: double.infinity,
                                 height: 50,
-                                child: AnimatedButton(
-                                  text: 'SIGN UP',
-                                  color: AppColors.color1,
-                                  pressEvent: () {
+                                child: ElevatedButton(
+                                  onPressed: () async {
                                     if (_formKey.currentState!.validate()) {
                                       if (_passwordController.text !=
                                           _confirmPasswordController.text) {
@@ -246,122 +233,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             .showSnackBar(
                                           SnackBar(
                                               content: Text(
-                                                  'Passwords don\'t match')),
+                                                  'Passwords do not match')),
                                         );
                                         return;
                                       }
-                                      setState(() {
-                                        _isLoading = true;
-                                      });
                                       context.read<AuthCubit>().registerUser(
-                                            _emailController.text,
-                                            _passwordController.text,
-                                            _displayNameController.text,
-                                          );
-                                      AwesomeDialog(
-                                        context: context,
-                                        dialogType: DialogType.warning,
-                                        title: 'Verify Email',
-                                        desc: 'Please verify your email',
-                                        btnOkOnPress: () {
-                                          pushTo(context, LoginScreen());
-                                        },
-                                      ).show();
-                                    } else {
-                                      AwesomeDialog(
-                                          context: context,
-                                          dialogType: DialogType.error,
-                                          showCloseIcon: true,
-                                          title: 'Invalid Information',
-                                          desc:
-                                              'Your Registration has been cancelled due to an error in the registration process',
-                                          btnOkOnPress: () {
-                                            context.read<AuthCubit>().Verify(
-                                                _Verify_emailController.text);
-                                          }).show();
+                                          _displayNameController.text,
+                                          _emailController.text,
+                                          _passwordController.text,
+                                          _confirmPasswordController.text);
                                     }
                                   },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.color1,
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'SIGN UP',
+                                    style: getbodyStyle(color: AppColors.white),
+                                  ),
                                 ),
                               ),
                             ),
-                            // Container(
-                            //   padding: const EdgeInsets.only(top: 10.0),
-                            //   child: SizedBox(
-                            //     width: double.infinity,
-                            //     height: 50,
-                            //     child: Column(
-                            //       children: [
-                            //         AnimatedButton(
-                            //           text: 'SIGN UP',
-                            //           borderRadius: BorderRadius.circular(15),
-                            //           color: AppColors.color1,
-                            //           buttonTextStyle:
-                            //               getbodyStyle(color: AppColors.white),
-                            //           pressEvent: () {
-                            //             AwesomeDialog(
-                            //                 context: context,
-                            //                 dialogType: DialogType.warning,
-                            //                 showCloseIcon: true,
-                            //                 title: 'Verify Email',
-                            //                 desc: 'Please verify your email',
-                            //                 btnOkOnPress: () {
-                            //                   context.read<AuthCubit>().Verify(
-                            //                       _Verify_emailController.text);
-                            //                 }).show();
-                            //           },
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
-                            // )
-                            // Container(
-                            //   padding: const EdgeInsets.only(top: 10.0),
-                            //   child: SizedBox(
-                            //     width: double.infinity,
-                            //     height: 50,
-                            //     child: ElevatedButton(
-                            //       onPressed: () {
-                            //         if (_formKey.currentState!.validate()) {
-                            //           if (_passwordController.text !=
-                            //               _confirmPasswordController.text) {
-                            //             ScaffoldMessenger.of(context)
-                            //                 .showSnackBar(
-                            //               SnackBar(
-                            //                   content: Text(
-                            //                       'Passwords don\'t match')),
-                            //             );
-                            //             return;
-                            //           }
-                            //           setState(() {
-                            //             _isLoading = true;
-                            //           });
-                            //           context.read<AuthCubit>().registerUser(
-                            //                 _emailController.text,
-                            //                 _passwordController.text,
-                            //                 _displayNameController.text,
-                            //               );
-                            //         }
-                            //       },
-                            //       style: ElevatedButton.styleFrom(
-                            //         backgroundColor: AppColors.color1,
-                            //         elevation: 2,
-                            //         shape: RoundedRectangleBorder(
-                            //           borderRadius: BorderRadius.circular(15),
-                            //         ),
-                            //       ),
-                            //       child: Text(
-                            //         'SIGN UP',
-                            //         style: getbodyStyle(color: AppColors.white),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Already have an account? Sign In
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -373,8 +274,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                builder: (context) => LoginScreen(),
-                              ),
+                                  builder: (context) => LoginScreen()),
                             );
                           },
                           child: Text(

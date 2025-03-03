@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Column(
               children: [
                 Expanded(flex: 1, child: Container(color: AppColors.color1)),
-                Expanded(flex: 2, child: Container(color: AppColors.white)),
+                Expanded(flex: 2, child: Container(color: Colors.grey[200])),
               ],
             ),
             SingleChildScrollView(
