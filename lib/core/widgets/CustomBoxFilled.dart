@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 
+import '../../Features/Users/Patient/Home/Widgets/Refill_Medicine.dart';
+
 class CustomBoxFilled extends StatelessWidget {
   const CustomBoxFilled({
     super.key,
@@ -13,11 +15,13 @@ class CustomBoxFilled extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey
+            : AppColors.white,
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withOpacity(0.18),
+            color: AppColors.ShadowColor,
             blurRadius: 6,
             spreadRadius: 2,
           ),
@@ -28,10 +32,16 @@ class CustomBoxFilled extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            IconButton(
-              icon: const Icon(Icons.replay_circle_filled_rounded),
-              color: Colors.black26,
-              onPressed: onTap, // Only the button is clickable
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(icon: const Icon(Icons.replay_circle_filled_rounded), color: Colors.black26,
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const Refill_Medicine()));
+
+                  },),
+                IconButton(icon:const Icon(Icons.edit_rounded), color: Colors.black26, onPressed: () { },),
+              ],
             ),
             const SizedBox(height: 8),
             const Text(

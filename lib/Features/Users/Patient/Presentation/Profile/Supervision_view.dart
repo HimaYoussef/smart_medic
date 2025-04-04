@@ -10,17 +10,11 @@ class SupervisorsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Matches design background
       appBar: AppBar(
         title: const Text(
           'Supervisors',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold, // Bold title
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
         ),
-        backgroundColor: Colors.transparent,
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -65,7 +59,6 @@ class SupervisorsScreen extends StatelessWidget {
       ),
       // Floating Action Button
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.color1,
         onPressed: () {
           Navigator.push(
             context,
@@ -75,7 +68,6 @@ class SupervisorsScreen extends StatelessWidget {
           );
         },
         child: const Icon(Icons.add, color: Colors.white),
-        shape: const CircleBorder(), // Ensures it remains a perfect circle
       ),
     );
   }

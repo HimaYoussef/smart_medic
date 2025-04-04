@@ -28,10 +28,8 @@ class _Edit_Profile extends State<Edit_Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Set the background color of the screen.
-      backgroundColor: Color.fromARGB(255, 235, 235, 235),
 
       appBar: AppBar(
-        backgroundColor: AppColors.white,
         leading: GestureDetector(
           // Add a back button that navigates to the previous screen.
           onTap: () => Navigator.pop(context),
@@ -95,7 +93,7 @@ class _Edit_Profile extends State<Edit_Profile> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Name',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.TextField,
+                        fillColor: AppColors.textFieldColor,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -125,7 +123,7 @@ class _Edit_Profile extends State<Edit_Profile> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Email',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.TextField,
+                        fillColor: AppColors.textFieldColor,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -157,7 +155,7 @@ class _Edit_Profile extends State<Edit_Profile> {
                       decoration: InputDecoration(
                         hintText: 'Please Enter Your Age',
                         hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.TextField,
+                        fillColor: AppColors.textFieldColor,
                         filled: true,
                       ),
                       textInputAction: TextInputAction.next,
@@ -186,7 +184,7 @@ class _Edit_Profile extends State<Edit_Profile> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.color1,
+                              backgroundColor: AppColors.mainColor,
                               elevation: 2,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(15),

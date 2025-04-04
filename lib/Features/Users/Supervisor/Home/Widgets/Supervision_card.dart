@@ -22,7 +22,7 @@ class SupervisionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.color1,
+        color: AppColors.mainColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 2),

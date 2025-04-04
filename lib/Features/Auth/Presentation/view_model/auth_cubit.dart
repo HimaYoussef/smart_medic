@@ -1,7 +1,7 @@
+/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_medic/Features/Auth/Presentation/view_model/auth_states.dart';
 
 class AuthCubit extends Cubit<AuthStates> {
   AuthCubit() : super(AuthInitState());
@@ -26,9 +26,7 @@ class AuthCubit extends Cubit<AuthStates> {
     }
   }
 
-  reset(
-    String email,
-  ) async {
+  reset(String email,) async {
     emit(LoginLoadingState());
     try {
       FirebaseAuth.instance.sendPasswordResetEmail(email: email);
@@ -42,9 +40,7 @@ class AuthCubit extends Cubit<AuthStates> {
     }
   }
 
-  Verify(
-    String email,
-  ) async {
+  Verify(String email,) async {
     emit(LoginLoadingState());
     try {
       User user = FirebaseAuth.instance.currentUser!;
@@ -63,8 +59,7 @@ class AuthCubit extends Cubit<AuthStates> {
     }
   }
 
-  registerUser(String name, String email, String password,
-      String Confirmpassword) async {
+  registerUser(String name, String email, String password, String Confirmpassword) async {
     emit(RegisterLoadingState());
     try {
       final credential =
@@ -112,3 +107,4 @@ class AuthCubit extends Cubit<AuthStates> {
   //   }
   // }
 }
+*/

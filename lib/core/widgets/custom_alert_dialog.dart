@@ -33,7 +33,7 @@ showAlertDialog(BuildContext context,
                               horizontal: 20, vertical: 5),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
-                              color: AppColors.color2),
+                              color: AppColors.color4),
                           child: Text(
                             ok,
                             style: getbodyStyle(color: AppColors.black),
@@ -48,7 +48,7 @@ showAlertDialog(BuildContext context,
                               horizontal: 20, vertical: 5),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
-                              color: AppColors.color2),
+                              color: AppColors.color4),
                           child: Text(
                             no,
                             style: getbodyStyle(color: AppColors.black),

@@ -4,6 +4,8 @@ import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 
+import '../../../../../core/widgets/Custom_button.dart';
+
 // Stateful widget for handling medicine refill
 class Refill_Medicine extends StatefulWidget {
   const Refill_Medicine({super.key});
@@ -22,9 +24,7 @@ class _nameState extends State<Refill_Medicine> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 235, 235, 235),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context), // Navigate back when tapped
           child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
@@ -36,7 +36,9 @@ class _nameState extends State<Refill_Medicine> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: AppColors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.cointainerDarkColor
+                  : AppColors.white,
             ),
             height: 300,
             child: Form(
@@ -76,11 +78,8 @@ class _nameState extends State<Refill_Medicine> {
                     TextFormField(
                       keyboardType: TextInputType.number,
                       controller: _NumofPillsController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Enter The Num of pills added',
-                        hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.TextField,
-                        filled: true,
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
@@ -90,39 +89,16 @@ class _nameState extends State<Refill_Medicine> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 25.0),
+                    const SizedBox(height: 55.0),
                     // Submit button for refilling medicine
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 50),
-                      child: Container(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                _formKey.currentState!.save();
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => PatientHomeView(),
-                                ));
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.color1,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                            ),
-                            child: Text(
-                              'Refill',
-                              style: getTitleStyle(color: AppColors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    CustomButton(text: 'Refill', onPressed: (){
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const PatientHomeView(),
+                        ));
+                      }
+                    }),
                   ],
                 ),
               ),

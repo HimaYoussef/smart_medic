@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Add_New_Medicine.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Refill_Medicine.dart';
-import 'package:smart_medic/core/utils/Colors.dart';
-import 'package:smart_medic/core/utils/Style.dart';
 import 'package:smart_medic/core/widgets/CustomBoxFilled.dart';
 import 'package:smart_medic/core/widgets/CustomBoxIcon.dart';
 
@@ -18,15 +14,9 @@ class _PatientMainViewState extends State<PatientMainView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
       appBar: AppBar(
-        title: Text(
-          'Home Page',
-          style: getTitleStyle(
-              color: AppColors.black, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Home Page'),
         centerTitle: true,
-        backgroundColor: AppColors.white,
         elevation: 0,
         actions: [
           Image.asset(
@@ -50,7 +40,7 @@ class _PatientMainViewState extends State<PatientMainView> {
                   ? const NeverScrollableScrollPhysics()
                   : const BouncingScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                
+
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
@@ -68,17 +58,7 @@ class _PatientMainViewState extends State<PatientMainView> {
                           ),
                         ),
                       )
-                    : CustomBoxIcon(
-                        onTap: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const Add_new_Medicine(),
-                          //   ),
-                          // );
-                        },
-                        iconSize: 60, // Increase plus (+) size here
-                      );
+                    : CustomBoxIcon(index: index,);
               },
             );
           },

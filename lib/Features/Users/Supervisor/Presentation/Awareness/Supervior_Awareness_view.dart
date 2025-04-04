@@ -15,9 +15,7 @@ class _nameState extends State<Supervisor_Awareness_View> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA), // Light gray background
       appBar: AppBar(
-        backgroundColor: AppColors.white,
         elevation: 0, // Removes shadow from AppBar
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -25,10 +23,7 @@ class _nameState extends State<Supervisor_Awareness_View> {
         ),
         title: const Text(
           'Awareness',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
@@ -67,7 +62,9 @@ class _nameState extends State<Supervisor_Awareness_View> {
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.color1, // Card background color
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.cointainerDarkColor
+            : AppColors.mainColor, // Card background color
         borderRadius: BorderRadius.circular(12), // Rounded corners
       ),
       child: Column(

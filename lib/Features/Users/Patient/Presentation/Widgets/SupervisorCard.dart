@@ -22,12 +22,14 @@ class SupervisorCard extends StatelessWidget {
       width: screenWidth * 0.9, // Adapts width dynamically
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.color1,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.cointainerDarkColor
+            : AppColors.mainColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 24,
             backgroundImage: AssetImage('assets/avatar2.png'),
           ),

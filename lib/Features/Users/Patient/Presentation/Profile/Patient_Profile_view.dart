@@ -8,6 +8,8 @@ import 'package:smart_medic/core/functions/routing.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 
+import '../../../../../main.dart';
+
 class PatientProfileView extends StatefulWidget {
   const PatientProfileView({super.key});
 
@@ -39,13 +41,8 @@ class _PatientProfileViewState extends State<PatientProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white, // Light grey background
       appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: Colors.black),
-        ),
-        backgroundColor: AppColors.white,
+        title: const Text('Profile',),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -64,13 +61,15 @@ class _PatientProfileViewState extends State<PatientProfileView> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 1,
                   ),
                 ],
-                color: AppColors.white,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.cointainerDarkColor
+                    : AppColors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -107,10 +106,12 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   CircleAvatar(
                       radius: 16,
-                      backgroundColor: AppColors.color1,
+                      backgroundColor: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.mainColorDark
+                          : AppColors.mainColor,
                       child: Icon(
                         Icons.notifications_sharp,
                         color: AppColors.white,
@@ -123,9 +124,11 @@ class _PatientProfileViewState extends State<PatientProfileView> {
             // Settings Section
             Container(
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.cointainerDarkColor
+                    : AppColors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 6,
@@ -137,16 +140,32 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                 children: [
                   // Dark Mode Toggle
                   ListTile(
-                    leading: Icon(Icons.dark_mode, color: AppColors.color1),
+                    leading: Icon(Icons.dark_mode,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.mainColorDark
+                          : AppColors.mainColor,),
                     title: const Text('Dark Mode'),
-                    trailing: Switch(value: false, onChanged: (value) {}),
+                    trailing: ValueListenableBuilder<ThemeMode>(
+                      valueListenable: MainApp.themeNotifier,
+                      builder: (context, currentMode, child) {
+                        return Switch(
+                          value: currentMode == ThemeMode.dark, // تحديث الحالة بناءً على الثيم الحالي
+                          onChanged: (value) {
+                            MainApp.themeNotifier.value =
+                            value ? ThemeMode.dark : ThemeMode.light; // تحديث الثيم
+                          },
+                        );
+                      },
+                    ),
                   ),
                   const Divider(),
 
                   // Supervisor Section
                   ListTile(
                     leading:
-                        Icon(Icons.supervisor_account, color: AppColors.color1),
+                        Icon(Icons.supervisor_account, color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.mainColorDark
+                            : AppColors.mainColor,),
                     title: const Text('Supervisor'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
@@ -162,7 +181,9 @@ class _PatientProfileViewState extends State<PatientProfileView> {
 
                   // Language Change Option
                   ListTile(
-                    leading: Icon(Icons.language, color: AppColors.color1),
+                    leading: Icon(Icons.language, color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.mainColorDark
+                        : AppColors.mainColor,),
                     title: const Text('Change Language'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
@@ -172,13 +193,21 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                   const Divider(),
 
                   ListTile(
-                    leading: Icon(Icons.logout, color: AppColors.color1),
+                    leading: Icon(Icons.logout, color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.mainColorDark
+                        : AppColors.mainColor,),
                     title: const Text('Log out'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      pushAndRemoveUntil(context, RoleSelectionScreen());
-
                       _signOut();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RoleSelectionScreen(),
+                        ),
+                      );
+
+
                     },
                   ),
                 ],

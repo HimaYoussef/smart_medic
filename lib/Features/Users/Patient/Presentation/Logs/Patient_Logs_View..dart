@@ -16,18 +16,11 @@ class _PatientLogsViewState extends State<PatientLogsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
         elevation: 0, // Removes AppBar shadow for a cleaner look
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context), // Navigates back when tapped
-        ),
         title: const Text(
           'Logs',
-          style: TextStyle(
-              color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -47,8 +40,10 @@ class _PatientLogsViewState extends State<PatientLogsView> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color:
-                    AppColors.color1, // Background color for the log container
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.cointainerDarkColor
+                    : AppColors.mainColor,
+                     // Background color for the log container
                 borderRadius:
                     BorderRadius.circular(16), // Rounded corners for styling
               ),
@@ -61,8 +56,7 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                     style: getTitleStyle(color: AppColors.white, fontSize: 20),
                   ),
                   const SizedBox(height: 25), // Spacing before the log items
-                  const Divider(
-                      color: Colors.white), // Divider for visual separation
+                  const Divider(color: Colors.white), // Divider for visual separation
 
                   // List of log items (medication & health stats)
                   const LogItem(

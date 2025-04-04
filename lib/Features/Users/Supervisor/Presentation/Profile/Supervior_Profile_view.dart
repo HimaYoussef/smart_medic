@@ -1,10 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
-import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
-import 'package:smart_medic/core/functions/routing.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import '../../../../../main.dart';
 
 class Supervior_Profile_view extends StatefulWidget {
   const Supervior_Profile_view({super.key});
@@ -13,6 +12,7 @@ class Supervior_Profile_view extends StatefulWidget {
   State<Supervior_Profile_view> createState() => _nameState();
 }
 final FirebaseAuth _auth = FirebaseAuth.instance;
+
 
 User? user;
 String? UserID;
@@ -23,10 +23,6 @@ Future<void> _getUser() async {
   UserID = user?.uid;
 }
 
-@override
-void initState() {
-  _getUser();
-}
 
 Future _signOut() async {
   await _auth.signOut();
@@ -35,15 +31,10 @@ class _nameState extends State<Supervior_Profile_view> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Profile',
-          style: getTitleStyle(
-              color: AppColors.black, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.white,
-        centerTitle: true,
         elevation: 0,
         actions: [
           Image.asset(
@@ -61,13 +52,15 @@ class _nameState extends State<Supervior_Profile_view> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 1,
                   ),
                 ],
-                color: AppColors.white,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.cointainerDarkColor
+                    : AppColors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -107,7 +100,7 @@ class _nameState extends State<Supervior_Profile_view> {
                   Spacer(),
                   CircleAvatar(
                       radius: 16,
-                      backgroundColor: AppColors.color1,
+                      backgroundColor: AppColors.mainColor,
                       child: Icon(
                         Icons.notifications_sharp,
                         color: AppColors.white,
@@ -120,9 +113,11 @@ class _nameState extends State<Supervior_Profile_view> {
             // Settings Options
             Container(
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.cointainerDarkColor
+                    : AppColors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                       color: Colors.black12, blurRadius: 6, spreadRadius: 2),
                 ],
@@ -130,25 +125,52 @@ class _nameState extends State<Supervior_Profile_view> {
               child: Column(
                 children: [
                   ListTile(
-                    leading: Icon(Icons.dark_mode, color: AppColors.color1),
+                    leading: Icon(Icons.dark_mode,
+                      color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.mainColorDark
+                        : AppColors.mainColor,),
                     title: const Text('Dark Mode'),
-                    trailing: Switch(value: false, onChanged: (value) {}),
+                    trailing: ValueListenableBuilder<ThemeMode>(
+                      valueListenable: MainApp.themeNotifier,
+                      builder: (context, currentMode, child) {
+                        return Switch(
+                          value: currentMode == ThemeMode.dark, // تحديث الحالة بناءً على الثيم الحالي
+                          onChanged: (value) {
+                            MainApp.themeNotifier.value =
+                            value ? ThemeMode.dark : ThemeMode.light; // تحديث الثيم
+                          },
+                        );
+                      },
+                    ),
                   ),
                   const Divider(),
                   ListTile(
-                    leading: Icon(Icons.language, color: AppColors.color1),
+                    leading: Icon(Icons.language, color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.mainColorDark
+                        : AppColors.mainColor,),
                     title: const Text('Change Language'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {},
+                    onTap: () {
+                      // Add functionality for language change
+                    },
                   ),
-                   ListTile(
-                    leading: Icon(Icons.logout, color: AppColors.color1),
+                  const Divider(),
+                  ListTile(
+                    leading: Icon(Icons.logout, color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.mainColorDark
+                        : AppColors.mainColor,),
                     title: const Text('Log out'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      pushAndRemoveUntil(context, RoleSelectionScreen());
-
                       _signOut();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RoleSelectionScreen(),
+                        ),
+                      );
+
+
                     },
                   ),
                 ],
