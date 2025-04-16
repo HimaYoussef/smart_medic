@@ -4,13 +4,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
 import 'dart:async';
 import 'Database/firestoreDB.dart';
+import 'Features/Auth/Presentation/view/Login.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
+import 'Features/Users/Patient/Home/Patient_Main_view.dart';
+import 'Features/Users/Supervisor/Home/Supervior_Main_view.dart';
 import 'Theme/themes.dart';
 
 Future<void> main() async {
@@ -25,6 +30,11 @@ Future<void> main() async {
   SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
   );
+
+  final appDocumentDir = await getApplicationDocumentsDirectory();
+  await Hive.initFlutter(appDocumentDir.path);
+  await Hive.openBox<String>('pendingMessages');
+
   runApp(const MainApp());
 }
 
@@ -48,7 +58,7 @@ class MainApp extends StatelessWidget {
               theme: AppThemes.lightTheme,
               darkTheme: AppThemes.darkTheme,
               themeMode: currentMode,
-              home: AuthCheck(),
+              home: const AuthCheck(),
               builder: (context, child) {
                 return Directionality(
                   textDirection: TextDirection.ltr,
@@ -61,87 +71,61 @@ class MainApp extends StatelessWidget {
   }
 }
 
-class AuthCheck extends StatefulWidget {
-  @override
-  _AuthCheckState createState() => _AuthCheckState();
-}
 
-class _AuthCheckState extends State<AuthCheck> {
-  String? userRole;
-
-  @override
-  void initState() {
-    super.initState();
-    getCurrentUserType();
-  }
-
-  void getCurrentUserType() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      String? role = await getUserType(user.uid);
-      setState(() {
-        userRole = role;
-      });
-    }
-  }
+class AuthCheck extends StatelessWidget {
+  const AuthCheck({super.key});
 
   @override
   Widget build(BuildContext context) {
-    User? user = FirebaseAuth.instance.currentUser;
 
-    if (user == null) {
-      print('there is no user111111111111111');
-      return RoleSelectionScreen();
-    }
-/*
-    if (userRole == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()), // لعرض مؤشر تحميل أثناء جلب البيانات
-      );
-    }*/
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    if (userRole == 'Patient') {
-      return const PatientHomeView();
-    } else if (userRole == 'Supervisor') {
-      return const SupervisorHomeView();
-    } else {
-      print('there is user111111111111111++++$userRole');
-      return RoleSelectionScreen();
-    }
+        if (snapshot.hasError) {
+          return  RoleSelectionScreen();
+        }
+
+        if (!snapshot.hasData || snapshot.data == null) {
+          return  RoleSelectionScreen();
+        }
+
+        User user = snapshot.data!;
+
+        return FutureBuilder<Map<String, dynamic>?>(
+          future: SmartMedicalDb.getUserById(user.uid),
+          builder: (context, userSnapshot) {
+            if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (userSnapshot.hasError) {
+              return  RoleSelectionScreen();
+            }
+
+            if (!userSnapshot.hasData || userSnapshot.data == null) {
+              return  RoleSelectionScreen();
+            }
+
+            String userType = userSnapshot.data!['type']?.toString().trim().toLowerCase() ?? 'patient';
+
+            if (userType == 'patient') {
+              return const PatientHomeView();
+            } else if (userType == 'supervisor') {
+              return const SupervisorHomeView();
+            } else {
+              return  RoleSelectionScreen();
+            }
+          },
+        );
+      },
+    );
   }
 }
-
-
-
-Future<String?> getUserType(String userId) async {
-  try {
-    DocumentSnapshot documentSnapshot = await usersCollection.doc(userId).get();
-
-    if (documentSnapshot.exists) {
-      return documentSnapshot.get("type"); // استرجاع التايب
-    } else {
-      return null; // المستخدم غير موجود
-    }
-  } catch (e) {
-    print("Error getting user type: $e");
-    return null; // حدث خطأ أثناء جلب البيانات
-  }
-}
-
-
-Future<String> getUserRole() async {
-  User user = FirebaseAuth.instance.currentUser!;
-  // استرجاع مستند المستخدم من Firestore
-  DocumentSnapshot userDoc =
-  await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-
-  if (userDoc.exists) {
-    print('${userDoc['type']}+1111111111111111111111111111111');
-    return userDoc['type'];
-    // استرجاع الدور (role)
-  } else {
-    print('guest111111111111111111111');
-    return 'guest'; // في حالة عدم وجود مستخدم أو مستند
-  }
-}
-

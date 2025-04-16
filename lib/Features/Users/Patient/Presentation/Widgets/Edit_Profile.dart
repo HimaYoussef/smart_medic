@@ -1,14 +1,12 @@
-// Import necessary packages for creating the edit profile screen.
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
-import 'package:smart_medic/Features/Auth/Data/Super_Visor_type.dart';
-import 'package:smart_medic/core/functions/email_validation.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
-import 'package:smart_medic/core/utils/Style.dart';
-import 'package:smart_medic/core/widgets/custom_dialogs.dart';
+import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/core/widgets/Custom_button.dart';
+import '../../../../../core/widgets/BuildText.dart';
+import '../../../../../core/widgets/build_text_field.dart';
 
-// Stateful widget for editing profile information (name, email, and age).
 class Edit_Profile extends StatefulWidget {
   const Edit_Profile({super.key});
 
@@ -16,188 +14,168 @@ class Edit_Profile extends StatefulWidget {
   State<Edit_Profile> createState() => _Edit_Profile();
 }
 
-// Global keys for managing form state and controllers for input fields.
-final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-final TextEditingController _ProfileNameController = TextEditingController();
-final TextEditingController _ProfileEmailController = TextEditingController();
-final TextEditingController _ProfileAgeController = TextEditingController();
-
-// Stateful widget's state class for editing profile.
 class _Edit_Profile extends State<Edit_Profile> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _profileNameController = TextEditingController();
+  final TextEditingController _profileEmailController = TextEditingController();
+  final TextEditingController _profileAgeController = TextEditingController();
+  User? user = FirebaseAuth.instance.currentUser;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    if (user != null) {
+      var result = await SmartMedicalDb.getPatientProfile(user!.uid);
+      if (result['success']) {
+        setState(() {
+          _profileNameController.text = result['data']['name'] ?? user!.displayName ?? '';
+          _profileEmailController.text = result['data']['email'] ?? user!.email ?? '';
+          _profileAgeController.text = result['data']['age']?.toString() ?? '';
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['message'],
+              style: TextStyle(color: AppColors.white),
+            ),
+          ),
+        );
+      }
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      var result = await SmartMedicalDb.updatePatientProfile(
+        userId: user!.uid,
+        updates: {
+          'name': _profileNameController.text,
+          'email': _profileEmailController.text,
+          'age': int.parse(_profileAgeController.text),
+        },
+      );
+
+      if (result['success']) {
+        // Update Firebase Auth profile
+        await user!.updateDisplayName(_profileNameController.text);
+        if (_profileEmailController.text != user!.email) {
+          await user!.updateEmail(_profileEmailController.text);
+        }
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['message'],
+            style: TextStyle(color: AppColors.white),
+          ),
+        ),
+      );
+
+      if (result['success']) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Set the background color of the screen.
-
       appBar: AppBar(
         leading: GestureDetector(
-          // Add a back button that navigates to the previous screen.
           onTap: () => Navigator.pop(context),
-          child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
+          child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.white
+              : AppColors.black,),
         ),
         actions: [
           Image.asset(
             'assets/pills.png',
             width: 60,
             height: 35,
-          )
+          ),
         ],
       ),
-
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(15),
         child: SingleChildScrollView(
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: AppColors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.cointainerDarkColor
+                  : AppColors.cointainerColor,
             ),
             height: 580,
             child: Form(
-              key:
-                  _formKey, // Linking the form with the form key for validation.
+              key: _formKey,
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Gap(20),
-                    Row(
+                    const Gap(20),
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          'Edit Profile', // Title text for the profile editing screen.
-                          style: getTitleStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.black,
-                          ),
-                        ),
+                        CustomText(text: 'Edit Profile', fonSize: 20),
                       ],
                     ),
-                    Gap(30),
-                    // TextField for the user's name with validation.
-                    Text(
-                      'Name',
-                      style: getTitleStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.black,
-                      ),
-                    ),
+                    const Gap(30),
+                    const CustomText(text: 'Name', fonSize: 15),
                     const SizedBox(height: 15),
-                    TextFormField(
+                    CustomTextField(
+                      controller: _profileNameController,
+                      readOnly: false,
                       keyboardType: TextInputType.name,
-                      controller: _ProfileNameController,
-                      textAlign: TextAlign.start,
-                      decoration: InputDecoration(
-                        hintText: 'Please Enter Your Name',
-                        hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.textFieldColor,
-                        filled: true,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Enter A valid Name';
-                        } else {
-                          return null;
-                        }
-                      },
-                    ),
+                      labelText: 'Please Enter Your Name',
+                      validatorText: 'Please Enter A valid Name',),
                     const SizedBox(height: 25.0),
-                    // TextField for the user's email with validation.
-                    Text(
-                      'Email',
-                      style: getTitleStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.black,
-                      ),
-                    ),
+                    const CustomText(text:  'Email', fonSize: 15),
                     const SizedBox(height: 15),
-                    TextFormField(
-                      controller: _ProfileEmailController,
-                      style: TextStyle(color: AppColors.black),
+                    CustomTextField(
+                      controller: _profileEmailController,
+                      readOnly: false,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        hintText: 'Please Enter Your Email',
-                        hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.textFieldColor,
-                        filled: true,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Enter your Email';
-                        } else if (!emailValidate(value)) {
-                          return 'Please Enter A valid email';
-                        } else {
-                          return null;
-                        }
-                      },
-                    ),
+                      labelText: 'Please Enter Your Email',
+                      validatorText: 'Please Enter your Email',),
                     const SizedBox(height: 25),
-                    // TextField for the user's age with validation.
-                    Text(
-                      'Age',
-                      style: getTitleStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.black,
-                      ),
-                    ),
+                    const CustomText(text: 'Age', fonSize: 15),
                     const SizedBox(height: 15),
-                    TextFormField(
+                    CustomTextField(
+                      controller: _profileAgeController,
+                      readOnly: false,
                       keyboardType: TextInputType.number,
-                      controller: _ProfileAgeController,
-                      textAlign: TextAlign.start,
-                      decoration: InputDecoration(
-                        hintText: 'Please Enter Your Age',
-                        hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.textFieldColor,
-                        filled: true,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Enter Your Age';
-                        } else {
-                          return null;
-                        }
-                      },
-                    ),
+                      labelText: 'Please Enter Your Age',
+                      validatorText: 'Please Enter Your Age',),
                     const SizedBox(height: 25.0),
-                    // Button to submit the form after validation.
-                    Padding(
-                      padding: const EdgeInsets.only(right: 50, left: 50),
-                      child: Container(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                // If validation passes, save form data.
-                                _formKey.currentState!.save();
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.mainColor,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                            ),
-                            child: Text(
-                              'Edit',
-                              style: getTitleStyle(color: AppColors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    CustomButton(text: 'Edit', onPressed: _updateProfile)
                   ],
                 ),
               ),
@@ -206,5 +184,13 @@ class _Edit_Profile extends State<Edit_Profile> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _profileNameController.dispose();
+    _profileEmailController.dispose();
+    _profileAgeController.dispose();
+    super.dispose();
   }
 }

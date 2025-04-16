@@ -3,15 +3,19 @@ import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 
 class SupervisorCard extends StatelessWidget {
+  final String supervisorId;
   final String name;
   final String email;
   final String type;
+  final VoidCallback onDelete;
 
   const SupervisorCard({
     super.key,
+    required this.supervisorId,
     required this.name,
     required this.email,
     required this.type,
+    required this.onDelete,
   });
 
   @override
@@ -19,7 +23,7 @@ class SupervisorCard extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
-      width: screenWidth * 0.9, // Adapts width dynamically
+      width: screenWidth * 0.9,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
@@ -57,9 +61,9 @@ class SupervisorCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
-            Icons.arrow_forward_ios,
-            color: Colors.white,
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.white),
+            onPressed: onDelete,
           ),
         ],
       ),

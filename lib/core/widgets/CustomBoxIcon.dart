@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Add_New_Medicine.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 
-class CustomBoxIcon extends StatelessWidget{
+class CustomBoxIcon extends StatelessWidget {
   final int index;
 
   const CustomBoxIcon({super.key, required this.index});
@@ -16,56 +16,65 @@ class CustomBoxIcon extends StatelessWidget{
             ? AppColors.cointainerDarkColor
             : AppColors.white,
         child: InkWell(
-          onTap: (){
-            _Aleart(context);
+          onTap: () {
+            _alert(context);
           },
-
-          highlightColor: Colors.deepOrange,
           splashColor: Colors.blue.withOpacity(0.5),
           child: Icon(
             Icons.add_box_outlined,
             size: 150,
             color: Theme.of(context).brightness == Brightness.dark
                 ? const Color(0xFF006C8E)
-                : AppColors.mainColor,),
+                : AppColors.mainColor,
+          ),
         ),
       ),
     );
   }
 
-  Future<void> _Aleart(BuildContext context) async{
+  Future<void> _alert(BuildContext context) async {
     showDialog(
-        context: context,
-        builder: (BuildContext context){
-          return AlertDialog(
-            title: const Text('Alert!!'),
-            content: const SingleChildScrollView(
-              child: ListBody(
-                children: [
-                  Text('Are you want to add new medication',style: TextStyle(),)
-                ],
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Alert!!'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: [
+                Text(
+                  'Are you sure you want to add a new medication?',
+                  style: TextStyle(),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => addNewMedicine(compNum: index+1,),
+                  ),
+                );
+              },
+              child: Text(
+                'Yes',
+                style: TextStyle(color: AppColors.mainColor),
               ),
             ),
-            actions: [
-              TextButton(
-                  onPressed: (){
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => addNewMedicine(compNum: index,),
-                      ),
-                    );
-                  },
-                  child: Text('Yes',style: TextStyle(color: AppColors.mainColor),)),
-              TextButton(
-                  onPressed: (){
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('No',style: TextStyle(color: AppColors.mainColor),))
-            ],
-          );
-        }
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'No',
+                style: TextStyle(color: AppColors.mainColor),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
-

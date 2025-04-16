@@ -3,35 +3,42 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:smart_medic/Bluetooth/BluetoothManager.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
-import '../../../../../Bluetooth/BluetoothManager.dart';
-import '../../../../../core/widgets/BuildText.dart';
-import '../../../../../core/widgets/build_text_field.dart';
+import 'package:smart_medic/core/widgets/BuildText.dart';
+import 'package:smart_medic/core/widgets/build_text_field.dart';
 
-class addNewMedicine extends StatefulWidget {
-  final int compNum;
-  const addNewMedicine({super.key, required this.compNum});
+class EditMedicine extends StatefulWidget {
+  final String medicineId;
+  final Map<String, dynamic> medicineData;
+  final int compartmentNumber;
+
+  const EditMedicine({
+    super.key,
+    required this.medicineId,
+    required this.medicineData,
+    required this.compartmentNumber,
+  });
 
   @override
-  State<addNewMedicine> createState() => _Add_new_Medicine();
+  State<EditMedicine> createState() => _EditMedicineState();
 }
 
-final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-class _Add_new_Medicine extends State<addNewMedicine> {
-  final TextEditingController _medNameController = TextEditingController();
-  final TextEditingController _pillsController = TextEditingController();
-  final TextEditingController _dosageController = TextEditingController();
-  final TextEditingController _numTimesController = TextEditingController();
-  final TextEditingController _daysIntervalController = TextEditingController();
-
-  int _scheduleType = 0;
-  List<String> _times = [];
-  List<TimeOfDay?> _selectedTimes = [];
-  TimeOfDay? _selectedTime; // Added for single time in scheduleType 2
-  List<int> _bitmaskDays = [0, 0, 0, 0, 0, 0, 0];
+class _EditMedicineState extends State<EditMedicine> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late TextEditingController _medNameController;
+  late TextEditingController _pillsController;
+  late TextEditingController _dosageController;
+  late TextEditingController _numTimesController;
+  late TextEditingController _daysIntervalController;
+  late int _scheduleType;
+  late List<String> _times;
+  late List<TimeOfDay?> _selectedTimes;
+  TimeOfDay? _selectedTime;
+  late List<int> _bitmaskDays;
+  bool _isLoading = false;
 
   final BluetoothManager _bluetoothManager = BluetoothManager();
 
@@ -39,6 +46,36 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   void initState() {
     super.initState();
     _bluetoothManager.initBluetooth();
+    // Initialize fields with existing medicine data
+    _medNameController = TextEditingController(text: widget.medicineData['name'] ?? '');
+    _pillsController = TextEditingController(text: widget.medicineData['pillsLeft']?.toString() ?? '');
+    _dosageController = TextEditingController(text: widget.medicineData['dosage']?.toString() ?? '');
+    _numTimesController = TextEditingController(text: widget.medicineData['scheduleValue']?.toString() ?? '');
+    _daysIntervalController = TextEditingController(text: widget.medicineData['scheduleValue']?.toString() ?? '');
+    _scheduleType = widget.medicineData['scheduleType'] + 1; // Adjust for dropdown (0-based to 1-based)
+    _times = List<String>.from(widget.medicineData['times'] ?? []);
+    _bitmaskDays = List<int>.from(widget.medicineData['bitmaskDays'] ?? [0, 0, 0, 0, 0, 0, 0]);
+
+    // Initialize times based on scheduleType
+    if (_scheduleType == 1) {
+      _selectedTimes = _times.map((time) {
+        final parts = time.split(':');
+        int hour = int.parse(parts[0]);
+        int minute = int.parse(parts[1].split(' ')[0]);
+        String period = parts[1].split(' ')[1];
+        if (period == 'PM' && hour != 12) hour += 12;
+        if (period == 'AM' && hour == 12) hour = 0;
+        return TimeOfDay(hour: hour, minute: minute);
+      }).toList();
+    } else if (_scheduleType == 2 && _times.isNotEmpty) {
+      final parts = _times[0].split(':');
+      int hour = int.parse(parts[0]);
+      int minute = int.parse(parts[1].split(' ')[0]);
+      String period = parts[1].split(' ')[1];
+      if (period == 'PM' && hour != 12) hour += 12;
+      if (period == 'AM' && hour == 12) hour = 0;
+      _selectedTime = TimeOfDay(hour: hour, minute: minute);
+    }
   }
 
   void _updateTimesList() {
@@ -51,6 +88,99 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   bool _isValidNumTimes(String value) {
     int? num = int.tryParse(value);
     return num != null && num > 0 && num <= 4;
+  }
+
+  Future<void> _updateMedicine() async {
+    if (_scheduleType == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select a schedule type',
+            style: TextStyle(color: AppColors.white),
+          ),
+        ),
+      );
+      return;
+    }
+    if (_scheduleType == 1 && (_selectedTimes.isEmpty || _selectedTimes.contains(null))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select all times for daily schedule',
+            style: TextStyle(color: AppColors.white),
+          ),
+        ),
+      );
+      return;
+    }
+    if (_scheduleType == 2 && _selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select a time for every X days schedule',
+            style: TextStyle(color: AppColors.white),
+          ),
+        ),
+      );
+      return;
+    }
+    if (_scheduleType == 3 && !_bitmaskDays.contains(1)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select at least one day for specific days schedule',
+            style: TextStyle(color: AppColors.white),
+          ),
+        ),
+      );
+      return;
+    }
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      Map<String, dynamic> updates = {
+        'name': _medNameController.text,
+        'pillsLeft': int.parse(_pillsController.text),
+        'dosage': int.parse(_dosageController.text),
+        'scheduleType': _scheduleType - 1,
+        'scheduleValue': _numTimesController.text.isNotEmpty
+            ? int.parse(_numTimesController.text)
+            : (_daysIntervalController.text.isNotEmpty
+            ? int.parse(_daysIntervalController.text)
+            : 0),
+        'times': _times,
+        'bitmaskDays': _bitmaskDays,
+        'compartmentNumber': widget.compartmentNumber,
+      };
+
+      var result = await SmartMedicalDb.updateMedicine(
+        medicineId: widget.medicineId,
+        updates: updates,
+      );
+
+      if (result['success']) {
+        await sendAllMedicationsToArduino();
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['message'],
+            style: TextStyle(color: AppColors.white),
+          ),
+        ),
+      );
+
+      if (result['success']) {
+        Navigator.pop(context);
+      }
+    }
   }
 
   @override
@@ -66,8 +196,19 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                 : AppColors.black,
           ),
         ),
+        title: const Text('Edit Medicine'),
+        centerTitle: true,
+        actions: [
+          Image.asset(
+            'assets/pills.png',
+            width: 60,
+            height: 35,
+          ),
+        ],
       ),
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(15),
         child: SingleChildScrollView(
           child: Container(
@@ -88,20 +229,19 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CustomText(text: 'Add New Medicine', fonSize: 20)
+                        CustomText(text: 'Edit Medicine', fonSize: 20)
                       ],
                     ),
                     const Gap(30),
-                    const CustomText(text: 'Compartment Number', fonSize: 15,),
+                    const CustomText(text: 'Compartment Number', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
-                      controller: TextEditingController(
-                      text: (widget.compNum).toString()),
+                      controller: TextEditingController(text: widget.compartmentNumber.toString()),
                       readOnly: true,
                       enablation: false,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Med Name', fonSize: 15,),
+                    const CustomText(text: 'Med Name', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: _medNameController,
@@ -111,36 +251,38 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                       readOnly: false,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Pills', fonSize: 15,),
+                    const CustomText(text: 'Pills', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
-                        controller: _pillsController,
-                        labelText: 'Enter the number of pills added',
-                        keyboardType: TextInputType.number,
-                        readOnly: false,
-                        validatorText: 'Please enter the number of pills'),
+                      controller: _pillsController,
+                      labelText: 'Enter the number of pills added',
+                      keyboardType: TextInputType.number,
+                      readOnly: false,
+                      validatorText: 'Please enter the number of pills',
+                    ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Dosage', fonSize: 15,),
+                    const CustomText(text: 'Dosage', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
-                        controller: _dosageController,
-                        labelText: 'Enter the number of pills every time',
-                        keyboardType: TextInputType.number,
-                        readOnly: false,
-                        validatorText: 'Please enter the number of the pills'),
+                      controller: _dosageController,
+                      labelText: 'Enter the number of pills every time',
+                      keyboardType: TextInputType.number,
+                      readOnly: false,
+                      validatorText: 'Please enter the number of the pills',
+                    ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Schedule Type', fonSize: 15,),
+                    const CustomText(text: 'Schedule Type', fonSize: 15),
                     const SizedBox(height: 10),
                     buildDropdownButton(context),
                     const SizedBox(height: 25),
                     if (_scheduleType == 1) ...[
-                      const CustomText(text: 'How many times per day?', fonSize: 15,),
+                      const CustomText(text: 'How many times per day?', fonSize: 15),
                       const SizedBox(height: 10),
                       CustomTextField(
                         controller: _numTimesController,
                         readOnly: false,
-                        labelText:'Enter number of times per day',
-                        validatorText:'Please enter the number of the times' ,
+                        labelText: 'Enter number of times per day',
+                        validatorText: 'Please enter the number of the times',
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
                           setState(() {
@@ -166,14 +308,12 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                       if (_numTimesController.text.isNotEmpty &&
                           int.tryParse(_numTimesController.text) != null &&
                           int.parse(_numTimesController.text) > 0 &&
-                          int.parse(_numTimesController.text) <= 4
-                      ) ...[
+                          int.parse(_numTimesController.text) <= 4) ...[
                         Builder(
                           builder: (context) {
                             int numTimes = int.parse(_numTimesController.text);
                             if (_selectedTimes.length != numTimes) {
-                              _selectedTimes =
-                                  List<TimeOfDay?>.filled(numTimes, null);
+                              _selectedTimes = List<TimeOfDay?>.filled(numTimes, null);
                             }
                             return Column(
                               children: List.generate(numTimes, (i) {
@@ -183,7 +323,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                     onPressed: () async {
                                       TimeOfDay? time = await showTimePicker(
                                         context: context,
-                                        initialTime: TimeOfDay.now(),
+                                        initialTime: _selectedTimes[i] ?? TimeOfDay.now(),
                                       );
                                       if (time != null) {
                                         setState(() {
@@ -193,10 +333,10 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: _selectedTimes[i] != null ?
-                                              Theme.of(context).brightness == Brightness.dark
-                                              ? AppColors.mainColorDark
-                                              : AppColors.mainColor
+                                      backgroundColor: _selectedTimes[i] != null
+                                          ? Theme.of(context).brightness == Brightness.dark
+                                          ? AppColors.mainColorDark
+                                          : AppColors.mainColor
                                           : null,
                                     ),
                                     child: Text(
@@ -217,18 +357,17 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                       const CustomText(text: 'Every how many days?', fonSize: 15),
                       const SizedBox(height: 10),
                       CustomTextField(
-                          controller: _daysIntervalController,
-                          readOnly: false,
-                          keyboardType: TextInputType.number,
-                          labelText: 'Enter number of days',
-                          onChanged: (value) {
-                            setState(() {
-                              _times = [];
-                              _selectedTime = null; // Reset time when days change
-                            });
-                          },
+                        controller: _daysIntervalController,
+                        readOnly: false,
+                        keyboardType: TextInputType.number,
+                        labelText: 'Enter number of days',
                         validatorText: 'Please enter the number of the days',
-
+                        onChanged: (value) {
+                          setState(() {
+                            _times = [];
+                            _selectedTime = null;
+                          });
+                        },
                       ),
                       const SizedBox(height: 25),
                       if (_daysIntervalController.text.isNotEmpty &&
@@ -238,12 +377,12 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           onPressed: () async {
                             TimeOfDay? time = await showTimePicker(
                               context: context,
-                              initialTime: TimeOfDay.now(),
+                              initialTime: _selectedTime ?? TimeOfDay.now(),
                             );
                             if (time != null) {
                               setState(() {
                                 _selectedTime = time;
-                                _times = [time.format(context)]; // Single time
+                                _times = [time.format(context)];
                               });
                             }
                           },
@@ -264,8 +403,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                       ],
                     ],
                     if (_scheduleType == 3) ...[
-                      const CustomText(
-                          text: 'Select Specific Days', fonSize: 15),
+                      const CustomText(text: 'Select Specific Days', fonSize: 15),
                       const SizedBox(height: 2),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -273,8 +411,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           return GestureDetector(
                             onTap: () {
                               setState(() {
-                                _bitmaskDays[index] =
-                                    _bitmaskDays[index] == 1 ? 0 : 1;
+                                _bitmaskDays[index] = _bitmaskDays[index] == 1 ? 0 : 1;
                               });
                             },
                             child: Container(
@@ -296,56 +433,10 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                     ],
                     const SizedBox(height: 30),
                     CustomButton(
-                      text: 'Submit',
-                      onPressed: () async {
-                        if (_scheduleType == 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select a schedule type',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 1 &&
-                            (_selectedTimes.isEmpty ||
-                                _selectedTimes.contains(null))) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select all times for daily schedule',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 2 && _selectedTime == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select a time for every X days schedule',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 3 &&
-                            !_bitmaskDays.contains(1)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select at least one day for specific days schedule',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_formKey.currentState!.validate()) {
-                          await addMedication();
-                          if (mounted) {
-                            Navigator.pop(context);
-                          }
-                        }
-                      },
+                      text: 'Update',
+                      onPressed: _updateMedicine,
                     ),
-                    const SizedBox(height: 5,)
+                    const SizedBox(height: 5),
                   ],
                 ),
               ),
@@ -366,7 +457,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
           _scheduleType = newValue!;
           _times.clear();
           _selectedTimes = [];
-          _selectedTime = null; // Reset single time
+          _selectedTime = null;
           _bitmaskDays = [0, 0, 0, 0, 0, 0, 0];
         });
       },
@@ -389,90 +480,17 @@ class _Add_new_Medicine extends State<addNewMedicine> {
     );
   }
 
-  User? user = FirebaseAuth.instance.currentUser;
-
-  Future<void> addMedication() async {
-    await SmartMedicalDb.addMedication(
-      patientId: user!.uid,
-      name: _medNameController.text,
-      dosage: int.parse(_dosageController.text),
-      scheduleType: (_scheduleType - 1),
-      scheduleValue: _numTimesController.text.isNotEmpty
-          ? int.parse(_numTimesController.text)
-          : (_daysIntervalController.text.isNotEmpty
-              ? int.parse(_daysIntervalController.text)
-              : 0),
-      times: _times,
-      bitmaskDays: _bitmaskDays,
-      pillsLeft: int.parse(_pillsController.text),
-      compartmentNumber: (widget.compNum ),
-    );
-
-    await sendAllMedicationsToArduino();
-  }
-
-  /*
   Future<void> sendAllMedicationsToArduino() async {
     try {
       // Fetch all medications for the user
       QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
           .collection('medications')
-          .where('patientId', isEqualTo: user!.uid)
+          .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .get();
 
-      // تحويل البيانات مع التعامل مع Timestamp
-      List<Map<String, dynamic>> medications = medicationsSnapshot.docs
-          .map((doc) {
+      // Transform data
+      List<Map<String, dynamic>> medications = medicationsSnapshot.docs.map((doc) {
         var data = doc.data() as Map<String, dynamic>;
-        if (data['lastUpdated'] is Timestamp) {
-          data['lastUpdated'] = (data['lastUpdated'] as Timestamp).toDate().toIso8601String();
-        }
-        return data;
-      })
-          .toList();
-
-      // Convert medications to JSON
-      String dataToSend = jsonEncode({'medications': medications});
-      print("Data to send: $dataToSend");
-
-      // Send data via Bluetooth
-      await _bluetoothManager.sendData(dataToSend);
-
-      // إشعار لليوزر لو البلوتوث مش متصل
-      if (!_bluetoothManager.isConnected && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Bluetooth not connected. Data will be sent later."),
-          ),
-        );
-      }
-
-      // Update syncStatus to "Synced" for all sent medications
-      for (var doc in medicationsSnapshot.docs) {
-        await SmartMedicalDb.updateMedicationSyncStatus(
-          medId: doc.id,
-          syncStatus: 'Synced',
-        );
-      }
-    } catch (e) {
-      print("Error sending medications: $e");
-    }
-  }
-*/
-
-  Future<void> sendAllMedicationsToArduino() async {
-    try {
-      // Fetch all medications for the user
-      QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
-          .collection('medications')
-          .where('patientId', isEqualTo: user!.uid)
-          .get();
-
-      // تحويل البيانات مع التعامل مع Timestamp
-      List<Map<String, dynamic>> medications =
-          medicationsSnapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
-        // إزالة الحقول الغير ضرورية
         return {
           "name": data["name"],
           "dosage": data["dosage"],
@@ -485,15 +503,15 @@ class _Add_new_Medicine extends State<addNewMedicine> {
         };
       }).toList();
 
-      // إرسال كل دواء لوحده
+      // Send each medication individually
       for (var med in medications) {
         String dataToSend = jsonEncode({"medication": med});
         print("Data to send: $dataToSend");
         await _bluetoothManager.sendData(dataToSend);
-        await Future.delayed(const Duration(milliseconds: 500)); // تأخير بسيط بين كل دواء
+        await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      // إشعار لليوزر لو البلوتوث مش متصل
+      // Notify user if Bluetooth is not connected
       if (!_bluetoothManager.isConnected && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
