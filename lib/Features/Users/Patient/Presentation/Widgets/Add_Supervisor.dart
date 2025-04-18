@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:smart_medic/Features/Auth/Data/Super_Visor_type.dart';
-import 'package:smart_medic/core/functions/email_validation.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
-import 'package:smart_medic/core/utils/Style.dart';
 import 'package:smart_medic/core/widgets/custom_dialogs.dart';
+import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-// Stateful widget for adding a new supervisor
+import '../../../../../core/widgets/BuildText.dart';
+import '../../../../../core/widgets/Custom_button.dart';
+import '../../../../../core/widgets/build_text_field.dart';
+
 class Add_SuperVisor extends StatefulWidget {
   const Add_SuperVisor({super.key});
 
@@ -15,36 +17,66 @@ class Add_SuperVisor extends StatefulWidget {
   State<Add_SuperVisor> createState() => _Add_SuperVisor();
 }
 
-// Form key for validation
-final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-// Controllers for input fields
-final TextEditingController _SuperVisorNameController = TextEditingController();
-final TextEditingController _SuperVisorEmailController =
-    TextEditingController();
-
-// Default selected value for supervisor type
-String _SuperVisor_Type = SuperVisor_type[0];
 
 class _Add_SuperVisor extends State<Add_SuperVisor> {
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _SuperVisorNameController = TextEditingController();
+  final TextEditingController _SuperVisorEmailController = TextEditingController();
+  String _SuperVisor_Type = SuperVisor_type[0];
+
+  User? user = FirebaseAuth.instance.currentUser;
+  bool _isLoading = false;
+
+  Future<void> _addSupervisor() async {
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    var result = await SmartMedicalDb.addSupervisor(
+      name: _SuperVisorNameController.text,
+      email: _SuperVisorEmailController.text,
+      type: _SuperVisor_Type,
+      patientId: user!.uid,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (result['success']) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result['message'],
+            style: TextStyle(color: AppColors.white),
+          ),
+        ),
+      );
+      Navigator.pop(context);
+    } else {
+      showErrorDialog(context, result['message']);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          const Color.fromARGB(255, 235, 235, 235), // Light grey background
-      // Light grey background
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // Transparent AppBar
         leading: GestureDetector(
-          onTap: () => Navigator.pop(context), // Navigates back on tap
-          child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
+          onTap: () => Navigator.pop(context),
+          child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.white
+              : AppColors.black,),
         ),
         actions: [
           Image.asset(
             'assets/pills.png',
             width: 60,
             height: 35,
-          )
+          ),
         ],
       ),
       body: Padding(
@@ -52,116 +84,55 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
         child: SingleChildScrollView(
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20), // Rounded corners
-              color: AppColors.white, // White container background
+              borderRadius: BorderRadius.circular(20),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.cointainerDarkColor
+                  : AppColors.cointainerColor,
             ),
-            height: 550, // Fixed height for the form container
+            height: 550,
             child: Form(
-              key: _formKey, // Assign form key for validation
+              key: _formKey,
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Gap(20), // Spacer
-
-                    // Title - "Add Supervisor"
-                    Row(
+                    const Gap(20),
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          'Add Supervisor',
-                          style: getTitleStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.black,
-                          ),
-                        ),
+                        CustomText(text: 'Add Supervisor', fonSize: 20),
                       ],
                     ),
-
-                    const Gap(30), // Spacer
-
-                    // Name Input Field
-                    Text(
-                      'Name',
-                      style: getTitleStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.black,
-                      ),
-                    ),
+                    const Gap(30),
+                    const CustomText(text: 'Name', fonSize: 15,),
                     const SizedBox(height: 15),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
+                    CustomTextField(
                       controller: _SuperVisorNameController,
-                      textAlign: TextAlign.start,
-                      decoration: InputDecoration(
-                        hintText: 'Enter The name of the Supervisor',
-                        hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.TextField,
-                        filled: true,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Enter The name of the Supervisor';
-                        }
-                        return null;
-                      },
+                      readOnly: false,
+                      keyboardType: TextInputType.text,
+                      labelText: 'Enter The name of the Supervisor',
+                      validatorText: 'Please Enter The name of the Supervisor',
                     ),
                     const SizedBox(height: 25.0),
-
-                    // Email Input Field
-                    Text(
-                      'Email',
-                      style: getTitleStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.black,
-                      ),
-                    ),
+                    const CustomText(text:'Email', fonSize: 15),
                     const SizedBox(height: 15),
-                    TextFormField(
-                      textAlign: TextAlign.start,
+                    CustomTextField(
                       controller: _SuperVisorEmailController,
-                      style: TextStyle(color: AppColors.black),
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        hintText: 'Enter The Email of the Supervisor',
-                        hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.TextField,
-                        filled: true,
-                      ),
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Enter the Email of the Supervisor';
-                        } else if (!emailValidate(value)) {
-                          return 'Please Enter A valid email';
-                        }
-                        return null;
-                      },
+                      readOnly: false,
+                      keyboardType:TextInputType.emailAddress ,
+                      validatorText: 'Please Enter the Email of the Supervisor',
+                      labelText: 'Enter The Email of the Supervisor',
                     ),
                     const SizedBox(height: 25),
-
-                    // Supervisor Type Dropdown
-                    Text(
-                      'Supervisor type',
-                      style: getTitleStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.black,
-                      ),
-                    ),
+                    const CustomText(text: 'Supervisor type', fonSize: 15),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.only(right: 160),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 2),
+                            horizontal: 10, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.TextField,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: DropdownButton<String>(
@@ -183,44 +154,26 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                         ),
                       ),
                     ),
-
-                    const Gap(30), // Spacer
-
-                    // Add Supervisor Button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 50),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              if (_SuperVisor_Type == "Choose") {
-                                showErrorDialog(
-                                  context,
-                                  'Please select a valid Supervisor type',
-                                );
-                                return;
-                              }
-                              _formKey.currentState!.save();
+                    const Gap(30),
+                    if (_isLoading)
+                      const Center(child: CircularProgressIndicator())
+                    else
+                      CustomButton(
+                        text: 'Add',
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            if (_SuperVisor_Type == "Choose") {
+                              showErrorDialog(
+                                context,
+                                'Please select a valid Supervisor type',
+                              );
+                              return;
                             }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                AppColors.color1, // Primary button color
-                            elevation: 2, // Light shadow effect
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(15), // Rounded button
-                            ),
-                          ),
-                          child: Text(
-                            'Add',
-                            style: getTitleStyle(color: AppColors.white),
-                          ),
-                        ),
+                            _formKey.currentState!.save();
+                            _addSupervisor();
+                          }
+                        },
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -231,13 +184,10 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
     );
   }
 
-  // **Dispose Controllers when Widget is Removed from the Tree**
-  /*
   @override
   void dispose() {
     _SuperVisorNameController.dispose();
     _SuperVisorEmailController.dispose();
     super.dispose();
   }
-  */
 }

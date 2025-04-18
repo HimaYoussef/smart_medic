@@ -18,7 +18,7 @@ class AwarenessCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16), // Padding around the content
       decoration: BoxDecoration(
-        color: AppColors.color1, // Background color from theme
+        color: AppColors.mainColor, // Background color from theme
         borderRadius: BorderRadius.circular(16), // Rounded corners
       ),
       child: Column(

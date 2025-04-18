@@ -1,103 +1,125 @@
+// main.dart with role-based AuthCheck routing
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:smart_medic/Features/Auth/Presentation/view/Login.dart';
-import 'package:smart_medic/Features/Auth/Presentation/view_model/auth_cubit.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
-import 'dart:async';
-
-import 'package:smart_medic/core/utils/Colors.dart';
-import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
+import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
+import 'Database/firestoreDB.dart';
+import 'Features/Auth/Presentation/view/Login.dart';
+import 'Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
+import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
+import 'Features/Users/Patient/Home/Patient_Main_view.dart';
+import 'Features/Users/Supervisor/Home/Supervior_Main_view.dart';
+import 'Theme/themes.dart';
 
 Future<void> main() async {
-  //--- initilaize firebase on my app
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-      options: const FirebaseOptions(
-          apiKey: 'AIzaSyDV-Qnv-_7vxGZ1Wa_WC7aVGLLAwZHJ5hQ',
-          appId: 'com.example.smart_medic',
-          messagingSenderId: '352505676305',
-          projectId: 'smartmedicbox-2025'));
-  SystemChrome.setPreferredOrientations(
-    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
+    options: const FirebaseOptions(
+      apiKey: 'AIzaSyDV-Qnv-_7vxGZ1Wa_WC7aVGLLAwZHJ5hQ',
+      appId: 'com.example.smart_medic',
+      messagingSenderId: '352505676305',
+      projectId: 'smartmedicbox-2025',
+    ),
   );
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  final appDocumentDir = await getApplicationDocumentsDirectory();
+  await Hive.initFlutter(appDocumentDir.path);
+  await Hive.openBox<String>('pendingMessages');
+
   runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
+  static final ValueNotifier<ThemeMode> themeNotifier =
+      ValueNotifier(ThemeMode.light);
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: BlocProvider(
-        create: (context) => AuthCubit(),
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            scaffoldBackgroundColor: AppColors.white,
-            snackBarTheme:
-                SnackBarThemeData(backgroundColor: AppColors.redColor),
-            appBarTheme: AppBarTheme(
-              titleTextStyle: getTitleStyle(color: AppColors.white),
-              centerTitle: true,
-              elevation: 0.0,
-              actionsIconTheme: IconThemeData(color: AppColors.color1),
-              backgroundColor: AppColors.color1,
-            ),
-            inputDecorationTheme: InputDecorationTheme(
-              contentPadding: const EdgeInsets.only(
-                left: 20,
-                top: 10,
-                bottom: 10,
-                right: 20,
-              ),
-              border: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20)),
-                borderSide: BorderSide.none,
-              ),
-              hintStyle: getbodyStyle(color: Colors.grey),
-              fillColor: AppColors.redColor,
-              filled: true,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: AppColors.white),
-              ),
-              disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: AppColors.black),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: AppColors.black),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: AppColors.redColor),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: AppColors.redColor),
-              ),
-            ),
-            dividerTheme: DividerThemeData(
-              color: AppColors.black,
-              indent: 10,
-              endIndent: 10,
-            ),
-            fontFamily: GoogleFonts.cairo().fontFamily,
+    return ValueListenableBuilder(
+      valueListenable: themeNotifier,
+      builder: (_, ThemeMode currentMode, __) {
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => SignUpCubit()),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppThemes.lightTheme,
+            darkTheme: AppThemes.darkTheme,
+            themeMode: currentMode,
+            home: const AuthCheck(),
+            builder: (context, child) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: child!,
+              );
+            },
           ),
-          home: RoleSelectionScreen(),
-          builder: (context, child) {
-            return Directionality(
-              textDirection: TextDirection.ltr,
-              child: child!,
-            );
+        );
+      },
+    );
+  }
+}
+
+class AuthCheck extends StatelessWidget {
+  const AuthCheck({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+          return  RoleSelectionScreen();
+        }
+
+        User user = snapshot.data!;
+
+        return FutureBuilder<Map<String, dynamic>?>(
+          future: SmartMedicalDb.getUserById(user.uid),
+          builder: (context, userSnapshot) {
+            if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (userSnapshot.hasError ||
+                !userSnapshot.hasData ||
+                userSnapshot.data == null) {
+              return  RoleSelectionScreen();
+            }
+
+            String userType = userSnapshot.data!['type']?.toString().trim().toLowerCase() ?? 'patient';
+
+            if (userType == 'patient') {
+              return const PatientHomeView();
+            } else if (userType == 'supervisor') {
+              return const SupervisorHomeView();
+            } else {
+              return  RoleSelectionScreen();
+            }
           },
-        ),
-      ),
+        );
+      },
     );
   }
 }

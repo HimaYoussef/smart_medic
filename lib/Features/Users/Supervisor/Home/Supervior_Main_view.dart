@@ -14,13 +14,9 @@ class _nameState extends State<Supervior_Main_view> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
       appBar: AppBar(
         title: const Text(
-          'Supervision',
-          style: TextStyle(color: Colors.black),
-        ),
-        backgroundColor: AppColors.white,
+          'Supervision',),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -38,17 +34,17 @@ class _nameState extends State<Supervior_Main_view> {
             // List of Supervisors
             Expanded(
               child: ListView(
-                children: const [
+                children: [
                   SupervisorCard(
                     name: "Omar",
                     email: "Omar@gmail.com",
-                    type: "Family",
+                    type: "Family", supervisorId: '', onDelete: () {  },
                   ),
-                  SizedBox(height: 12),
-                  SupervisorCard(
+                  const SizedBox(height: 12),
+                   SupervisorCard(
                     name: "Omar",
                     email: "Omar@gmail.com",
-                    type: "Family",
+                    type: "Family", supervisorId: '', onDelete: () {  },
                   ),
                 ],
               ),

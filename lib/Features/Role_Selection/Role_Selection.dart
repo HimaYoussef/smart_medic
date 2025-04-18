@@ -32,7 +32,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               children: [
                 Text(
                   "Continue As..",
-                  style: getTitleStyle(color: AppColors.black),
+                  style: getTitleStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.white
+                          : AppColors.black),
                 ),
                 SizedBox(height: screenHeight * 0.03),
                 _buildRoleCard('Patient', 'assets/patient.png', screenWidth),
@@ -48,13 +51,13 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => LoginScreen(role: selectedRole),
+                                builder: (context) =>
+                                    LoginScreen(role: selectedRole),
                               ),
                             );
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.color1,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -107,7 +110,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               Text(
                 role,
                 style: getbodyStyle(
-                  color: AppColors.black,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.white
+                      : AppColors.black,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),

@@ -1,32 +1,32 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/Database/firestoreDB.dart';
+import '../../../../../core/widgets/Custom_button.dart';
 
-// Stateful widget for handling medicine refill
 class Refill_Medicine extends StatefulWidget {
-  const Refill_Medicine({super.key});
+  final int compartmentNum;
+  const Refill_Medicine({super.key, required this.compartmentNum});
 
   @override
   State<Refill_Medicine> createState() => _nameState();
 }
 
-// Form key for validating user input
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-// Controller to handle input for the number of pills
 final TextEditingController _NumofPillsController = TextEditingController();
 
 class _nameState extends State<Refill_Medicine> {
+  User? user = FirebaseAuth.instance.currentUser;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 235, 235, 235),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         leading: GestureDetector(
-          onTap: () => Navigator.pop(context), // Navigate back when tapped
+          onTap: () => Navigator.pop(context),
           child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
         ),
       ),
@@ -36,7 +36,9 @@ class _nameState extends State<Refill_Medicine> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: AppColors.white,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.cointainerDarkColor
+                  : AppColors.white,
             ),
             height: 300,
             child: Form(
@@ -46,8 +48,7 @@ class _nameState extends State<Refill_Medicine> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Gap(20),
-                    // Centered title
+                    const Gap(20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -61,8 +62,7 @@ class _nameState extends State<Refill_Medicine> {
                         ),
                       ],
                     ),
-                    Gap(30),
-                    // Label for number of pills input
+                    const Gap(30),
                     Text(
                       'Num of Pills',
                       style: getTitleStyle(
@@ -72,17 +72,13 @@ class _nameState extends State<Refill_Medicine> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Text input for entering the number of pills
                     TextFormField(
                       keyboardType: TextInputType.number,
                       controller: _NumofPillsController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Enter The Num of pills added',
-                        hintStyle: getbodyStyle(color: Colors.black),
-                        fillColor: AppColors.TextField,
-                        filled: true,
                       ),
-                      textInputAction: TextInputAction.next,
+                      textInputAction: TextInputAction.done,
                       validator: (value) {
                         if (value!.isEmpty) {
                           return 'Please enter the number of pills';
@@ -90,38 +86,35 @@ class _nameState extends State<Refill_Medicine> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 25.0),
-                    // Submit button for refilling medicine
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 50),
-                      child: Container(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                _formKey.currentState!.save();
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => PatientHomeView(),
-                                ));
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.color1,
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                            ),
-                            child: Text(
-                              'Refill',
-                              style: getTitleStyle(color: AppColors.white),
-                            ),
-                          ),
-                        ),
-                      ),
+                    const SizedBox(height: 55.0),
+                    CustomButton(
+                      text: 'Refill',
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          // Update pillsLeft in Firestore for compartment 1
+                          QuerySnapshot medSnapshot = await FirebaseFirestore
+                              .instance
+                              .collection('medications')
+                              .where('patientId', isEqualTo: user!.uid)
+                              .where('compartmentNumber', isEqualTo: widget.compartmentNum)
+                              .get();
+
+                          if (medSnapshot.docs.isNotEmpty) {
+                            String medId = medSnapshot.docs.first.id;
+                            await SmartMedicalDb.updateMedicine(
+                              medicineId: medId ,
+                              updates: {
+                                'pillsLeft':
+                                int.parse(_NumofPillsController.text),
+                                'lastUpdated': FieldValue.serverTimestamp(),
+                              },
+                            );
+                          }
+                          _NumofPillsController.text='';
+                          Navigator.pop(context);
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -132,11 +125,4 @@ class _nameState extends State<Refill_Medicine> {
       ),
     );
   }
-
-  // Dispose controller to prevent memory leaks
-  // @override
-  // void dispose() {
-  //   _NumofPillsController.dispose();
-  //   super.dispose();
-  // }
 }

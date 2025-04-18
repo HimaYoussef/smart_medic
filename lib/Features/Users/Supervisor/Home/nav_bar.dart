@@ -29,7 +29,9 @@ class _SupervisorHomeViewState extends State<SupervisorHomeView> {
         margin: const EdgeInsets.symmetric(horizontal: 17, vertical: 20),
         height: 53,
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.nav_parColor
+              : AppColors.white,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
@@ -43,53 +45,39 @@ class _SupervisorHomeViewState extends State<SupervisorHomeView> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
             currentIndex: currentIndex,
-            selectedItemColor: Colors.blue,
-            unselectedItemColor: Colors.grey,
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
+            onTap: (index)=>setState(() => currentIndex= index,),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.white,
             elevation: 0,
-            onTap: (index) {
-              setState(() {
-                currentIndex = index;
-              });
-            },
-            items: [
+            items:  [
               BottomNavigationBarItem(
-                icon: _buildNavItem('assets/Home.svg', 0),
-                label: 'Home',
+                icon:const SizedBox(height:18,child: Icon(Icons.home,),),
+                label: "",
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.mainColorDark
+                    : AppColors.nav_parColor,
               ),
               BottomNavigationBarItem(
-                icon: _buildNavItem('assets/Logs.svg', 1),
-                label: 'Logs',
+                icon:const SizedBox(height:18,child: Icon(Icons.article, ),),
+                label: "",
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.mainColorDark
+                    : AppColors.nav_parColor,
               ),
               BottomNavigationBarItem(
-                icon: _buildNavItem('assets/Awareness.svg', 2),
-                label: 'Awareness',
-              ),
-              BottomNavigationBarItem(
-                icon: _buildNavItem('assets/Profile.svg', 3),
-                label: 'Profile',
+                icon:const SizedBox(height:18,child: Icon(Icons.person,),),
+                label: "",
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.mainColorDark
+                    : AppColors.nav_parColor,
               ),
             ],
           ),
         ),
       ),
       body: screens[currentIndex],
-    );
-  }
-
-  Widget _buildNavItem(String asset, int index) {
-    bool isSelected = index == currentIndex;
-    return SvgPicture.asset(
-      asset,
-      height: 18,
-      width: 18,
-      colorFilter: ColorFilter.mode(
-        isSelected ? Colors.blue : Colors.grey,
-        BlendMode.srcIn,
-      ),
     );
   }
 }

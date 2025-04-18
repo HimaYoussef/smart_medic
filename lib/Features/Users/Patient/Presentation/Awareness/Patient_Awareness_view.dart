@@ -9,21 +9,10 @@ class PatientAwarenessView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA), // Light gray background
       appBar: AppBar(
-        backgroundColor: AppColors.white,
         elevation: 0, // Removes shadow from AppBar
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context), // Back navigation
-        ),
         title: const Text(
-          'Awareness',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          'Awareness', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
         ),
         centerTitle: true,
         actions: [
@@ -42,12 +31,14 @@ class PatientAwarenessView extends StatelessWidget {
               title: "Mental Health",
               description:
                   "During the COVID-19 pandemic, young people experienced spikes in mental health difficulties, with girls taking a harder hit.",
+                context: context
             ),
             const SizedBox(height: 12), // Space between cards
             _buildAwarenessCard(
               title: "Daily Calorie",
               description:
                   "Whether you're trying to lose weight, gain weight, or stick to your current weight, it's important to know how many calories you need to eat each day.",
+              context: context
             ),
           ],
         ),
@@ -56,12 +47,14 @@ class PatientAwarenessView extends StatelessWidget {
   }
 
   Widget _buildAwarenessCard(
-      {required String title, required String description}) {
+      {required String title, required String description, required BuildContext context}) {
     return Container(
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.color1, // Card background color
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.cointainerDarkColor
+            : AppColors.mainColor,// Card background color
         borderRadius: BorderRadius.circular(12), // Rounded corners
       ),
       child: Column(

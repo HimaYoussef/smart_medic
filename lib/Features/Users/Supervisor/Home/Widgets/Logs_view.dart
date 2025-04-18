@@ -14,13 +14,9 @@ class _Logs_viewState extends State<Logs_view> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
       appBar: AppBar(
         title: const Text(
-          'Profile',
-          style: TextStyle(color: Colors.black),
-        ),
-        backgroundColor: AppColors.white,
+          'Profile',),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -69,7 +65,7 @@ class _Logs_viewState extends State<Logs_view> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.color1,
+                color: AppColors.mainColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
