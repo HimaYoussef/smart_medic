@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../Bluetooth/BluetoothManager.dart';
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/build_text_field.dart';
@@ -85,14 +86,14 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Gap(20),
-                    const Row(
+                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CustomText(text: 'Add New Medicine', fonSize: 20)
+                        CustomText(text: S.of(context).Add_New_Medicine_Head, fonSize: 20)
                       ],
                     ),
                     const Gap(30),
-                    const CustomText(text: 'Compartment Number', fonSize: 15,),
+                     CustomText(text: S.of(context).Add_New_Medicine_Compartment_Number, fonSize: 15,),
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: TextEditingController(
@@ -101,12 +102,12 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                       enablation: false,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Med Name', fonSize: 15,),
+                     CustomText(text: S.of(context).Add_New_Medicine_Med_Name, fonSize: 15,),
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: _medNameController,
-                      labelText: 'Enter the name of the Medicine',
-                      validatorText: 'Please enter the name of the medicine',
+                      labelText: S.of(context).Add_New_Medicine_labelText1,
+                      validatorText: S.of(context).Add_New_Medicine_validatorText1,
                       keyboardType: TextInputType.text,
                       readOnly: false,
                     ),
@@ -115,32 +116,32 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                     const SizedBox(height: 10),
                     CustomTextField(
                         controller: _pillsController,
-                        labelText: 'Enter the number of pills added',
+                        labelText: S.of(context).Add_New_Medicine_labelText2,
                         keyboardType: TextInputType.number,
                         readOnly: false,
-                        validatorText: 'Please enter the number of pills'),
+                        validatorText: S.of(context).Add_New_Medicine_validatorText2),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Dosage', fonSize: 15,),
+                     CustomText(text: S.of(context).Add_New_Medicine_Dosage, fonSize: 15,),
                     const SizedBox(height: 10),
                     CustomTextField(
                         controller: _dosageController,
-                        labelText: 'Enter the number of pills every time',
+                        labelText: S.of(context).Add_New_Medicine_labelText3,
                         keyboardType: TextInputType.number,
                         readOnly: false,
-                        validatorText: 'Please enter the number of the pills'),
+                        validatorText: S.of(context).Add_New_Medicine_validatorText3),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Schedule Type', fonSize: 15,),
+                     CustomText(text:S.of(context).Add_New_Medicine_Schedule_Type, fonSize: 15,),
                     const SizedBox(height: 10),
                     buildDropdownButton(context),
                     const SizedBox(height: 25),
                     if (_scheduleType == 1) ...[
-                      const CustomText(text: 'How many times per day?', fonSize: 15,),
+                       CustomText(text: S.of(context).Add_New_Medicine_How_many_times_per_day, fonSize: 15,),
                       const SizedBox(height: 10),
                       CustomTextField(
                         controller: _numTimesController,
                         readOnly: false,
-                        labelText:'Enter number of times per day',
-                        validatorText:'Please enter the number of the times' ,
+                        labelText:S.of(context).Add_New_Medicine_labelText4,
+                        validatorText:S.of(context).Add_New_Medicine_validatorText4 ,
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
                           setState(() {
@@ -151,7 +152,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'Number of times must be between 1 and 4',
+                                      S.of(context).Add_New_Medicine_SnackBar,
                                       style: TextStyle(color: AppColors.white),
                                     ),
                                   ),
@@ -214,20 +215,20 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                       ],
                     ],
                     if (_scheduleType == 2) ...[
-                      const CustomText(text: 'Every how many days?', fonSize: 15),
+                       CustomText(text: S.of(context).Add_New_Medicine_Every_how_many_days, fonSize: 15),
                       const SizedBox(height: 10),
                       CustomTextField(
                           controller: _daysIntervalController,
                           readOnly: false,
                           keyboardType: TextInputType.number,
-                          labelText: 'Enter number of days',
+                          labelText: S.of(context).Add_New_Medicine_labelText5,
                           onChanged: (value) {
                             setState(() {
                               _times = [];
                               _selectedTime = null; // Reset time when days change
                             });
                           },
-                        validatorText: 'Please enter the number of the days',
+                        validatorText: S.of(context).Add_New_Medicine_validatorText5,
 
                       ),
                       const SizedBox(height: 25),
@@ -257,15 +258,15 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           child: Text(
                             _selectedTime != null
                                 ? _selectedTime!.format(context)
-                                : 'Add Time',
+                                : S.of(context).Add_New_Medicine_Add_Time,
                             style: TextStyle(color: AppColors.white),
                           ),
                         ),
                       ],
                     ],
                     if (_scheduleType == 3) ...[
-                      const CustomText(
-                          text: 'Select Specific Days', fonSize: 15),
+                       CustomText(
+                          text: S.of(context).Add_New_Medicine_Select_Specific_Days, fonSize: 15),
                       const SizedBox(height: 2),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -296,13 +297,13 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                     ],
                     const SizedBox(height: 30),
                     CustomButton(
-                      text: 'Submit',
+                      text: S.of(context).Add_New_Medicine_Submit,
                       onPressed: () async {
                         if (_scheduleType == 0) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Please select a schedule type',
+                                S.of(context).Add_New_Medicine_Please_select_a_schedule_type,
                                 style: TextStyle(color: AppColors.white),
                               ),
                             ),
@@ -313,7 +314,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Please select all times for daily schedule',
+                                S.of(context).Add_New_Medicine_Please_select_all_times_for_daily_schedule,
                                 style: TextStyle(color: AppColors.white),
                               ),
                             ),
@@ -322,7 +323,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Please select a time for every X days schedule',
+                                S.of(context).Add_New_Medicine_Every_X_Days,
                                 style: TextStyle(color: AppColors.white),
                               ),
                             ),
@@ -332,7 +333,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Please select at least one day for specific days schedule',
+                               S.of(context).Add_New_Medicine_Please_select_at_least_one_day_for_specific_days_schedule,
                                 style: TextStyle(color: AppColors.white),
                               ),
                             ),
@@ -374,7 +375,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
         DropdownMenuItem<int>(
           value: 0,
           child: Text(
-            'Select Type',
+            S.of(context).Add_New_Medicine_Select_Type,
             style: TextStyle(
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white60
@@ -382,9 +383,9 @@ class _Add_new_Medicine extends State<addNewMedicine> {
             ),
           ),
         ),
-        const DropdownMenuItem<int>(value: 1, child: Text('Daily')),
-        const DropdownMenuItem<int>(value: 2, child: Text('Every X Days')),
-        const DropdownMenuItem<int>(value: 3, child: Text('Specific Days')),
+         DropdownMenuItem<int>(value: 1, child: Text( S.of(context).Add_New_Medicine_Daily)),
+         DropdownMenuItem<int>(value: 2, child: Text(S.of(context).Add_New_Medicine_Every_X_Days)),
+         DropdownMenuItem<int>(value: 3, child: Text(S.of(context).Add_New_Medicine_Specific_Days)),
       ],
     );
   }
@@ -496,8 +497,8 @@ class _Add_new_Medicine extends State<addNewMedicine> {
       // إشعار لليوزر لو البلوتوث مش متصل
       if (!_bluetoothManager.isConnected && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Bluetooth not connected. Data will be sent later."),
+           SnackBar(
+            content: Text(S.of(context).Add_New_Medicine_Bluetooth_not_connected_Data_will_be_sent_later),
           ),
         );
       }

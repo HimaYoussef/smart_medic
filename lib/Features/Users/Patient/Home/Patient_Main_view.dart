@@ -5,6 +5,7 @@ import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Refill_Medicine.
 import 'package:smart_medic/core/widgets/CustomBoxFilled.dart';
 import 'package:smart_medic/core/widgets/CustomBoxIcon.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 class PatientMainView extends StatefulWidget {
   const PatientMainView({super.key});
@@ -20,7 +21,7 @@ class _PatientMainViewState extends State<PatientMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title:  Text(S.of(context).Patient_Main_view_Home),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -40,7 +41,7 @@ class _PatientMainViewState extends State<PatientMainView> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return const Center(child: Text("Error loading medications"));
+              return  Center(child: Text(S.of(context).Patient_Main_view_Error_loading_medications));
             }
 
             // Extract medications from snapshot

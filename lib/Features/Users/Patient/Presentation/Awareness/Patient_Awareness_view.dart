@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 class PatientAwarenessView extends StatelessWidget {
   const PatientAwarenessView({super.key});
@@ -11,8 +12,12 @@ class PatientAwarenessView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0, // Removes shadow from AppBar
-        title: const Text(
-          'Awareness', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,),
+        title: Text(
+          S.of(context).Awareness_view_Awareness,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
         actions: [
@@ -28,18 +33,14 @@ class PatientAwarenessView extends StatelessWidget {
         child: Column(
           children: [
             _buildAwarenessCard(
-              title: "Mental Health",
-              description:
-                  "During the COVID-19 pandemic, young people experienced spikes in mental health difficulties, with girls taking a harder hit.",
-                context: context
-            ),
+                title: S.of(context).Awareness_view_title1,
+                description: S.of(context).Awareness_view_description1,
+                context: context),
             const SizedBox(height: 12), // Space between cards
             _buildAwarenessCard(
-              title: "Daily Calorie",
-              description:
-                  "Whether you're trying to lose weight, gain weight, or stick to your current weight, it's important to know how many calories you need to eat each day.",
-              context: context
-            ),
+                title: S.of(context).Awareness_view_title2,
+                description: S.of(context).Awareness_view_description2,
+                context: context),
           ],
         ),
       ),
@@ -47,14 +48,16 @@ class PatientAwarenessView extends StatelessWidget {
   }
 
   Widget _buildAwarenessCard(
-      {required String title, required String description, required BuildContext context}) {
+      {required String title,
+      required String description,
+      required BuildContext context}) {
     return Container(
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
             ? AppColors.cointainerDarkColor
-            : AppColors.mainColor,// Card background color
+            : AppColors.mainColor, // Card background color
         borderRadius: BorderRadius.circular(12), // Rounded corners
       ),
       child: Column(

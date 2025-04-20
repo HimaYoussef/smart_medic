@@ -4,9 +4,12 @@ import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Supervision_view.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
+import 'package:smart_medic/LocalProvider.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../main.dart';
+import 'package:provider/provider.dart';
 
 class Supervior_Profile_view extends StatefulWidget {
   const Supervior_Profile_view({super.key});
@@ -71,10 +74,12 @@ class Supervior_Profile_view_State extends State<Supervior_Profile_view> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Profile',
+        title:  Text(
+          S.of(context).Supervisor_Profile_view_Profile,
         ),
         elevation: 0,
         actions: [
@@ -88,7 +93,7 @@ class Supervior_Profile_view_State extends State<Supervior_Profile_view> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : user == null
-              ? const Center(child: Text("Please log in to view your profile"))
+              ?  Center(child: Text( S.of(context).Supervisor_Profile_view_Please_log_in_to_view_your_profile))
               : Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -193,7 +198,7 @@ class Supervior_Profile_view_State extends State<Supervior_Profile_view> {
                                     ? AppColors.mainColorDark
                                     : AppColors.mainColor,
                               ),
-                              title: const Text('Dark Mode'),
+                              title:  Text( S.of(context).Supervisor_Profile_view_Dark_Mode),
                               trailing: ValueListenableBuilder<ThemeMode>(
                                 valueListenable: MainApp.themeNotifier,
                                 builder: (context, currentMode, child) {
@@ -218,11 +223,16 @@ class Supervior_Profile_view_State extends State<Supervior_Profile_view> {
                                     ? AppColors.mainColorDark
                                     : AppColors.mainColor,
                               ),
-                              title: const Text('Change Language'),
+                              title:  Text( S.of(context).Supervisor_Profile_view_Change_Language),
                               trailing:
                                   const Icon(Icons.arrow_forward_ios, size: 16),
                               onTap: () {
-                                // Add functionality for language change
+                                if (localeProvider.locale.languageCode ==
+                                    'en') {
+                                  localeProvider.setLocale(const Locale('ar'));
+                                } else {
+                                  localeProvider.setLocale(const Locale('en'));
+                                }
                               },
                             ),
                             const Divider(),
@@ -235,7 +245,7 @@ class Supervior_Profile_view_State extends State<Supervior_Profile_view> {
                                     ? AppColors.mainColorDark
                                     : AppColors.mainColor,
                               ),
-                              title: const Text('Log out'),
+                              title:  Text( S.of(context).Supervisor_Profile_view_Log_out),
                               trailing:
                                   const Icon(Icons.arrow_forward_ios, size: 16),
                               onTap: _signOut,

@@ -1,6 +1,9 @@
 // LoginCubit with role validation
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:path/path.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../../Database/firestoreDB.dart';
 part 'login_state.dart';
 
@@ -13,8 +16,11 @@ class LoginCubit extends Cubit<LoginState> {
       : _auth = auth ?? FirebaseAuth.instance,
         super(LoginInitial());
 
-  Future<void> login({required String email, required String pass}) async {
-    emit(Loading());
+  Future<void> login({
+    required String email,
+    required String pass,
+    required BuildContext context,
+  }) async {    emit(Loading());
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -23,20 +29,20 @@ class LoginCubit extends Cubit<LoginState> {
 
       final user = userCredential.user;
       if (user == null) {
-        emit(Failed(errorMessage: 'Login failed. User is null.'));
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage1));
         return;
       }
 
       await user.reload();
       if (!user.emailVerified) {
-        emit(Failed(errorMessage: 'Email not verified yet.'));
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage2));
         return;
       }
 
       final userData = await SmartMedicalDb.getUserById(user.uid);
 
       if (userData == null) {
-        emit(Failed(errorMessage: 'User data not found.'));
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage3));
         return;
       }
 
@@ -49,15 +55,16 @@ class LoginCubit extends Cubit<LoginState> {
       emit(Success());
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        emit(Failed(errorMessage: 'No user found with this email'));
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage4));
       } else if (e.code == 'wrong-password') {
-        emit(Failed(errorMessage: 'Incorrect password'));
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage5));
       } else {
-        emit(Failed(errorMessage: e.message ?? 'Authentication error'));
-      }
+  emit(Failed(
+            errorMessage:
+                e.message ?? S.of(context).login_cubit_errorMessage6));      }
     } catch (e) {
-      emit(Failed(errorMessage: 'Unexpected error occurred'));
-      print("Error: \$e");
+      emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage7));
+      print("Error: $e");
     }
   }
 

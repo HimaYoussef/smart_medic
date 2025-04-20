@@ -4,9 +4,12 @@ import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Supervision_view.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/LocalProvider.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../main.dart';
+import 'package:provider/provider.dart';
 
 class PatientProfileView extends StatefulWidget {
   const PatientProfileView({super.key});
@@ -64,16 +67,18 @@ class _PatientProfileViewState extends State<PatientProfileView> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) =>  RoleSelectionScreen(),
+        builder: (context) => RoleSelectionScreen(),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title:  Text(S.of(context).Patient_Profile_view_Profile),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -87,176 +92,192 @@ class _PatientProfileViewState extends State<PatientProfileView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : user == null
-          ? const Center(child: Text("Please log in to view your profile"))
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Profile Card
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 1,
-                  ),
-                ],
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.cointainerDarkColor
-                    : AppColors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  // Profile Image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: Image.asset(
-                      'assets/avatar1.png',
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  // User Details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Name: ${userProfile?['name'] ?? user?.displayName ?? 'Unknown'}',
-                          style: getbodyStyle(
-                            color: AppColors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+              ?  Center(child: Text(S.of(context).Patient_Profile_view_Please_log_in_to_view_your_profile))
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      // Profile Card
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 1,
+                            ),
+                          ],
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.cointainerDarkColor
+                              : AppColors.white,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        Text(
-                          'Age: ${userProfile?['age']?.toString() ?? 'Not set'}',
-                          style: getbodyStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
+                        child: Row(
+                          children: [
+                            // Profile Image
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: Image.asset(
+                                'assets/avatar1.png',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            // User Details
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Name: ${userProfile?['name'] ?? user?.displayName ?? 'Unknown'}',
+                                    style: getbodyStyle(
+                                      color: AppColors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Age: ${userProfile?['age']?.toString() ?? 'Not set'}',
+                                    style: getbodyStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.edit,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const Edit_Profile(),
+                                  ),
+                                ).then((_) =>
+                                    _getUser()); // Refresh profile after edit
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.mainColorDark
-                          : AppColors.mainColor,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Edit_Profile(),
+                      ),
+                      const SizedBox(height: 20),
+                      // Settings Section
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.cointainerDarkColor
+                              : AppColors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                            ),
+                          ],
                         ),
-                      ).then((_) => _getUser()); // Refresh profile after edit
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Settings Section
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? AppColors.cointainerDarkColor
-                    : AppColors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Dark Mode Toggle
-                  ListTile(
-                    leading: Icon(
-                      Icons.dark_mode,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.mainColorDark
-                          : AppColors.mainColor,
-                    ),
-                    title: const Text('Dark Mode'),
-                    trailing: ValueListenableBuilder<ThemeMode>(
-                      valueListenable: MainApp.themeNotifier,
-                      builder: (context, currentMode, child) {
-                        return Switch(
-                          value: currentMode == ThemeMode.dark,
-                          onChanged: (value) {
-                            MainApp.themeNotifier.value =
-                            value ? ThemeMode.dark : ThemeMode.light;
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  const Divider(),
-                  // Supervisor Section
-                  ListTile(
-                    leading: Icon(
-                      Icons.supervisor_account,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.mainColorDark
-                          : AppColors.mainColor,
-                    ),
-                    title: const Text('Supervisor'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SupervisorsScreen(),
+                        child: Column(
+                          children: [
+                            // Dark Mode Toggle
+                            ListTile(
+                              leading: Icon(
+                                Icons.dark_mode,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
+                              ),
+                              title:  Text(S.of(context).Patient_Profile_view_Dark_Mode),
+                              trailing: ValueListenableBuilder<ThemeMode>(
+                                valueListenable: MainApp.themeNotifier,
+                                builder: (context, currentMode, child) {
+                                  return Switch(
+                                    value: currentMode == ThemeMode.dark,
+                                    onChanged: (value) {
+                                      MainApp.themeNotifier.value = value
+                                          ? ThemeMode.dark
+                                          : ThemeMode.light;
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                            const Divider(),
+                            // Supervisor Section
+                            ListTile(
+                              leading: Icon(
+                                Icons.supervisor_account,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
+                              ),
+                              title:  Text(S.of(context).Patient_Profile_view_Supervisor),
+                              trailing:
+                                  const Icon(Icons.arrow_forward_ios, size: 16),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SupervisorsScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            const Divider(),
+                            // Language Change Option
+                            ListTile(
+                              leading: Icon(
+                                Icons.language,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
+                              ),
+                              title:  Text(S.of(context).Patient_Profile_view_Change_Language),
+                              trailing:
+                                  const Icon(Icons.arrow_forward_ios, size: 16),
+                              onTap: () {
+                                if (localeProvider.locale.languageCode ==
+                                    'en') {
+                                  localeProvider.setLocale(const Locale('ar'));
+                                } else {
+                                  localeProvider.setLocale(const Locale('en'));
+                                }
+                              },
+                            ),
+                            const Divider(),
+                            // Log out
+                            ListTile(
+                              leading: Icon(
+                                Icons.logout,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
+                              ),
+                              title:  Text(S.of(context).Patient_Profile_view_Log_out),
+                              trailing:
+                                  const Icon(Icons.arrow_forward_ios, size: 16),
+                              onTap: _signOut,
+                            ),
+                          ],
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                  const Divider(),
-                  // Language Change Option
-                  ListTile(
-                    leading: Icon(
-                      Icons.language,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.mainColorDark
-                          : AppColors.mainColor,
-                    ),
-                    title: const Text('Change Language'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      // Add functionality for language change
-                    },
-                  ),
-                  const Divider(),
-                  // Log out
-                  ListTile(
-                    leading: Icon(
-                      Icons.logout,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.mainColorDark
-                          : AppColors.mainColor,
-                    ),
-                    title: const Text('Log out'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: _signOut,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+                ),
     );
   }
 }

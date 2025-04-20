@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Awareness_card.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 class Supervisor_Awareness_View extends StatefulWidget {
   const Supervisor_Awareness_View({super.key});
@@ -21,8 +22,8 @@ class _nameState extends State<Supervisor_Awareness_View> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context), // Back navigation
         ),
-        title: const Text(
-          'Awareness',
+        title:  Text(
+           S.of(context).Awareness_view_Awareness,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
           ),
         ),
@@ -40,15 +41,15 @@ class _nameState extends State<Supervisor_Awareness_View> {
         child: Column(
           children: [
             _buildAwarenessCard(
-              title: "Mental Health",
+              title: S.of(context).Awareness_view_title1,
               description:
-                  "During the COVID-19 pandemic, young people experienced spikes in mental health difficulties, with girls taking a harder hit.",
+                 S.of(context).Awareness_view_description1,
             ),
             const SizedBox(height: 12), // Space between cards
             _buildAwarenessCard(
-              title: "Daily Calorie",
+              title: S.of(context).Awareness_view_title2,
               description:
-                  "Whether you're trying to lose weight, gain weight, or stick to your current weight, it's important to know how many calories you need to eat each day.",
+                  S.of(context).Awareness_view_description2,
             ),
           ],
         ),

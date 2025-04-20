@@ -6,6 +6,7 @@ import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/LogItem.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 class PatientLogsView extends StatefulWidget {
   const PatientLogsView({super.key});
@@ -22,8 +23,8 @@ class _PatientLogsViewState extends State<PatientLogsView> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          'Logs',
+        title:  Text(
+          S.of(context).Patient_Logs_View_logs,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -45,10 +46,10 @@ class _PatientLogsViewState extends State<PatientLogsView> {
             }
             if (snapshot.hasError) {
               print('StreamBuilder error: ${snapshot.error}');
-              return const Center(child: Text("Error loading logs"));
+              return  Center(child: Text(S.of(context).Patient_Logs_View_Error_loading_logs));
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("No logs available"));
+              return  Center(child: Text(S.of(context).Patient_Logs_View_No_logs_available));
             }
 
             // Group logs by date
@@ -72,7 +73,7 @@ class _PatientLogsViewState extends State<PatientLogsView> {
             }
 
             if (logsByDate.isEmpty) {
-              return const Center(child: Text("No valid logs available"));
+              return  Center(child: Text(S.of(context).Patient_Logs_View_No_valid_logs_available));
             }
 
             return ListView(

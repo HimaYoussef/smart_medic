@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../core/functions/email_validation.dart';
 import '../../../../core/functions/routing.dart';
 import '../../../../core/utils/Colors.dart';
 import '../../../../core/widgets/Custom_button.dart';
 import '../view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
 import 'login.dart';
-import '../../../../Database/firestoreDB.dart'; // Import Firestore DB
+import '../../../../Database/firestoreDB.dart';
 
 class SignUpScreen extends StatelessWidget {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isLoading = false;
   final String role;
 
@@ -28,7 +30,7 @@ class SignUpScreen extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                "Account created successfully!",
+                S.of(context).signUp_SnackBar,
                 style: TextStyle(color: AppColors.white),
               ),
             ),
@@ -77,7 +79,7 @@ class SignUpScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 100),
                     Text(
-                      "Sign Up",
+                      S.of(context).signUp_Head,
                       style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -120,9 +122,9 @@ class SignUpScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            const Center(
+                            Center(
                               child: Text(
-                                'Hello',
+                                S.of(context).signUp_Hello,
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -133,9 +135,9 @@ class SignUpScreen extends StatelessWidget {
                             TextFormField(
                               keyboardType: TextInputType.name,
                               controller: _nameController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 border: UnderlineInputBorder(),
-                                labelText: 'Enter your Name',
+                                labelText: S.of(context).signUp_Name,
                                 labelStyle: TextStyle(color: Colors.grey),
                               ),
                             ),
@@ -143,9 +145,9 @@ class SignUpScreen extends StatelessWidget {
                             TextFormField(
                               keyboardType: TextInputType.emailAddress,
                               controller: _emailController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 border: UnderlineInputBorder(),
-                                labelText: 'Enter your Email',
+                                labelText: S.of(context).signUp_Email,
                                 labelStyle: TextStyle(color: Colors.grey),
                               ),
                             ),
@@ -155,7 +157,7 @@ class SignUpScreen extends StatelessWidget {
                               obscureText: !cubit.isPasswordVisible,
                               decoration: InputDecoration(
                                 border: const UnderlineInputBorder(),
-                                labelText: 'Enter your Password',
+                                labelText: S.of(context).signUp_password,
                                 labelStyle: const TextStyle(color: Colors.grey),
                                 suffixIcon: IconButton(
                                   icon: Icon(
@@ -180,7 +182,8 @@ class SignUpScreen extends StatelessWidget {
                               obscureText: !cubit.isConfirmPasswordVisible,
                               decoration: InputDecoration(
                                 border: const UnderlineInputBorder(),
-                                labelText: 'Confirm your Password',
+                                labelText:
+                                    S.of(context).signUp_Confirm_Password,
                                 labelStyle: const TextStyle(color: Colors.grey),
                                 suffixIcon: IconButton(
                                   icon: Icon(
@@ -204,7 +207,7 @@ class SignUpScreen extends StatelessWidget {
                               const Center(child: CircularProgressIndicator())
                             else
                               CustomButton(
-                                text: "SIGN Up",
+                                text: S.of(context).signUp_SIGN_UP,
                                 onPressed: () async {
                                   final name = _nameController.text;
                                   final email = _emailController.text.trim();
@@ -217,7 +220,9 @@ class SignUpScreen extends StatelessWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                           content: Text(
-                                              'Please continue...',
+                                              S
+                                                  .of(context)
+                                                  .signUp_SnackBar_Please_Continue,
                                               style: TextStyle(
                                                   color: AppColors.white))),
                                     );
@@ -225,7 +230,9 @@ class SignUpScreen extends StatelessWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                           content: Text(
-                                              'Please enter a valid email',
+                                              S
+                                                  .of(context)
+                                                  .signUp_Please_enter_a_valid_email,
                                               style: TextStyle(
                                                   color: AppColors.white))),
                                     );
@@ -233,7 +240,9 @@ class SignUpScreen extends StatelessWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                           content: Text(
-                                              "Passwords do not match",
+                                              S
+                                                  .of(context)
+                                                  .signUp_Passwords_do_not_match,
                                               style: TextStyle(
                                                   color: AppColors.white))),
                                     );
@@ -243,7 +252,8 @@ class SignUpScreen extends StatelessWidget {
                                             name: name,
                                             email: email,
                                             password: password,
-                                            type: role); // Pass role to Firestore
+                                            type: role,
+                                            context: context);
                                   }
                                 },
                               )
@@ -257,7 +267,7 @@ class SignUpScreen extends StatelessWidget {
                         Navigator.pop(context);
                       },
                       child: Text(
-                        "Already have an account? SIGN IN",
+                        S.of(context).signUp_Already_have_an_account_SIGN_IN,
                         style: TextStyle(
                           color: Theme.of(context).brightness == Brightness.dark
                               ? AppColors.mainColorDark

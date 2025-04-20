@@ -5,6 +5,7 @@ import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
 import 'package:smart_medic/core/widgets/custom_dialogs.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/build_text_field.dart';
@@ -115,34 +116,34 @@ class _Edit_Supervisor extends State<Edit_Supervisor> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Gap(20),
-                    const Row(
+                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CustomText(text: 'Edit Supervisor', fonSize: 20)
+                        CustomText(text: S.of(context).Edit_Supervisor_Head, fonSize: 20)
                       ],
                     ),
                     const Gap(30),
-                    const CustomText(text: 'Name', fonSize: 15),
+                     CustomText(text: S.of(context).Edit_Supervisor_Name, fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _nameController,
                       readOnly: false,
                       keyboardType: TextInputType.text,
-                      labelText: 'Enter The name of the Supervisor',
-                      validatorText: 'Please Enter The name of the Supervisor',
+                      labelText: S.of(context).Edit_Supervisor_labelText1,
+                      validatorText: S.of(context).Edit_Supervisor_validatorText1,
                     ),
                     const SizedBox(height: 25.0),
-                    const CustomText(text: 'Email', fonSize: 15),
+                     CustomText(text: S.of(context).Edit_Supervisor_Email, fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _emailController,
                       readOnly: false,
                       keyboardType: TextInputType.emailAddress,
-                      labelText: 'Enter The Email of the Supervisor',
-                      validatorText:'Please Enter the Email of the Supervisor' ,
+                      labelText: S.of(context).Edit_Supervisor_labelText2,
+                      validatorText:S.of(context).Edit_Supervisor_validatorText2 ,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Supervisor type', fonSize: 15),
+                     CustomText(text: S.of(context).Edit_Supervisor_Supervisor_type, fonSize: 15),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.only(right: 160),
@@ -175,7 +176,7 @@ class _Edit_Supervisor extends State<Edit_Supervisor> {
                     if (_isLoading)
                       const Center(child: CircularProgressIndicator())
                     else
-                      CustomButton(text: 'Update', onPressed: _updateSupervisor)
+                      CustomButton(text: S.of(context).Edit_Supervisor_update, onPressed: _updateSupervisor)
                   ],
                 ),
               ),

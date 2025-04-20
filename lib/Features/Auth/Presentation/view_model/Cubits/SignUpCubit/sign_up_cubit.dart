@@ -1,64 +1,70 @@
-  import 'package:firebase_auth/firebase_auth.dart';
-  import 'package:flutter/cupertino.dart';
-  import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_medic/generated/l10n.dart';
+import '../../../../../../Database/firestoreDB.dart';
 
-  import '../../../../../../Database/firestoreDB.dart';
-  part 'sign_up_state.dart';
+part 'sign_up_state.dart';
 
-  class SignUpCubit extends Cubit<SignUpState> {
-    final FirebaseAuth _auth;
-    bool isPasswordVisible = false; 
-    bool isConfirmPasswordVisible = false;
+class SignUpCubit extends Cubit<SignUpState> {
+  final FirebaseAuth _auth;
+  bool isPasswordVisible = false;
+  bool isConfirmPasswordVisible = false;
 
-    SignUpCubit({FirebaseAuth? auth})
-        : _auth = auth ?? FirebaseAuth.instance,
-          super(SignUpInitial());
+  SignUpCubit({FirebaseAuth? auth})
+      : _auth = auth ?? FirebaseAuth.instance,
+        super(SignUpInitial());
 
-    void togglePasswordVisibility() {
-      isPasswordVisible = !isPasswordVisible;
-      emit(PasswordVisibilityChanged(isPasswordVisible, isConfirmPasswordVisible));
-    }
+  void togglePasswordVisibility() {
+    isPasswordVisible = !isPasswordVisible;
+    emit(PasswordVisibilityChanged(isPasswordVisible, isConfirmPasswordVisible));
+  }
 
-    void toggleConfirmPasswordVisibility() {
-      isConfirmPasswordVisible = !isConfirmPasswordVisible;
-      emit(PasswordVisibilityChanged(isPasswordVisible, isConfirmPasswordVisible));
-    }
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordVisible = !isConfirmPasswordVisible;
+    emit(PasswordVisibilityChanged(isPasswordVisible, isConfirmPasswordVisible));
+  }
 
-    Future<void> signUp({required String name,required String email, required String password,required String type}) async {
-      emit(SignUpLoading());
-      try {
-        final userCredential = await _auth.createUserWithEmailAndPassword(
-            email: email,
-            password: password
-        );
-        User user= userCredential.user!;
-        SmartMedicalDb.addUser(userId: user.uid, name: name, type: type).then((response) {
-          print(response.message); // "User added successfully"
-        });
-        emit(SignUpSuccess());
-        await sendEmailVerification();
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'email-already-in-use') {
-          emit(SignUpFailure('This email already used'));
-        } else if (e.code == 'weak-password') {
-          emit(SignUpFailure('The password is too weak'));
-        }
-      } catch (e) {
-        emit(SignUpFailure('Unexpected error occurred'));
-      } finally{
-        await Future.delayed(const Duration(seconds: 1));
-        emit(SignUpInitial());
+  Future<void> signUp({
+    required String name,
+    required String email,
+    required String password,
+    required String type,
+    required BuildContext context,
+  }) async {
+    emit(SignUpLoading());
+    try {
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      User user = userCredential.user!;
+      SmartMedicalDb.addUser(userId: user.uid, name: name, type: type).then((response) {
+        print(response.message); // "User added successfully"
+      });
+      emit(SignUpSuccess());
+      await sendEmailVerification(context);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        emit(SignUpFailure(S.of(context).sign_up_cubit_SignUpFailure1));
+      } else if (e.code == 'weak-password') {
+        emit(SignUpFailure(S.of(context).sign_up_cubit_SignUpFailure2));
       }
+    } catch (e) {
+      emit(SignUpFailure(S.of(context).sign_up_cubit_SignUpFailure3));
+    } finally {
+      await Future.delayed(const Duration(seconds: 1));
+      emit(SignUpInitial());
     }
   }
 
-  Future<void> sendEmailVerification() async {
+  Future<void> sendEmailVerification(BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
-
     if (user != null && !user.emailVerified) {
       await user.sendEmailVerification();
-      print('Verification email has been sent.');
+      print(S.of(context).sign_up_cubit_EmailVerification1);
     } else {
-      print('User is already verified or not logged in.');
+      print(S.of(context).sign_up_cubit_EmailVerification2);
     }
   }
+}

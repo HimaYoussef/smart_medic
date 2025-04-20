@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view/Login.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
   @override
@@ -31,16 +32,27 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Continue As..",
+                  S.of(context).Role_Selection_Head,
                   style: getTitleStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.white
-                          : AppColors.black),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.white
+                        : AppColors.black,
+                  ),
                 ),
                 SizedBox(height: screenHeight * 0.03),
-                _buildRoleCard('Patient', 'assets/patient.png', screenWidth),
+                _buildRoleCard(
+                  'Patient',
+                  S.of(context).Role_Selection_patient,
+                  'assets/patient.png',
+                  screenWidth,
+                ),
                 SizedBox(height: screenHeight * 0.02),
-                _buildRoleCard('Supervisor', 'assets/supervisor.png', screenWidth),
+                _buildRoleCard(
+                  'Supervisor',
+                  S.of(context).Role_Selection_Supervisor,
+                  'assets/supervisor.png',
+                  screenWidth,
+                ),
                 SizedBox(height: screenHeight * 0.05),
                 SizedBox(
                   width: screenWidth * 0.6,
@@ -62,9 +74,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      "Next",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    child: Text(
+                      S.of(context).Role_Selection_Next,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ),
@@ -76,10 +89,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     );
   }
 
-  Widget _buildRoleCard(String role, String assetPath, double screenWidth) {
-    bool isSelected = selectedRole == role;
+  Widget _buildRoleCard(String roleKey, String displayText, String assetPath, double screenWidth) {
+    bool isSelected = selectedRole == roleKey;
     return GestureDetector(
-      onTap: () => selectRole(role),
+      onTap: () => selectRole(roleKey),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 4,
@@ -94,7 +107,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 child: Checkbox(
                   value: isSelected,
                   onChanged: (bool? value) {
-                    selectRole(role);
+                    selectRole(roleKey);
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
@@ -108,7 +121,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                role,
+                displayText,
                 style: getbodyStyle(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? AppColors.white

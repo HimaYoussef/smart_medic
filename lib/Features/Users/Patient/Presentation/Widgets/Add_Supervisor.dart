@@ -5,6 +5,7 @@ import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/custom_dialogs.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/Custom_button.dart';
@@ -17,20 +18,18 @@ class Add_SuperVisor extends StatefulWidget {
   State<Add_SuperVisor> createState() => _Add_SuperVisor();
 }
 
-
-
 class _Add_SuperVisor extends State<Add_SuperVisor> {
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _SuperVisorNameController = TextEditingController();
-  final TextEditingController _SuperVisorEmailController = TextEditingController();
+  final TextEditingController _SuperVisorNameController =
+      TextEditingController();
+  final TextEditingController _SuperVisorEmailController =
+      TextEditingController();
   String _SuperVisor_Type = SuperVisor_type[0];
 
   User? user = FirebaseAuth.instance.currentUser;
   bool _isLoading = false;
 
   Future<void> _addSupervisor() async {
-
     setState(() {
       _isLoading = true;
     });
@@ -67,9 +66,12 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).brightness == Brightness.dark
-              ? AppColors.white
-              : AppColors.black,),
+          child: Icon(
+            Icons.arrow_back_ios_new,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.white
+                : AppColors.black,
+          ),
         ),
         actions: [
           Image.asset(
@@ -98,34 +100,44 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Gap(20),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CustomText(text: 'Add Supervisor', fonSize: 20),
+                        CustomText(
+                            text: S.of(context).Add_Supervisor_Add_Supervisor,
+                            fonSize: 20),
                       ],
                     ),
                     const Gap(30),
-                    const CustomText(text: 'Name', fonSize: 15,),
+                    CustomText(
+                      text: S.of(context).Add_Supervisor_Name,
+                      fonSize: 15,
+                    ),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _SuperVisorNameController,
                       readOnly: false,
                       keyboardType: TextInputType.text,
-                      labelText: 'Enter The name of the Supervisor',
-                      validatorText: 'Please Enter The name of the Supervisor',
+                      labelText: S.of(context).Add_Supervisor_labelText1,
+                      validatorText:
+                          S.of(context).Add_Supervisor_validatorText1,
                     ),
                     const SizedBox(height: 25.0),
-                    const CustomText(text:'Email', fonSize: 15),
+                    CustomText(
+                        text: S.of(context).Add_Supervisor_Email, fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _SuperVisorEmailController,
                       readOnly: false,
-                      keyboardType:TextInputType.emailAddress ,
-                      validatorText: 'Please Enter the Email of the Supervisor',
-                      labelText: 'Enter The Email of the Supervisor',
+                      keyboardType: TextInputType.emailAddress,
+                      validatorText:
+                          S.of(context).Add_Supervisor_validatorText2,
+                      labelText: S.of(context).Add_Supervisor_labelText2,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Supervisor type', fonSize: 15),
+                    CustomText(
+                        text: S.of(context).Add_Supervisor_Supervisor_type,
+                        fonSize: 15),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.only(right: 160),
@@ -159,13 +171,16 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                       const Center(child: CircularProgressIndicator())
                     else
                       CustomButton(
-                        text: 'Add',
+                        text: S.of(context).Add_Supervisor_Supervisor_Add,
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            if (_SuperVisor_Type == "Choose") {
+                            if (_SuperVisor_Type ==
+                                S.of(context).Add_Supervisor_Choose) {
                               showErrorDialog(
                                 context,
-                                'Please select a valid Supervisor type',
+                                S
+                                    .of(context)
+                                    .Add_Supervisor_Please_select_a_valid_Supervisor_type,
                               );
                               return;
                             }

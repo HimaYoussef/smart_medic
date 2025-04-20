@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/build_text_field.dart';
 
@@ -33,8 +34,10 @@ class _Edit_Profile extends State<Edit_Profile> {
       var result = await SmartMedicalDb.getPatientProfile(user!.uid);
       if (result['success']) {
         setState(() {
-          _profileNameController.text = result['data']['name'] ?? user!.displayName ?? '';
-          _profileEmailController.text = result['data']['email'] ?? user!.email ?? '';
+          _profileNameController.text =
+              result['data']['name'] ?? user!.displayName ?? '';
+          _profileEmailController.text =
+              result['data']['email'] ?? user!.email ?? '';
           _profileAgeController.text = result['data']['age']?.toString() ?? '';
           _isLoading = false;
         });
@@ -108,9 +111,12 @@ class _Edit_Profile extends State<Edit_Profile> {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).brightness == Brightness.dark
-              ? AppColors.white
-              : AppColors.black,),
+          child: Icon(
+            Icons.arrow_back_ios_new,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.white
+                : AppColors.black,
+          ),
         ),
         actions: [
           Image.asset(
@@ -123,66 +129,82 @@ class _Edit_Profile extends State<Edit_Profile> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-        padding: const EdgeInsets.all(15),
-        child: SingleChildScrollView(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? AppColors.cointainerDarkColor
-                  : AppColors.cointainerColor,
-            ),
-            height: 580,
-            child: Form(
-              key: _formKey,
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Gap(20),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomText(text: 'Edit Profile', fonSize: 20),
-                      ],
+              padding: const EdgeInsets.all(15),
+              child: SingleChildScrollView(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.cointainerDarkColor
+                        : AppColors.cointainerColor,
+                  ),
+                  height: 580,
+                  child: Form(
+                    key: _formKey,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Gap(20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CustomText(
+                                  text: S.of(context).Edit_Profile_Head,
+                                  fonSize: 20),
+                            ],
+                          ),
+                          const Gap(30),
+                          CustomText(
+                              text: S.of(context).Edit_Profile_Name,
+                              fonSize: 15),
+                          const SizedBox(height: 15),
+                          CustomTextField(
+                            controller: _profileNameController,
+                            readOnly: false,
+                            keyboardType: TextInputType.name,
+                            labelText: S.of(context).Edit_Profile_labelText1,
+                            validatorText:
+                                S.of(context).Edit_Profile_validatorText1,
+                          ),
+                          const SizedBox(height: 25.0),
+                          CustomText(
+                              text: S.of(context).Edit_Profile_Email,
+                              fonSize: 15),
+                          const SizedBox(height: 15),
+                          CustomTextField(
+                            controller: _profileEmailController,
+                            readOnly: false,
+                            keyboardType: TextInputType.emailAddress,
+                            labelText: S.of(context).Edit_Profile_labelText2,
+                            validatorText:
+                                S.of(context).Edit_Profile_validatorText2,
+                          ),
+                          const SizedBox(height: 25),
+                          CustomText(
+                              text: S.of(context).Edit_Profile_Age,
+                              fonSize: 15),
+                          const SizedBox(height: 15),
+                          CustomTextField(
+                            controller: _profileAgeController,
+                            readOnly: false,
+                            keyboardType: TextInputType.number,
+                            labelText: S.of(context).Edit_Profile_labelText3,
+                            validatorText:
+                                S.of(context).Edit_Profile_validatorText3,
+                          ),
+                          const SizedBox(height: 25.0),
+                          CustomButton(
+                              text: S.of(context).Edit_Profile_Age,
+                              onPressed: _updateProfile)
+                        ],
+                      ),
                     ),
-                    const Gap(30),
-                    const CustomText(text: 'Name', fonSize: 15),
-                    const SizedBox(height: 15),
-                    CustomTextField(
-                      controller: _profileNameController,
-                      readOnly: false,
-                      keyboardType: TextInputType.name,
-                      labelText: 'Please Enter Your Name',
-                      validatorText: 'Please Enter A valid Name',),
-                    const SizedBox(height: 25.0),
-                    const CustomText(text:  'Email', fonSize: 15),
-                    const SizedBox(height: 15),
-                    CustomTextField(
-                      controller: _profileEmailController,
-                      readOnly: false,
-                      keyboardType: TextInputType.emailAddress,
-                      labelText: 'Please Enter Your Email',
-                      validatorText: 'Please Enter your Email',),
-                    const SizedBox(height: 25),
-                    const CustomText(text: 'Age', fonSize: 15),
-                    const SizedBox(height: 15),
-                    CustomTextField(
-                      controller: _profileAgeController,
-                      readOnly: false,
-                      keyboardType: TextInputType.number,
-                      labelText: 'Please Enter Your Age',
-                      validatorText: 'Please Enter Your Age',),
-                    const SizedBox(height: 25.0),
-                    CustomButton(text: 'Edit', onPressed: _updateProfile)
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      ),
     );
   }
 

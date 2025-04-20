@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../core/widgets/Custom_button.dart';
 
 class Refill_Medicine extends StatefulWidget {
@@ -53,7 +54,7 @@ class _nameState extends State<Refill_Medicine> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Refill Medicine',
+                          S.of(context).Refill_Medicine_Head,
                           style: getTitleStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -64,7 +65,7 @@ class _nameState extends State<Refill_Medicine> {
                     ),
                     const Gap(30),
                     Text(
-                      'Num of Pills',
+                      S.of(context).Refill_Medicine_Num_of_Pills,
                       style: getTitleStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -75,13 +76,13 @@ class _nameState extends State<Refill_Medicine> {
                     TextFormField(
                       keyboardType: TextInputType.number,
                       controller: _NumofPillsController,
-                      decoration: const InputDecoration(
-                        hintText: 'Enter The Num of pills added',
+                      decoration:  InputDecoration(
+                        hintText: S.of(context).Refill_Medicine_Enter_The_Num_of_pills_added,
                       ),
                       textInputAction: TextInputAction.done,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Please enter the number of pills';
+                          return S.of(context).Refill_Medicine_Please_enter_the_number_of_pills;
                         }
                         return null;
                       },

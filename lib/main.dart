@@ -1,22 +1,21 @@
 // main.dart with role-based AuthCheck routing
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
+import 'package:smart_medic/LocalProvider.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import 'Database/firestoreDB.dart';
-import 'Features/Auth/Presentation/view/Login.dart';
-import 'Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
-import 'Features/Users/Patient/Home/Patient_Main_view.dart';
-import 'Features/Users/Supervisor/Home/Supervior_Main_view.dart';
 import 'Theme/themes.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +36,12 @@ Future<void> main() async {
   await Hive.initFlutter(appDocumentDir.path);
   await Hive.openBox<String>('pendingMessages');
 
-  runApp(const MainApp());
+  runApp(
+  ChangeNotifierProvider(
+    create: (_) => LocaleProvider(),
+    child: const MainApp(),
+  ),
+);
 }
 
 class MainApp extends StatelessWidget {
@@ -47,14 +51,25 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return ValueListenableBuilder(
       valueListenable: themeNotifier,
       builder: (_, ThemeMode currentMode, __) {
         return MultiBlocProvider(
           providers: [
             BlocProvider(create: (context) => SignUpCubit()),
+            
           ],
           child: MaterialApp(
+            locale: localeProvider.locale,
+            localizationsDelegates: const [
+              S.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: S.delegate.supportedLocales,
             debugShowCheckedModeBanner: false,
             theme: AppThemes.lightTheme,
             darkTheme: AppThemes.darkTheme,
@@ -62,7 +77,9 @@ class MainApp extends StatelessWidget {
             home: const AuthCheck(),
             builder: (context, child) {
               return Directionality(
-                textDirection: TextDirection.ltr,
+                textDirection: localeProvider.locale.languageCode == 'ar'
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
                 child: child!,
               );
             },
@@ -88,7 +105,7 @@ class AuthCheck extends StatelessWidget {
         }
 
         if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-          return  RoleSelectionScreen();
+          return RoleSelectionScreen();
         }
 
         User user = snapshot.data!;
@@ -105,17 +122,19 @@ class AuthCheck extends StatelessWidget {
             if (userSnapshot.hasError ||
                 !userSnapshot.hasData ||
                 userSnapshot.data == null) {
-              return  RoleSelectionScreen();
+              return RoleSelectionScreen();
             }
 
-            String userType = userSnapshot.data!['type']?.toString().trim().toLowerCase() ?? 'patient';
+            String userType =
+                userSnapshot.data!['type']?.toString().trim().toLowerCase() ??
+                    'patient';
 
             if (userType == 'patient') {
               return const PatientHomeView();
             } else if (userType == 'supervisor') {
               return const SupervisorHomeView();
             } else {
-              return  RoleSelectionScreen();
+              return RoleSelectionScreen();
             }
           },
         );

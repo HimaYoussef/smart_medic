@@ -6,6 +6,7 @@ import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Sup
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/SupervisorCard.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 class SupervisorsScreen extends StatelessWidget {
   const SupervisorsScreen({super.key});
@@ -16,8 +17,8 @@ class SupervisorsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Supervisors',
+        title:  Text(
+          S.of(context).Supervision_view_Head,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -39,10 +40,10 @@ class SupervisorsScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return const Center(child: Text("Error loading supervisors"));
+              return  Center(child: Text( S.of(context).Supervision_view_Error_loading_supervisors));
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("No supervisors found"));
+              return  Center(child: Text( S.of(context).Supervision_view_No_supervisors_found));
             }
 
             return ListView(
