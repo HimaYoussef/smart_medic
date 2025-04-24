@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/LogItem.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import '../../../../../Services/firebaseServices.dart';
 
 class PatientLogsView extends StatefulWidget {
   const PatientLogsView({super.key});
@@ -16,6 +16,28 @@ class PatientLogsView extends StatefulWidget {
 
 class _PatientLogsViewState extends State<PatientLogsView> {
   User? user = FirebaseAuth.instance.currentUser;
+
+  // Helper function to format time from minutesMidnight or timestamp
+  String formatLogTime(Map<String, dynamic> log) {
+    try {
+      // Try using minutesMidnight first
+      if (log['minutesMidnight'] != null) {
+        int minutes = log['minutesMidnight'] as int;
+        int hours = minutes ~/ 60;
+        int remainingMinutes = minutes % 60;
+        return "${hours.toString().padLeft(2, '0')}:${remainingMinutes.toString().padLeft(2, '0')}";
+      }
+      // Fallback to timestamp if minutesMidnight is not available
+      Timestamp? timestamp = log['timestamp'];
+      if (timestamp != null) {
+        return DateFormat('HH:mm').format(timestamp.toDate());
+      }
+      return "Unknown";
+    } catch (e) {
+      print('Error formatting time: $e');
+      return "Unknown";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,42 +116,67 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                     children: [
                       Text(
                         date,
-                        style: getTitleStyle(color: AppColors.white, fontSize: 20),
+                        style: getTitleStyle(color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.black
+                            : AppColors.white, fontSize: 20),
                       ),
                       const SizedBox(height: 25),
                       const Divider(color: Colors.white),
                       ...logs.map((log) {
                         try {
-                          String time = log['minutesMidnight'] != null
-                              ? "${(log['minutesMidnight'] ~/ 60).toString().padLeft(2, '0')}:${(log['minutesMidnight'] % 60).toString().padLeft(2, '0')}"
-                              : "Unknown";
-                          String text;
+                          String time = formatLogTime(log);
                           bool? isChecked;
                           String? bpm;
+                          String text;
 
                           if (log['medicationId'] != null) {
-                            // Medication log
-                            text = log['medicationId'].toString();
-                            isChecked = log['status'] == 'taken';
+                            // Medication log - Fetch medicine name
+                            return FutureBuilder<Map<String, dynamic>>(
+                              future: SmartMedicalDb.getMedicineById(log['medicationId']),
+                              builder: (context, medicineSnapshot) {
+                                if (medicineSnapshot.connectionState == ConnectionState.waiting) {
+                                  return const Center(child: CircularProgressIndicator());
+                                }
+                                if (medicineSnapshot.hasError || !medicineSnapshot.hasData || !medicineSnapshot.data!['success']) {
+                                  text = "Medicine: Not found";
+                                } else {
+                                  var medicineData = medicineSnapshot.data!['data'];
+                                  text = "Medicine: ${medicineData['name'] ?? 'Unknown'}";
+                                  isChecked = log['status'] == 'taken';
+                                }
+
+                                return Column(
+                                  children: [
+                                    LogItem(
+                                      time: time,
+                                      text: text,
+                                      isChecked: isChecked,
+                                      bpm: bpm,
+                                    ),
+                                    const Divider(color: Colors.white),
+                                  ],
+                                );
+                              },
+                            );
                           } else {
                             // Health measurement log
                             text = log['spo2'] != null ? "SpO2: ${log['spo2']}%" : "Unknown";
                             bpm = log['heartRate'] != null && log['heartRate'] != 0
                                 ? log['heartRate'].toString()
                                 : null;
-                          }
 
-                          return Column(
-                            children: [
-                              LogItem(
-                                time: time,
-                                text: text,
-                                isChecked: isChecked,
-                                bpm: bpm,
-                              ),
-                              const Divider(color: Colors.white),
-                            ],
-                          );
+                            return Column(
+                              children: [
+                                LogItem(
+                                  time: time,
+                                  text: text,
+                                  isChecked: isChecked,
+                                  bpm: bpm,
+                                ),
+                                const Divider(color: Colors.white),
+                              ],
+                            );
+                          }
                         } catch (e) {
                           print('Error rendering log: $e');
                           return const SizedBox.shrink();

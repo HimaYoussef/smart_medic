@@ -29,7 +29,9 @@ dependencies:
   sqflite: ^2.3.0
   path: ^1.8.3
   intl:
-
+  firebase_messaging:
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.2
 
 
 

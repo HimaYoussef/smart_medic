@@ -3,9 +3,8 @@ import 'package:gap/gap.dart';
 import 'package:smart_medic/Features/Auth/Data/Super_Visor_type.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/custom_dialogs.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import '../../../../../Services/firebaseServices.dart';
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/Custom_button.dart';
 import '../../../../../core/widgets/build_text_field.dart';
@@ -17,12 +16,8 @@ class Add_SuperVisor extends StatefulWidget {
   State<Add_SuperVisor> createState() => _Add_SuperVisor();
 }
 
-
-
 class _Add_SuperVisor extends State<Add_SuperVisor> {
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _SuperVisorNameController = TextEditingController();
   final TextEditingController _SuperVisorEmailController = TextEditingController();
   String _SuperVisor_Type = SuperVisor_type[0];
 
@@ -30,14 +25,12 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
   bool _isLoading = false;
 
   Future<void> _addSupervisor() async {
-
     setState(() {
       _isLoading = true;
     });
 
     var result = await SmartMedicalDb.addSupervisor(
-      name: _SuperVisorNameController.text,
-      email: _SuperVisorEmailController.text,
+      email: _SuperVisorEmailController.text.trim(),
       type: _SuperVisor_Type,
       patientId: user!.uid,
     );
@@ -67,9 +60,12 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).brightness == Brightness.dark
-              ? AppColors.white
-              : AppColors.black,),
+          child: Icon(
+            Icons.arrow_back_ios_new,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.white
+                : AppColors.black,
+          ),
         ),
         actions: [
           Image.asset(
@@ -89,7 +85,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                   ? AppColors.cointainerDarkColor
                   : AppColors.cointainerColor,
             ),
-            height: 550,
+            height: 450, // Reduced height since we removed name field
             child: Form(
               key: _formKey,
               child: Padding(
@@ -105,24 +101,14 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                       ],
                     ),
                     const Gap(30),
-                    const CustomText(text: 'Name', fonSize: 15,),
-                    const SizedBox(height: 15),
-                    CustomTextField(
-                      controller: _SuperVisorNameController,
-                      readOnly: false,
-                      keyboardType: TextInputType.text,
-                      labelText: 'Enter The name of the Supervisor',
-                      validatorText: 'Please Enter The name of the Supervisor',
-                    ),
-                    const SizedBox(height: 25.0),
-                    const CustomText(text:'Email', fonSize: 15),
+                    const CustomText(text: 'Email', fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _SuperVisorEmailController,
                       readOnly: false,
-                      keyboardType:TextInputType.emailAddress ,
-                      validatorText: 'Please Enter the Email of the Supervisor',
-                      labelText: 'Enter The Email of the Supervisor',
+                      keyboardType: TextInputType.emailAddress,
+                      validatorText: 'Please enter a valid email',
+                      labelText: 'Enter the Email of the Supervisor',
                     ),
                     const SizedBox(height: 25),
                     const CustomText(text: 'Supervisor type', fonSize: 15),
@@ -186,7 +172,6 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
 
   @override
   void dispose() {
-    _SuperVisorNameController.dispose();
     _SuperVisorEmailController.dispose();
     super.dispose();
   }

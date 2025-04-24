@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +9,9 @@ import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
 import 'dart:async';
-import 'Database/firestoreDB.dart';
-import 'Features/Auth/Presentation/view/Login.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
-import 'Features/Users/Patient/Home/Patient_Main_view.dart';
-import 'Features/Users/Supervisor/Home/Supervior_Main_view.dart';
+import 'Services/firebaseServices.dart';
 import 'Theme/themes.dart';
 
 Future<void> main() async {
@@ -40,7 +36,7 @@ Future<void> main() async {
 
 class MainApp extends StatelessWidget {
   static final ValueNotifier<ThemeMode> themeNotifier =
-      ValueNotifier(ThemeMode.light);
+  ValueNotifier(ThemeMode.light);
   const MainApp({super.key});
 
   @override

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Refill_Medicine.dart';
 import 'package:smart_medic/core/widgets/CustomBoxFilled.dart';
 import 'package:smart_medic/core/widgets/CustomBoxIcon.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
+import '../../../../Services/firebaseServices.dart';
 
 class PatientMainView extends StatefulWidget {
   const PatientMainView({super.key});

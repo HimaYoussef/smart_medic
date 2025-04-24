@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../../../Database/firestoreDB.dart';
+import '../../../../../../Services/firebaseServices.dart';
 part 'sign_up_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
@@ -32,8 +31,8 @@ class SignUpCubit extends Cubit<SignUpState> {
           password: password
       );
       User user= userCredential.user!;
-      SmartMedicalDb.addUser(userId: user.uid, name: name, type: type).then((response) {
-        print(response.message); // "User added successfully"
+      SmartMedicalDb.addUser(userId: user.uid, name: name, type: type, email: email).then((response) {
+        print("User added successfully"); // "User added successfully"
       });
       emit(SignUpSuccess());
       await sendEmailVerification();

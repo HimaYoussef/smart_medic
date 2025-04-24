@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Add_Supervisor.dart';
-import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Supervisor.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/SupervisorCard.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
+
+import '../../../../../../Services/firebaseServices.dart';
 
 class SupervisorsScreen extends StatelessWidget {
   const SupervisorsScreen({super.key});
@@ -52,26 +52,12 @@ class SupervisorsScreen extends StatelessWidget {
                 return Column(
                   children: [
                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Edit_Supervisor(
-                              supervisorId: supervisorId,
-                              name: supervisor['name'] ?? 'Unknown',
-                              email: supervisor['email'] ?? 'Unknown',
-                              type: supervisor['type'] ?? 'Unknown',
-                            ),
-                          ),
-                        );
-                      },
                       child: SupervisorCard(
-                        supervisorId: supervisorId,
                         name: supervisor['name'] ?? 'Unknown',
                         email: supervisor['email'] ?? 'Unknown',
                         type: supervisor['type'] ?? 'Unknown',
                         onDelete: () async {
-                          var result = await SmartMedicalDb.deleteSupervisor(
+                          var result = await SmartMedicalDb.deleteSupervision(
                             supervisorId: supervisorId,
                             patientId: user.uid,
                           );

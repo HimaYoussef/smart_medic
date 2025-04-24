@@ -116,6 +116,7 @@ class LoginScreen extends StatelessWidget {
                                 labelText: 'Enter your Email',
                                 labelStyle: TextStyle(color: Colors.grey)
                               ),
+                              textInputAction: TextInputAction.next,
                             ),
                             const SizedBox(height: 24),
                             TextField(

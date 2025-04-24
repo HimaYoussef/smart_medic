@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
+import '../../../../../Services/firebaseServices.dart';
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/build_text_field.dart';
 
@@ -66,7 +66,7 @@ class _Edit_Profile extends State<Edit_Profile> {
         _isLoading = true;
       });
 
-      var result = await SmartMedicalDb.updatePatientProfile(
+      var result = await SmartMedicalDb.updateUserProfile(
         userId: user!.uid,
         updates: {
           'name': _profileNameController.text,

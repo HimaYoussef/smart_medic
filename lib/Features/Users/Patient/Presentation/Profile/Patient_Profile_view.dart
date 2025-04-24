@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Supervision_view.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import '../../../../../Services/firebaseServices.dart';
 import '../../../../../main.dart';
 
 class PatientProfileView extends StatefulWidget {
