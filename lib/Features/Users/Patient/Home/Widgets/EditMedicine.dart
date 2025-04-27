@@ -9,6 +9,7 @@ import 'package:smart_medic/core/widgets/Custom_button.dart';
 import 'package:smart_medic/core/widgets/BuildText.dart';
 import 'package:smart_medic/core/widgets/build_text_field.dart';
 import '../../../../../Services/firebaseServices.dart';
+import '../../../../../Services/notificationService.dart'; // Import LocalNotificationService
 
 class EditMedicine extends StatefulWidget {
   final String medicineId;
@@ -175,7 +176,12 @@ class _EditMedicineState extends State<EditMedicine> {
       );
 
       if (result['success']) {
+        // Schedule notifications after updating the medication
+        await LocalNotificationService.scheduleMedicineNotifications();
         await sendAllMedicationsToArduino();
+        if (mounted) {
+          Navigator.pop(context);
+        }
       }
 
       setState(() {
@@ -190,14 +196,124 @@ class _EditMedicineState extends State<EditMedicine> {
           ),
         ),
       );
-
-      if (result['success']) {
-        Navigator.pop(context);
-      }
     }
   }
 
-  @override
+  Future<void> sendAllMedicationsToArduino() async {
+    try {
+      print('Starting sendAllMedicationsToArduino...');
+      // Fetch all medications for the user
+      QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
+          .collection('medications')
+          .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      print('Found ${medicationsSnapshot.docs.length} medications to sync.');
+
+      // Transform data
+      List<Map<String, dynamic>> medications = medicationsSnapshot.docs.map((doc) {
+        var data = doc.data() as Map<String, dynamic>;
+
+        // فحص الحقول اللي ممكن تكون null
+        String name = data["name"]?.toString() ?? "Unknown";
+        int dosage = data["dosage"] ?? 0;
+        int scheduleType = data["scheduleType"] ?? 0;
+        int scheduleValue = data["scheduleValue"] ?? 0;
+        List<String> times = (data["times"] as List<dynamic>?)?.cast<String>() ?? [];
+        List<int> bitmaskDays = (data["bitmaskDays"] as List<dynamic>?)?.cast<int>() ?? [0, 0, 0, 0, 0, 0, 0];
+        int pillsLeft = data["pillsLeft"] ?? 0;
+        int compartmentNumber = data["compartmentNumber"] ?? 0;
+
+        return {
+          "id": doc.id,
+          "name": name,
+          "dosage": dosage,
+          "scheduleType": scheduleType,
+          "scheduleValue": scheduleValue,
+          "times": times,
+          "bitmaskDays": bitmaskDays,
+          "pillsLeft": pillsLeft,
+          "compartmentNumber": compartmentNumber,
+        };
+      }).toList();
+
+      // Send each medication individually
+      for (var med in medications) {
+        String dataToSend = jsonEncode({"medication": med}) + "\n";
+        print("Sending data to Arduino: $dataToSend");
+        try {
+          await _bluetoothManager.sendData(dataToSend);
+          print("Data sent successfully for medication: ${med['name']}");
+          // Update syncStatus to "Synced" only if the data was sent successfully
+          await SmartMedicalDb.updateMedicationSyncStatus(
+            medId: med['id'],
+            syncStatus: 'Synced',
+          );
+          print('Sync status updated to Synced for medication: ${med['id']}');
+        } catch (e) {
+          print("Error sending data for medication ${med['name']}: $e");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  "Failed to send ${med['name']} to Arduino: $e",
+                  style: TextStyle(color: AppColors.white),
+                ),
+              ),
+            );
+          }
+          // If sending fails, ensure syncStatus remains "Pending"
+          await SmartMedicalDb.updateMedicationSyncStatus(
+            medId: med['id'],
+            syncStatus: 'Pending',
+          );
+          print('Sync status remains Pending for medication: ${med['id']}');
+        }
+        await Future.delayed(const Duration(seconds: 2));
+      }
+
+      // Notify user if Bluetooth is not connected
+      if (!_bluetoothManager.isConnected && mounted) {
+        print('Bluetooth not connected. Showing snackbar.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Bluetooth not connected. Data will be sent later."),
+          ),
+        );
+      }
+
+      // Show Data Synced Notification only if at least one medication was synced
+      if (medications.isNotEmpty && _bluetoothManager.isConnected) {
+        print('Showing data synced notification.');
+        await LocalNotificationService.showDataSyncedNotification();
+      }
+    } catch (e) {
+      print("Error in sendAllMedicationsToArduino: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Error syncing medications: $e",
+              style: TextStyle(color: AppColors.white),
+            ),
+          ),
+        );
+      }
+
+      // Ensure syncStatus is updated to "Pending" for all medications if there's a general error
+      QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
+          .collection('medications')
+          .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+      for (var doc in medicationsSnapshot.docs) {
+        print('Updating syncStatus after error for medication: ${doc.id}');
+        await SmartMedicalDb.updateMedicationSyncStatus(
+          medId: doc.id,
+          syncStatus: 'Pending',
+        );
+      }
+    }
+  }  @override
   Widget build(BuildContext context) {
     const List<String> daysOfWeek = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 
@@ -586,58 +702,6 @@ class _EditMedicineState extends State<EditMedicine> {
         const DropdownMenuItem<int>(value: 3, child: Text('Specific Days')),
       ],
     );
-  }
-
-  Future<void> sendAllMedicationsToArduino() async {
-    try {
-      // Fetch all medications for the user
-      QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
-          .collection('medications')
-          .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-          .get();
-
-      // Transform data
-      List<Map<String, dynamic>> medications = medicationsSnapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
-        return {
-          "name": data["name"],
-          "dosage": data["dosage"],
-          "scheduleType": data["scheduleType"],
-          "scheduleValue": data["scheduleValue"],
-          "times": data["times"],
-          "bitmaskDays": data["bitmaskDays"],
-          "pillsLeft": data["pillsLeft"],
-          "compartmentNumber": data["compartmentNumber"],
-        };
-      }).toList();
-
-      // Send each medication individually
-      for (var med in medications) {
-        String dataToSend = jsonEncode({"medication": med});
-        print("Data to send: $dataToSend");
-        await _bluetoothManager.sendData(dataToSend);
-        await Future.delayed(const Duration(milliseconds: 500));
-      }
-
-      // Notify user if Bluetooth is not connected
-      if (!_bluetoothManager.isConnected && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Bluetooth not connected. Data will be sent later."),
-          ),
-        );
-      }
-
-      // Update syncStatus to "Synced" for all sent medications
-      for (var doc in medicationsSnapshot.docs) {
-        await SmartMedicalDb.updateMedicationSyncStatus(
-          medId: doc.id,
-          syncStatus: 'Synced',
-        );
-      }
-    } catch (e) {
-      print("Error sending medications: $e");
-    }
   }
 
   @override

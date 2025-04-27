@@ -42,6 +42,30 @@ class SmartMedicalDb {
     }
   }
 
+  // Read Users
+  static Stream<QuerySnapshot> readUsers() {
+    return usersCollection.snapshots();
+  }
+
+  // Delete User
+  static Future<Map<String, dynamic>> deleteUser({
+    required String userId,
+  }) async {
+    try {
+      DocumentReference documentReferencer = usersCollection.doc(userId);
+      await documentReferencer.delete();
+      return {
+        'success': true,
+        'message': 'User deleted successfully',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error deleting user: $e',
+      };
+    }
+  }
+
   // Get User by ID
   static Future<Map<String, dynamic>?> getUserById(String userId) async {
     try {
@@ -174,6 +198,67 @@ class SmartMedicalDb {
     }
   }
 
+  /*  // Upload profile image to Firebase Storage and update Firestore
+  static Future<Map<String, dynamic>> uploadProfileImage({
+    required String userId,
+    required File imageFile,
+  }) async {
+    try {
+      // Create a reference to the storage location
+      String fileName =
+          'profile_images/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      Reference storageRef = _storage.ref().child(fileName);
+
+      // Upload the file
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      TaskSnapshot snapshot = await uploadTask;
+
+      // Get the download URL
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      // Update the user's profile with the image URL
+      await usersCollection.doc(userId).update({
+        'photoUrl': downloadUrl,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      return {
+        'success': true,
+        'message': 'Profile image uploaded successfully',
+        'photoUrl': downloadUrl,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error uploading profile image: $e',
+      };
+    }
+  }
+
+  // Get profile image URL
+  static Future<Map<String, dynamic>> getProfileImage(String userId) async {
+    try {
+      DocumentSnapshot doc = await usersCollection.doc(userId).get();
+      if (doc.exists && doc.data() != null) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('photoUrl') && data['photoUrl'] != null) {
+          return {
+            'success': true,
+            'photoUrl': data['photoUrl'],
+          };
+        }
+      }
+      return {
+        'success': false,
+        'message': 'No profile image found',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error fetching profile image: $e',
+      };
+    }
+  }*/
 
   // Read supervisors for a specific patient
   static Stream<QuerySnapshot> readSupervisors(String patientId) {
@@ -217,6 +302,29 @@ class SmartMedicalDb {
     }
   }
 
+  // Get a specific supervisor by ID
+  static Future<Map<String, dynamic>> getSupervisor(String supervisorId) async {
+    try {
+      DocumentSnapshot doc =
+      await supervisionCollection.doc(supervisorId).get();
+      if (doc.exists) {
+        return {
+          'success': true,
+          'data': doc.data(),
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Supervisor not found',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error fetching supervisor: $e',
+      };
+    }
+  }
 
   // Add Medication
   static Future<Map<String, dynamic>> addMedication({
@@ -248,6 +356,7 @@ class SmartMedicalDb {
         "compartmentNumber": compartmentNumber,
         "lastUpdated": FieldValue.serverTimestamp(),
         "syncStatus": "Pending",
+        "missedCount": 0,
       };
 
       await documentReferencer.set(data);
@@ -334,6 +443,45 @@ class SmartMedicalDb {
     }
   }
 
+  // Update Missed Count for a Medication
+  static Future<Map<String, dynamic>> updateMissedCount({
+    required String medId,
+    required int missedCount,
+  }) async {
+    try {
+      DocumentReference documentReferencer = medicationsCollection.doc(medId);
+      await documentReferencer.update({"missedCount": missedCount});
+      return {
+        'success': true,
+        'message': 'Missed count updated successfully',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error updating missed count: $e',
+      };
+    }
+  }
+
+  // Reset Missed Count for a Medication
+  static Future<Map<String, dynamic>> resetMissedCount({
+    required String medId,
+  }) async {
+    try {
+      DocumentReference documentReferencer = medicationsCollection.doc(medId);
+      await documentReferencer.update({"missedCount": 0});
+      return {
+        'success': true,
+        'message': 'Missed count reset successfully',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error resetting missed count: $e',
+      };
+    }
+  }
+
   // Delete a medicine
   static Future<Map<String, dynamic>> deleteMedicine({
     required String medicineId,
@@ -359,7 +507,7 @@ class SmartMedicalDb {
     required String? medicationId,
     required String? status,
     required double? spo2,
-    required int? heartRate,
+    required double? heartRate,
     required int dayOfYear,
     required int minutesMidnight,
   }) async {

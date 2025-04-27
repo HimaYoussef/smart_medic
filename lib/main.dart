@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
+import 'package:smart_medic/Services/notificationService.dart';
 import 'dart:async';
 import 'Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
@@ -30,6 +31,8 @@ Future<void> main() async {
   final appDocumentDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
   await Hive.openBox<String>('pendingMessages');
+
+  await LocalNotificationService.init();
 
   runApp(const MainApp());
 }

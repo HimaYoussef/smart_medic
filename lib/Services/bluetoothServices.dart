@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_blue_classic/flutter_blue_classic.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-
-import '../Database/firestoreDB.dart';
+import 'firebaseServices.dart';
 
 class BluetoothManager {
   static final BluetoothManager _instance = BluetoothManager._internal();
@@ -184,7 +185,7 @@ class BluetoothManager {
     }
   }
 
-  // Listen to incoming data
+// Listen to incoming data
   void listenToDevice() {
     String buffer = "";
     _readSubscription = _connection?.input?.listen((event) async {
@@ -198,8 +199,13 @@ class BluetoothManager {
 
         print("Received: $receivedData");
         try {
-          Map<String, dynamic> logData = jsonDecode(receivedData);
-          await uploadLogToFirebase(logData);
+          // Parse the received data as a JSON array
+          List<dynamic> logList = jsonDecode(receivedData);
+          if (logList.isNotEmpty) {
+            // Take the first log entry (since it's an array with one element)
+            Map<String, dynamic> logData = logList[0];
+            await uploadLogToFirebase(logData);
+          }
         } catch (e) {
           print("Error parsing log: $e");
         }
@@ -209,20 +215,64 @@ class BluetoothManager {
     });
   }
 
-  // Upload log to Firebase
+// Upload log to Firebase
   Future<void> uploadLogToFirebase(Map<String, dynamic> logData) async {
     try {
-      await SmartMedicalDb.addLog(
-        logId: logData['logId'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        patientId: logData['patientId'],
-        medicationId: logData['medicationId'],
-        status: logData['status'],
-        spo2: logData['spo2'],
-        heartRate: logData['heartRate'],
-        dayOfYear: logData['dayOfYear'],
-        minutesMidnight: logData['minutesMidnight'],
-      );
-      print("Log uploaded successfully");
+      // Extract the type to determine how to handle the log
+      int logType = logData['type'];
+
+      if (logType == 0) {
+        // Log type 0: Medication log
+        // Extract the compartmentNumber (received as medicineID in the log)
+        int compartmentNumber = logData['medicineID'];
+
+        // Query the database to find the medication with this compartmentNumber
+        String? medicationId;
+        QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
+            .collection('medications')
+            .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            .where('compartmentNumber', isEqualTo: compartmentNumber)
+            .get();
+
+        if (medicationsSnapshot.docs.isNotEmpty) {
+          // Take the first matching medication
+          medicationId = medicationsSnapshot.docs.first.id;
+          print("Found medication with compartmentNumber $compartmentNumber, medicationId: $medicationId");
+        } else {
+          print("No medication found for compartmentNumber: $compartmentNumber");
+          medicationId = "unknown";
+        }
+
+        // Save the medication log
+        await SmartMedicalDb.addLog(
+          logId: DateTime.now().millisecondsSinceEpoch.toString(),
+          patientId: FirebaseAuth.instance.currentUser!.uid,
+          medicationId: medicationId,
+          status: logData['isConfirmed'] == -1 ? 'missed' : 'taken',
+          spo2: logData['oxygen'] != -1 ? (logData['oxygen'] as num).toDouble() : null, // تحويل من int إلى double
+          heartRate: logData['heartRate'] != -1 ? (logData['heartRate'] as num).toDouble() : null, // تحويل من int إلى double
+          dayOfYear: logData['dayOfYear'],
+          minutesMidnight: logData['minutesMidnight'],
+        );
+        print("Medication Log uploaded successfully with medicationId: $medicationId, compartmentNumber: $compartmentNumber");
+      } else if (logType == 1) {
+        // Log type 1: Vital signs log (heartRate, oxygen)
+        await SmartMedicalDb.addLog(
+          logId: DateTime.now().millisecondsSinceEpoch.toString(),
+          patientId: FirebaseAuth.instance.currentUser!.uid,
+          medicationId: null, // مافيش دواء مرتبط بالـ Log ده
+          status: null, // مافيش حالة دواء
+          spo2: logData['oxygen'] != -1 ? (logData['oxygen'] as num).toDouble() : null, // تحويل من int إلى double
+          heartRate: logData['heartRate'] != -1 ? (logData['heartRate'] as num).toDouble() : null, // تحويل من int إلى double
+          dayOfYear: logData['dayOfYear'],
+          minutesMidnight: logData['minutesMidnight'],
+        );
+        print("Vital Signs Log uploaded successfully: heartRate=${logData['heartRate']}, oxygen=${logData['oxygen']}");
+      } else {
+        // Log type غير معروف
+        print("Unknown log type: $logType, skipping...");
+        return;
+      }
     } catch (e) {
       print("Error uploading log: $e");
     }

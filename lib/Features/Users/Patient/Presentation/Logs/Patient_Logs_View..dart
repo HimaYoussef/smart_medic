@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/LogItem.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 import '../../../../../Services/firebaseServices.dart';
+import 'package:timezone/timezone.dart' as tz;
+
+import '../../../../../Services/notificationService.dart';
 
 class PatientLogsView extends StatefulWidget {
   const PatientLogsView({super.key});
@@ -16,6 +20,91 @@ class PatientLogsView extends StatefulWidget {
 
 class _PatientLogsViewState extends State<PatientLogsView> {
   User? user = FirebaseAuth.instance.currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize LocalNotificationService and set up the stream listener
+    LocalNotificationService.init();
+    LocalNotificationService.streamController.stream.listen((notificationResponse) async {
+      String? payload = notificationResponse.payload;
+      if (payload != null) {
+        if (payload.startsWith('medicine')) {
+          List<String> medData = payload.split('|')[1].split(',');
+          for (String data in medData) {
+            String medId = data.split(':')[0];
+            int dosage = int.parse(data.split(':')[1]);
+            String time = data.split(':')[2]; // Extract the time from payload
+
+            if (notificationResponse.actionId == 'taken') {
+              // Log the dose as taken
+              await FirebaseFirestore.instance.collection('logs').add({
+                'medicationId': medId,
+                'patientId': user!.uid,
+                'status': 'taken',
+                'timestamp': Timestamp.now(),
+              });
+
+              // Update pillsLeft
+              DocumentReference medRef = FirebaseFirestore.instance.collection('medications').doc(medId);
+              DocumentSnapshot medDoc = await medRef.get();
+              int pillsLeft = (medDoc.data() as Map<String, dynamic>)['pillsLeft'] ?? 0;
+              await medRef.update({'pillsLeft': pillsLeft - dosage});
+
+              // Cancel any pending missed dose checks for this medication
+              await LocalNotificationService.cancelNotification('missed_$medId'.hashCode);
+            } else if (notificationResponse.actionId == 'snooze') {
+          print('Snooze action triggered for notification: ${notificationResponse.payload}');
+          // Extract the original time from the payload
+          var parts = time.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1].split(' ')[0]);
+          String period = parts[1].split(' ')[1];
+          if (period == 'PM' && hour != 12) hour += 12;
+          if (period == 'AM' && hour == 12) hour = 0;
+
+          int newHour = hour;
+          int newMinute = minute + 10;
+          if (newMinute >= 60) {
+            newHour = (newHour + 1) % 24;
+            newMinute -= 60;
+          }
+
+          const AndroidNotificationDetails android = AndroidNotificationDetails(
+            'medicine_channel',
+            'Medicine Reminders',
+            importance: Importance.max,
+            priority: Priority.high,
+            actions: [
+              AndroidNotificationAction('taken', 'Taken'),
+              AndroidNotificationAction('snooze', 'Snooze (10 mins)'),
+            ],
+          );
+          const NotificationDetails details = NotificationDetails(android: android);
+
+          var snoozeTime = tz.TZDateTime.now(LocalNotificationService.localTimeZone!)
+              .add(Duration(minutes: 10));
+          print('Scheduling snooze notification at: $snoozeTime');
+
+          await LocalNotificationService.flutterLocalNotificationsPlugin.zonedSchedule(
+            notificationResponse.id!,
+            'Snoozed: Time to take your medicine',
+            'Rescheduled for ${newHour % 12 == 0 ? 12 : newHour % 12}:${newMinute.toString().padLeft(2, '0')} ${newHour >= 12 ? 'PM' : 'AM'}',
+            snoozeTime,
+            details,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            payload: notificationResponse.payload,
+            matchDateTimeComponents: DateTimeComponents.time,
+          );
+          print('Snooze notification scheduled successfully');
+        }
+          }
+        } else if (payload.startsWith('missed_check')) {
+          await LocalNotificationService.handleMissedDose(payload);
+        }
+      }
+    });
+  }
 
   // Helper function to format time from minutesMidnight or timestamp
   String formatLogTime(Map<String, dynamic> log) {
@@ -116,9 +205,11 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                     children: [
                       Text(
                         date,
-                        style: getTitleStyle(color: Theme.of(context).brightness == Brightness.dark
-                            ? AppColors.black
-                            : AppColors.white, fontSize: 20),
+                        style: getTitleStyle(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.black
+                                : AppColors.white,
+                            fontSize: 20),
                       ),
                       const SizedBox(height: 25),
                       const Divider(color: Colors.white),
@@ -137,7 +228,9 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                                 if (medicineSnapshot.connectionState == ConnectionState.waiting) {
                                   return const Center(child: CircularProgressIndicator());
                                 }
-                                if (medicineSnapshot.hasError || !medicineSnapshot.hasData || !medicineSnapshot.data!['success']) {
+                                if (medicineSnapshot.hasError ||
+                                    !medicineSnapshot.hasData ||
+                                    !medicineSnapshot.data!['success']) {
                                   text = "Medicine: Not found";
                                 } else {
                                   var medicineData = medicineSnapshot.data!['data'];
