@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/Features/Auth/Data/Super_Visor_type.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/custom_dialogs.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_medic/generated/l10n.dart';
-
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/Custom_button.dart';
 import '../../../../../core/widgets/build_text_field.dart';
@@ -20,10 +19,7 @@ class Add_SuperVisor extends StatefulWidget {
 
 class _Add_SuperVisor extends State<Add_SuperVisor> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _SuperVisorNameController =
-      TextEditingController();
-  final TextEditingController _SuperVisorEmailController =
-      TextEditingController();
+  final TextEditingController _SuperVisorEmailController = TextEditingController();
   String _SuperVisor_Type = SuperVisor_type[0];
 
   User? user = FirebaseAuth.instance.currentUser;
@@ -35,8 +31,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
     });
 
     var result = await SmartMedicalDb.addSupervisor(
-      name: _SuperVisorNameController.text,
-      email: _SuperVisorEmailController.text,
+      email: _SuperVisorEmailController.text.trim(),
       type: _SuperVisor_Type,
       patientId: user!.uid,
     );
@@ -60,19 +55,19 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Icon(
-            Icons.arrow_back_ios_new,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? AppColors.white
-                : AppColors.black,
-          ),
+ @override
+Widget build(BuildContext context) { // Change 'Context' to 'BuildContext'
+  return Scaffold(
+    appBar: AppBar(
+      leading: GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Icon(
+          Icons.arrow_back_ios_new,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.white
+              : AppColors.black,
         ),
+      ),
         actions: [
           Image.asset(
             'assets/pills.png',
@@ -91,7 +86,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                   ? AppColors.cointainerDarkColor
                   : AppColors.cointainerColor,
             ),
-            height: 550,
+            height: 450,
             child: Form(
               key: _formKey,
               child: Padding(
@@ -104,46 +99,34 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CustomText(
-                            text: S.of(context).Add_Supervisor_Add_Supervisor,
-                            fonSize: 20),
+                          text: S.of(context).Add_Supervisor_Add_Supervisor,
+                          fonSize: 20,
+                        ),
                       ],
                     ),
                     const Gap(30),
                     CustomText(
-                      text: S.of(context).Add_Supervisor_Name,
+                      text: S.of(context).Add_Supervisor_Email,
                       fonSize: 15,
                     ),
-                    const SizedBox(height: 15),
-                    CustomTextField(
-                      controller: _SuperVisorNameController,
-                      readOnly: false,
-                      keyboardType: TextInputType.text,
-                      labelText: S.of(context).Add_Supervisor_labelText1,
-                      validatorText:
-                          S.of(context).Add_Supervisor_validatorText1,
-                    ),
-                    const SizedBox(height: 25.0),
-                    CustomText(
-                        text: S.of(context).Add_Supervisor_Email, fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _SuperVisorEmailController,
                       readOnly: false,
                       keyboardType: TextInputType.emailAddress,
-                      validatorText:
-                          S.of(context).Add_Supervisor_validatorText2,
+                      validatorText: S.of(context).Add_Supervisor_validatorText2,
                       labelText: S.of(context).Add_Supervisor_labelText2,
                     ),
                     const SizedBox(height: 25),
                     CustomText(
-                        text: S.of(context).Add_Supervisor_Supervisor_type,
-                        fonSize: 15),
+                      text: S.of(context).Add_Supervisor_Supervisor_type,
+                      fonSize: 15,
+                    ),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.only(right: 160),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -174,13 +157,10 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                         text: S.of(context).Add_Supervisor_Supervisor_Add,
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            if (_SuperVisor_Type ==
-                                S.of(context).Add_Supervisor_Choose) {
+                            if (_SuperVisor_Type == S.of(context).Add_Supervisor_Choose) {
                               showErrorDialog(
                                 context,
-                                S
-                                    .of(context)
-                                    .Add_Supervisor_Please_select_a_valid_Supervisor_type,
+                                S.of(context).Add_Supervisor_Please_select_a_valid_Supervisor_type,
                               );
                               return;
                             }
@@ -201,7 +181,6 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
 
   @override
   void dispose() {
-    _SuperVisorNameController.dispose();
     _SuperVisorEmailController.dispose();
     super.dispose();
   }

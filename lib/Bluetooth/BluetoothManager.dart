@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter_blue_classic/flutter_blue_classic.dart';
-import 'package:path/path.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
-import '../Database/firestoreDB.dart';
 
 class BluetoothManager {
   static final BluetoothManager _instance = BluetoothManager._internal();

@@ -32,7 +32,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   List<String> _times = [];
   List<TimeOfDay?> _selectedTimes = [];
   TimeOfDay? _selectedTime; // Added for single time in scheduleType 2
-  List<int> _bitmaskDays = [0, 0, 0, 0, 0, 0, 0];
+    List<int> _bitmaskDays = [0, 0, 0, 0, 0, 0, 0];
 
   final BluetoothManager _bluetoothManager = BluetoothManager();
 

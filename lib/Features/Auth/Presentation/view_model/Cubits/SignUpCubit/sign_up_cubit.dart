@@ -1,9 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_medic/generated/l10n.dart';
-import '../../../../../../Database/firestoreDB.dart';
-
+import 'package:smart_medic/Database/firestoreDB.dart';
 part 'sign_up_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
@@ -25,7 +23,7 @@ class SignUpCubit extends Cubit<SignUpState> {
     emit(PasswordVisibilityChanged(isPasswordVisible, isConfirmPasswordVisible));
   }
 
-  Future<void> signUp({
+   Future<void> signUp({
     required String name,
     required String email,
     required String password,
@@ -35,36 +33,37 @@ class SignUpCubit extends Cubit<SignUpState> {
     emit(SignUpLoading());
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
+          email: email,
+          password: password
       );
-      User user = userCredential.user!;
-      SmartMedicalDb.addUser(userId: user.uid, name: name, type: type).then((response) {
-        print(response.message); // "User added successfully"
+      User user= userCredential.user!;
+      SmartMedicalDb.addUser(userId: user.uid, name: name, type: type, email: email).then((response) {
+        print("User added successfully"); // "User added successfully"
       });
       emit(SignUpSuccess());
-      await sendEmailVerification(context);
+      await sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
-        emit(SignUpFailure(S.of(context).sign_up_cubit_SignUpFailure1));
+        emit(SignUpFailure('This email already used'));
       } else if (e.code == 'weak-password') {
-        emit(SignUpFailure(S.of(context).sign_up_cubit_SignUpFailure2));
+        emit(SignUpFailure('The password is too weak'));
       }
     } catch (e) {
-      emit(SignUpFailure(S.of(context).sign_up_cubit_SignUpFailure3));
-    } finally {
+      emit(SignUpFailure('Unexpected error occurred'));
+    } finally{
       await Future.delayed(const Duration(seconds: 1));
       emit(SignUpInitial());
     }
   }
+}
 
-  Future<void> sendEmailVerification(BuildContext context) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null && !user.emailVerified) {
-      await user.sendEmailVerification();
-      print(S.of(context).sign_up_cubit_EmailVerification1);
-    } else {
-      print(S.of(context).sign_up_cubit_EmailVerification2);
-    }
+Future<void> sendEmailVerification() async {
+  User? user = FirebaseAuth.instance.currentUser;
+
+  if (user != null && !user.emailVerified) {
+    await user.sendEmailVerification();
+    print('Verification email has been sent.');
+  } else {
+    print('User is already verified or not logged in.');
   }
 }

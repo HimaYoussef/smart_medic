@@ -162,7 +162,7 @@ class _EditMedicineState extends State<EditMedicine> {
       );
 
       if (result['success']) {
-        await sendAllMedicationsToArduino();
+        // await sendAllMedicationsToArduino();
       }
 
       setState(() {

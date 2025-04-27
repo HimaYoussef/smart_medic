@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
 import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../core/widgets/BuildText.dart';
@@ -69,7 +69,7 @@ class _Edit_Profile extends State<Edit_Profile> {
         _isLoading = true;
       });
 
-      var result = await SmartMedicalDb.updatePatientProfile(
+      var result = await SmartMedicalDb.updateUserProfile(
         userId: user!.uid,
         updates: {
           'name': _profileNameController.text,
@@ -177,12 +177,12 @@ class _Edit_Profile extends State<Edit_Profile> {
                             controller: _profileEmailController,
                             readOnly: false,
                             keyboardType: TextInputType.emailAddress,
-                            labelText: S.of(context).Edit_Profile_labelText2,
+                             labelText: S.of(context).Edit_Profile_labelText2,
                             validatorText:
                                 S.of(context).Edit_Profile_validatorText2,
                           ),
                           const SizedBox(height: 25),
-                          CustomText(
+                         CustomText(
                               text: S.of(context).Edit_Profile_Age,
                               fonSize: 15),
                           const SizedBox(height: 15),
@@ -190,14 +190,12 @@ class _Edit_Profile extends State<Edit_Profile> {
                             controller: _profileAgeController,
                             readOnly: false,
                             keyboardType: TextInputType.number,
-                            labelText: S.of(context).Edit_Profile_labelText3,
+                           labelText: S.of(context).Edit_Profile_labelText3,
                             validatorText:
                                 S.of(context).Edit_Profile_validatorText3,
                           ),
                           const SizedBox(height: 25.0),
-                          CustomButton(
-                              text: S.of(context).Edit_Profile_Age,
-                              onPressed: _updateProfile)
+                          CustomButton(text: S.of(context).Edit_Profile_Edit, onPressed: _updateProfile)
                         ],
                       ),
                     ),

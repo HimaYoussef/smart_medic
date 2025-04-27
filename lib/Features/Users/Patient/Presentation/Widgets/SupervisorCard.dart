@@ -3,7 +3,6 @@ import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 
 class SupervisorCard extends StatelessWidget {
-  final String supervisorId;
   final String name;
   final String email;
   final String type;
@@ -11,7 +10,6 @@ class SupervisorCard extends StatelessWidget {
 
   const SupervisorCard({
     super.key,
-    required this.supervisorId,
     required this.name,
     required this.email,
     required this.type,
@@ -35,7 +33,7 @@ class SupervisorCard extends StatelessWidget {
         children: [
           const CircleAvatar(
             radius: 24,
-            backgroundImage: AssetImage('assets/avatar2.png'),
+            backgroundImage: AssetImage('assets/avatar1.png'),
           ),
           const SizedBox(width: 12),
           Expanded(
