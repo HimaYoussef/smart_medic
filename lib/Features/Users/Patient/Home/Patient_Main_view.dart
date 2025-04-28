@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Refill_Medicine.dart';
 import 'package:smart_medic/core/widgets/CustomBoxFilled.dart';
 import 'package:smart_medic/core/widgets/CustomBoxIcon.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
-import 'package:smart_medic/generated/l10n.dart';
 
 class PatientMainView extends StatefulWidget {
   const PatientMainView({super.key});
@@ -21,7 +20,7 @@ class _PatientMainViewState extends State<PatientMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text(S.of(context).Patient_Main_view_Home),
+        title: const Text('Home'),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -41,15 +40,14 @@ class _PatientMainViewState extends State<PatientMainView> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return  Center(child: Text(S.of(context).Patient_Main_view_Error_loading_medications));
+              return const Center(child: Text("Error loading medications"));
             }
 
-            // Extract medications from snapshot
             List<Map<String, dynamic>> medications = snapshot.data!.docs
                 .map((doc) => {
-              ...doc.data() as Map<String, dynamic>,
-              'id': doc.id, // Store document ID for deletion/edit
-            })
+                      ...doc.data() as Map<String, dynamic>,
+                      'id': doc.id,
+                    })
                 .toList();
 
             return LayoutBuilder(
@@ -70,26 +68,25 @@ class _PatientMainViewState extends State<PatientMainView> {
                   ),
                   itemCount: 8,
                   itemBuilder: (context, index) {
-                    // Check if there is a medication for this compartment
                     var medForCompartment = medications.firstWhere(
                       (med) => med['compartmentNumber'] == (index + 1),
                       orElse: () => {},
                     );
 
                     if (medForCompartment.isNotEmpty) {
-                      // If there is a medication, show CustomBoxFilled
                       return CustomBoxFilled(
                         medicineName: medForCompartment['name'] ?? 'Unknown',
                         compartmentNumber: index + 1,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Refill_Medicine(compartmentNum: index+1,),
+                            builder: (context) => Refill_Medicine(
+                              compartmentNum: index + 1,
+                            ),
                           ),
                         ),
                       );
                     } else {
-                      // If no medication, show CustomBoxIcon
                       return CustomBoxIcon(index: index);
                     }
                   },

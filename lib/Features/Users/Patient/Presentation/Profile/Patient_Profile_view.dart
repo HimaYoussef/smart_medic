@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 class PatientProfileView extends StatefulWidget {
   const PatientProfileView({super.key});
 
-  @override
+  @override 
   State<PatientProfileView> createState() => _PatientProfileViewState();
 }
 
@@ -75,6 +75,7 @@ class _PatientProfileViewState extends State<PatientProfileView> {
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
+    
 
     return Scaffold(
       appBar: AppBar(
