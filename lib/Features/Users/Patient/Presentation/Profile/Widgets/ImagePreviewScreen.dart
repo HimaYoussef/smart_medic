@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
-import 'package:smart_medic/generated/l10n.dart';
 
 class ImagePreviewScreen extends StatelessWidget {
   final String imageUrl;
@@ -16,8 +15,8 @@ class ImagePreviewScreen extends StatelessWidget {
           onTap: () => Navigator.pop(context),
           child: Icon(Icons.arrow_back_ios_new, color: AppColors.black),
         ),
-        title: Text(
-          S.of(context).ImagePreviewScreen_Profile_Image,
+        title: const Text(
+          'Profile Image',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -37,7 +36,7 @@ class ImagePreviewScreen extends StatelessWidget {
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
               return Text(
-                 S.of(context).ImagePreviewScreen_Error_loading_image,
+                'Error loading image',
                 style: getbodyStyle(color: AppColors.black),
               );
             },

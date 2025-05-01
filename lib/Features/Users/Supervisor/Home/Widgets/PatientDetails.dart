@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/Services/firebaseServices.dart';
 import '../../../Patient/Presentation/Widgets/LogItem.dart';
 import '../../../../../core/utils/Colors.dart';
 import '../../../../../core/utils/Style.dart';

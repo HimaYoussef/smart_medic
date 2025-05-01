@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/generated/l10n.dart';
+import '../../../../../Services/firebaseServices.dart';
 import '../../../../../core/widgets/Custom_button.dart';
 
 class Refill_Medicine extends StatefulWidget {
@@ -103,11 +103,12 @@ class _nameState extends State<Refill_Medicine> {
 
                           if (medSnapshot.docs.isNotEmpty) {
                             String medId = medSnapshot.docs.first.id;
+                            int pillsNow = medSnapshot.docs.first['pillsLeft'];
                             await SmartMedicalDb.updateMedicine(
                               medicineId: medId ,
                               updates: {
                                 'pillsLeft':
-                                int.parse(_NumofPillsController.text),
+                                int.parse(_NumofPillsController.text)+pillsNow,
                                 'lastUpdated': FieldValue.serverTimestamp(),
                               },
                             );

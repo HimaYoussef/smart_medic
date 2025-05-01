@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
 import 'package:smart_medic/generated/l10n.dart';
+import '../../../../../Services/firebaseServices.dart';
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/build_text_field.dart';
 
@@ -34,10 +34,8 @@ class _Edit_Profile extends State<Edit_Profile> {
       var result = await SmartMedicalDb.getPatientProfile(user!.uid);
       if (result['success']) {
         setState(() {
-          _profileNameController.text =
-              result['data']['name'] ?? user!.displayName ?? '';
-          _profileEmailController.text =
-              result['data']['email'] ?? user!.email ?? '';
+          _profileNameController.text = result['data']['name'] ?? user!.displayName ?? '';
+          _profileEmailController.text = result['data']['email'] ?? user!.email ?? '';
           _profileAgeController.text = result['data']['age']?.toString() ?? '';
           _isLoading = false;
         });
@@ -111,12 +109,9 @@ class _Edit_Profile extends State<Edit_Profile> {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: Icon(
-            Icons.arrow_back_ios_new,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? AppColors.white
-                : AppColors.black,
-          ),
+          child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.white
+              : AppColors.black,),
         ),
         actions: [
           Image.asset(
@@ -129,25 +124,25 @@ class _Edit_Profile extends State<Edit_Profile> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(15),
-              child: SingleChildScrollView(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.cointainerDarkColor
-                        : AppColors.cointainerColor,
-                  ),
-                  height: 580,
-                  child: Form(
-                    key: _formKey,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Gap(20),
-                          Row(
+        padding: const EdgeInsets.all(15),
+        child: SingleChildScrollView(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.cointainerDarkColor
+                  : AppColors.cointainerColor,
+            ),
+            height: 580,
+            child: Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Gap(20),
+                  Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CustomText(
@@ -199,10 +194,10 @@ class _Edit_Profile extends State<Edit_Profile> {
                         ],
                       ),
                     ),
-                  ),
-                ),
-              ),
             ),
+          ),
+        ),
+      ),
     );
   }
 

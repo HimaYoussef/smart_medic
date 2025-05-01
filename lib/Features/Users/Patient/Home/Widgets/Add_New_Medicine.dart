@@ -5,9 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:smart_medic/Bluetooth/BluetoothManager.dart';
-import 'package:smart_medic/Bluetooth/notificationService.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/Services/bluetoothServices.dart';
+import 'package:smart_medic/Services/firebaseServices.dart';
+import 'package:smart_medic/Services/notificationService.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
 import 'package:smart_medic/generated/l10n.dart';
@@ -296,7 +296,8 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           int.tryParse(_numTimesController.text) != null &&
                           int.parse(_numTimesController.text) > 0 &&
                           int.parse(_numTimesController.text) <= 4) ...[
-                        Builder(builder: (context) {
+                        Builder(
+                          builder: (context) {
                           int numTimes = int.parse(_numTimesController.text);
                           if (_selectedTimes.length != numTimes) {
                             _selectedTimes =
@@ -314,8 +315,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
-                                children:
-                                    List.generate(_selectedTimes.length, (i) {
+                                 children: List.generate(numTimes, (i) {
                                   return _selectedTimes[i] != null
                                       ? Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -504,6 +504,31 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                               ),
                               const SizedBox(width: 8),
                             ],
+                            // ActionChip(
+                            //   label: Text(
+                            //     _commonTimeForSpecificDays.isEmpty
+                            //         ? 'Add Time'
+                            //         : 'Change Time',
+                            //     style: TextStyle(color: AppColors.white),
+                            //   ),
+                            //   onPressed: () async {
+                            //     TimeOfDay? time = await showTimePicker(
+                            //       context: context,
+                            //       initialTime: TimeOfDay.now(),
+                            //     );
+                            //     if (time != null) {
+                            //       setState(() {
+                            //         _commonTimeForSpecificDays =
+                            //             time.format(context);
+                            //         _times = [time.format(context)];
+                            //       });
+                            //     }
+                            //   },
+                            //   backgroundColor: Theme.of(context).brightness ==
+                            //           Brightness.dark
+                            //       ? AppColors.mainColorDark
+                            //       : AppColors.mainColor,
+                            // ),
                             ActionChip(
                               label: Text(
                                 _commonTimeForSpecificDays.isEmpty
@@ -520,7 +545,9 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                   setState(() {
                                     _commonTimeForSpecificDays =
                                         time.format(context);
-                                    _times = [time.format(context)];
+                                    _times = [
+                                      time.format(context)
+                                    ]; // Store in times
                                   });
                                 }
                               },

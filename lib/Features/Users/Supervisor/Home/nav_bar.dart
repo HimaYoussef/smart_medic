@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Home/Supervior_Main_view.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Presentation/Awareness/Supervior_Awareness_view.dart';
-import 'package:smart_medic/Features/Users/Supervisor/Presentation/Profile/Supervisor_Profile_view.dart';
+import 'package:smart_medic/Features/Users/Supervisor/Presentation/Profile/Supervior_Profile_view.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 
 class SupervisorHomeView extends StatefulWidget {

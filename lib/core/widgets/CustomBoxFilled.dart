@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
+import 'package:smart_medic/Features/Users/Patient/Home/Widgets/EditMedicine.dart';
+import 'package:smart_medic/Features/Users/Patient/Home/Widgets/MedicineView.dart';
+import 'package:smart_medic/Services/firebaseServices.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
-
-import '../../Features/Users/Patient/Home/Widgets/EditMedicine.dart';
 
 class CustomBoxFilled extends StatelessWidget {
   final String medicineName;
-  final int compartmentNumber; // New parameter to identify the medicine
+  final int compartmentNumber;
   final void Function()? onTap;
 
   const CustomBoxFilled({
@@ -19,7 +19,6 @@ class CustomBoxFilled extends StatelessWidget {
   });
 
   Future<void> _deleteMedicine(BuildContext context) async {
-    // Find the medicine by compartmentNumber
     QuerySnapshot query = await FirebaseFirestore.instance
         .collection('medications')
         .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
@@ -69,6 +68,17 @@ class CustomBoxFilled extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () async {
+        QuerySnapshot query = await FirebaseFirestore.instance
+            .collection('medications')
+            .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            .where('compartmentNumber', isEqualTo: compartmentNumber)
+            .get();
+        if (query.docs.isNotEmpty) {
+          Map<String, dynamic> medicineData = query.docs.first.data() as Map<String, dynamic>;
+          MedicineDetailsPopup.showMedicineDetailsDialog(context, medicineData);
+        }
+      },
       onLongPress: () => _showDeleteConfirmation(context),
       child: Container(
         decoration: BoxDecoration(
@@ -101,7 +111,6 @@ class CustomBoxFilled extends StatelessWidget {
                     icon: const Icon(Icons.edit_rounded),
                     color: Colors.black26,
                     onPressed: () async {
-                      // Fetch medicine data
                       QuerySnapshot query = await FirebaseFirestore.instance
                           .collection('medications')
                           .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
+import '../../../../../../Services/firebaseServices.dart';
 part 'sign_up_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
@@ -23,13 +23,7 @@ class SignUpCubit extends Cubit<SignUpState> {
     emit(PasswordVisibilityChanged(isPasswordVisible, isConfirmPasswordVisible));
   }
 
-   Future<void> signUp({
-    required String name,
-    required String email,
-    required String password,
-    required String type,
-    required BuildContext context,
-  }) async {
+  Future<void> signUp({required String name,required String email, required String password,required String type}) async {
     emit(SignUpLoading());
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(

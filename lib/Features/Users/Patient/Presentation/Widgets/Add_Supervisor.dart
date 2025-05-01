@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/Features/Auth/Data/Super_Visor_type.dart';
 import 'package:smart_medic/LocalProvider.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/custom_dialogs.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_medic/generated/l10n.dart';
+import '../../../../../Services/firebaseServices.dart';
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/Custom_button.dart';
 import '../../../../../core/widgets/build_text_field.dart';
@@ -62,7 +62,6 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
   Widget build(BuildContext context) {
     // final localeProvider = context.read<LocaleProvider>();
     final localeProvider = Provider.of<LocaleProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(

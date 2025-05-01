@@ -3,13 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
-import 'package:smart_medic/Bluetooth/notificationService.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/LogItem.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import '../../../../../Services/firebaseServices.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../../../../Services/notificationService.dart';
 
 class PatientLogsView extends StatefulWidget {
   const PatientLogsView({super.key});

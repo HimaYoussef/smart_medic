@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_medic/Database/firestoreDB.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Add_Supervisor.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/SupervisorCard.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/generated/l10n.dart';
 
+import '../../../../../../Services/firebaseServices.dart';
 
 class SupervisorsScreen extends StatelessWidget {
   const SupervisorsScreen({super.key});
