@@ -61,7 +61,6 @@ class MainApp extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider(create: (context) => SignUpCubit()),
-            BlocProvider(create: (context) => LoginCubit()),
           ],
           child: MaterialApp(
             locale: localeProvider.locale,

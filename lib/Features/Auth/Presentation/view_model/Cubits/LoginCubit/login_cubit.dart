@@ -1,56 +1,75 @@
+// LoginCubit with role validation
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_medic/Services/firebaseServices.dart';
+// import 'package:path/path.dart';
+import 'package:smart_medic/generated/l10n.dart';
 part 'login_state.dart';
-
 
 class LoginCubit extends Cubit<LoginState> {
   final FirebaseAuth _auth;
+  final String expectedRole;
   bool isPasswordVisible = false;
 
-  LoginCubit({FirebaseAuth? auth})
+  LoginCubit({required this.expectedRole, FirebaseAuth? auth})
       : _auth = auth ?? FirebaseAuth.instance,
         super(LoginInitial());
 
-  Future<bool> _isEmailVerified(User? user) async {
-    if (user == null) return false;
-    await user.reload();
-    return user.emailVerified;
-  }
-
-  Future<void> login({required email,required pass}) async {
-    emit(Loading());
+  Future<void> login({
+    required String email,
+    required String pass,
+    required BuildContext context,
+  }) async {    emit(Loading());
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: pass,
       );
 
-      bool isVerified = await _isEmailVerified(userCredential.user);
-      if (!isVerified) {
-        emit(Failed(errorMessage: 'Email not verified yet.'));
-      }else {
-        emit(Success());
+      final user = userCredential.user;
+      if (user == null) {
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage1));
+        return;
       }
 
+      await user.reload();
+      if (!user.emailVerified) {
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage2));
+        return;
+      }
+
+      final userData = await SmartMedicalDb.getUserById(user.uid);
+
+      if (userData == null) {
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage3));
+        return;
+      }
+
+      final actualRole = userData['type'];
+      if (actualRole != expectedRole) {
+        emit(Failed(errorMessage: 'This email is not registered as $expectedRole.'));
+        return;
+      }
+
+      emit(Success());
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        emit(Failed(errorMessage: 'No user found with this email'));
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage4));
       } else if (e.code == 'wrong-password') {
-        emit(Failed(errorMessage: 'Incorrect password'));
-      }
-    }
-    catch (e){
-      emit(Failed(errorMessage: 'Unexpected error occurred'));
+        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage5));
+      } else {
+  emit(Failed(
+            errorMessage:
+                e.message ?? S.of(context).login_cubit_errorMessage6));      }
+    } catch (e) {
+      emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage7));
       print("Error: $e");
-    } /*finally {
-      await Future.delayed(const Duration(seconds: 1));
-      emit(LoginInitial());
-    }*/
     }
+  }
 
   void togglePasswordVisibility() {
     isPasswordVisible = !isPasswordVisible;
     emit(PasswordVisibilityChanged(isPasswordVisible));
   }
-  }
+}
