@@ -50,7 +50,6 @@ class _EditMedicineState extends State<EditMedicine> {
     super.initState();
     _bluetoothManager.initBluetooth();
 
-    // Initialize controllers with existing medicine data
     _medNameController = TextEditingController(
         text: widget.medicineData['name']?.toString() ?? '');
     _pillsController = TextEditingController(
@@ -61,14 +60,12 @@ class _EditMedicineState extends State<EditMedicine> {
         text: widget.medicineData['scheduleValue']?.toString() ?? '');
     _daysIntervalController = TextEditingController(
         text: widget.medicineData['scheduleValue']?.toString() ?? '');
-    _scheduleType = widget.medicineData['scheduleType'] +
-        1; // Adjust for dropdown (0-based to 1-based)
+    _scheduleType = widget.medicineData['scheduleType'] + 1;
 
     _times = List<String>.from(widget.medicineData['times'] ?? []);
     _bitmaskDays = List<int>.from(
         widget.medicineData['bitmaskDays'] ?? [0, 0, 0, 0, 0, 0, 0]);
 
-    // Initialize _selectedTimes based on scheduleType
     if (_scheduleType == 1) {
       _selectedTimes = [];
       try {
@@ -93,7 +90,7 @@ class _EditMedicineState extends State<EditMedicine> {
       if (period == 'AM' && hour == 12) hour = 0;
       _selectedTime = TimeOfDay(hour: hour, minute: minute);
     } else if (_scheduleType == 3 && _times.isNotEmpty) {
-      _commonTimeForSpecificDays = _times[0]; // Use the first time from times
+      _commonTimeForSpecificDays = _times[0];
     }
   }
 
@@ -200,36 +197,40 @@ class _EditMedicineState extends State<EditMedicine> {
       );
 
       if (result['success']) {
+        // Pop immediately and notify parent to refresh
+        if (mounted) {
+          Navigator.pop(context); // <--- KEY FIX
+        }
+        // Now do background tasks
         await LocalNotificationService.scheduleMedicineNotifications();
         await sendAllMedicationsToArduino();
-        if (mounted) {
-          Navigator.pop(context);
-        }
       }
 
       setState(() {
         _isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            result['message'],
-            style: TextStyle(color: AppColors.white),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['message'],
+              style: TextStyle(color: AppColors.white),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 
   Future<void> sendAllMedicationsToArduino() async {
     try {
       print('Starting sendAllMedicationsToArduino...');
+
       QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
           .collection('medications')
           .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .get();
-
       print('Found ${medicationsSnapshot.docs.length} medications to sync.');
 
       List<Map<String, dynamic>> medications =
@@ -263,6 +264,7 @@ class _EditMedicineState extends State<EditMedicine> {
       for (var med in medications) {
         String dataToSend = jsonEncode({"medication": med}) + "\n";
         print("Sending data to Arduino: $dataToSend");
+
         try {
           await _bluetoothManager.sendData(dataToSend);
           print("Data sent successfully for medication: ${med['name']}");
@@ -294,6 +296,7 @@ class _EditMedicineState extends State<EditMedicine> {
 
       if (!_bluetoothManager.isConnected && mounted) {
         print('Bluetooth not connected. Showing snackbar.');
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Bluetooth not connected. Data will be sent later."),
@@ -307,6 +310,7 @@ class _EditMedicineState extends State<EditMedicine> {
       }
     } catch (e) {
       print("Error in sendAllMedicationsToArduino: $e");
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -324,6 +328,7 @@ class _EditMedicineState extends State<EditMedicine> {
           .get();
       for (var doc in medicationsSnapshot.docs) {
         print('Updating syncStatus after error for medication: ${doc.id}');
+
         await SmartMedicalDb.updateMedicationSyncStatus(
           medId: doc.id,
           syncStatus: 'Pending',

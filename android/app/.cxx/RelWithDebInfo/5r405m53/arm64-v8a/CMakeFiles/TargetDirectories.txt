@@ -1,0 +1,2 @@
+E:/ibrahim/Kimit Study/Graduation_Project/smart_medic/android/app/.cxx/RelWithDebInfo/5r405m53/arm64-v8a/CMakeFiles/edit_cache.dir
+E:/ibrahim/Kimit Study/Graduation_Project/smart_medic/android/app/.cxx/RelWithDebInfo/5r405m53/arm64-v8a/CMakeFiles/rebuild_cache.dir

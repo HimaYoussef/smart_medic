@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:smart_medic/Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
@@ -60,6 +61,7 @@ class MainApp extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider(create: (context) => SignUpCubit()),
+            BlocProvider(create: (context) => LoginCubit()),
           ],
           child: MaterialApp(
             locale: localeProvider.locale,
