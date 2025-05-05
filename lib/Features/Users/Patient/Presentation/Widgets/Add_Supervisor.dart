@@ -23,10 +23,19 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _SuperVisorEmailController =
       TextEditingController();
-  String _SuperVisor_Type = SuperVisor_type[0];
+
+  late String _SuperVisor_Type;
 
   User? user = FirebaseAuth.instance.currentUser;
   bool _isLoading = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize _SuperVisor_Type with the first localized option
+    final supervisorTypes = getSuperVisorTypes(context);
+    _SuperVisor_Type = supervisorTypes[0];
+  }
 
   Future<void> _addSupervisor() async {
     setState(() {
@@ -60,8 +69,9 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
 
   @override
   Widget build(BuildContext context) {
-    // final localeProvider = context.read<LocaleProvider>();
     final localeProvider = Provider.of<LocaleProvider>(context);
+    final supervisorTypes = getSuperVisorTypes(context);
+
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
@@ -151,7 +161,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                                 _SuperVisor_Type = newValue ?? _SuperVisor_Type;
                               });
                             },
-                            items: SuperVisor_type.map((String value) {
+                            items: supervisorTypes.map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(value),

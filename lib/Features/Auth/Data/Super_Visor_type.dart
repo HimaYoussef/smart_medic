@@ -1,10 +1,17 @@
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:path/path.dart';
+// List<String> SuperVisor_type = [
+//   "Choose",
+//   "Doctor",
+//   "Family",
+//   "Neighbor",
+// ];
+
+// Super_Visor_type.dart
+import 'package:flutter/material.dart';
 import 'package:smart_medic/generated/l10n.dart';
 
-List<String> SuperVisor_type = [
-  S.of(context as BuildContext).Super_Visor_type_choose,
-  S.of(context as BuildContext).Super_Visor_type_Doctor,
-  S.of(context as BuildContext).Super_Visor_type_Family,
-  S.of(context as BuildContext).Super_Visor_type_Neighbor,
+List<String> getSuperVisorTypes(BuildContext context) => [
+  S.of(context).Super_Visor_type_choose,
+  S.of(context).Super_Visor_type_Doctor,
+  S.of(context).Super_Visor_type_Family,
+  S.of(context).Super_Visor_type_Neighbor,
 ];
