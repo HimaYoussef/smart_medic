@@ -71,19 +71,20 @@ class _PatientMainViewState extends State<PatientMainView> {
                   itemBuilder: (context, index) {
                     // Check if there is a medication for this compartment
                     var medForCompartment = medications.firstWhere(
-                      (med) => med['compartmentNumber'] == (index + 1),
+                          (med) => med['compartmentNumber'] == (index + 1),
                       orElse: () => {},
                     );
 
                     if (medForCompartment.isNotEmpty) {
                       // If there is a medication, show CustomBoxFilled
                       return CustomBoxFilled(
+                        key: ValueKey(medForCompartment['id']), // إضافة Key لتحسين التحديث
                         medicineName: medForCompartment['name'] ?? 'Unknown',
                         compartmentNumber: index + 1,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Refill_Medicine(compartmentNum: index+1,),
+                            builder: (context) => Refill_Medicine(compartmentNum: index + 1),
                           ),
                         ),
                       );

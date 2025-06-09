@@ -9,6 +9,7 @@ import 'package:path/path.dart';
 import 'firebaseServices.dart';
 
 class BluetoothManager {
+  static bool needsSync = false;
   static final BluetoothManager _instance = BluetoothManager._internal();
   factory BluetoothManager() => _instance;
   BluetoothManager._internal();
@@ -21,15 +22,15 @@ class BluetoothManager {
   StreamSubscription? _scanningStateSubscription;
   Database? _database;
 
-  // متغيرات لتتبع حالة البلوتوث والـ Scan
   BluetoothAdapterState _adapterState = BluetoothAdapterState.unknown;
   bool _isScanning = false;
   final Set<BluetoothDevice> _scanResults = {};
 
-  // Getter لمعرفة إذا كان البلوتوث متصل
+  final _responseStream = StreamController<String>.broadcast();
+  String _buffer = "";
+
   bool get isConnected => _connection != null && _connection!.isConnected;
 
-  // طلب الإذونات
   Future<void> requestPermissions() async {
     await Permission.bluetooth.request();
     await Permission.bluetoothScan.request();
@@ -37,7 +38,6 @@ class BluetoothManager {
     await Permission.location.request();
   }
 
-  // Initialize database for queue
   Future<void> initDatabase() async {
     String path = join(await getDatabasesPath(), 'bluetooth_queue.db');
     _database = await openDatabase(
@@ -51,14 +51,10 @@ class BluetoothManager {
     );
   }
 
-  // Initialize Bluetooth
   Future<void> initBluetooth() async {
-    // طلب الإذونات قبل أي حاجة
     await requestPermissions();
-
     await initDatabase();
 
-    // مراقبة حالة البلوتوث
     try {
       _adapterState = await _flutterBlueClassic.adapterStateNow;
       _adapterStateSubscription = _flutterBlueClassic.adapterState.listen((current) {
@@ -69,13 +65,11 @@ class BluetoothManager {
         }
       });
 
-      // مراقبة حالة الـ Scan
       _scanningStateSubscription = _flutterBlueClassic.isScanning.listen((isScanning) {
         print("Scanning State: $isScanning");
         _isScanning = isScanning;
       });
 
-      // مراقبة نتايج الـ Scan
       _scanSubscription = _flutterBlueClassic.scanResults.listen((device) {
         print("Found device: ${device.name}");
         _scanResults.add(device);
@@ -84,7 +78,6 @@ class BluetoothManager {
         }
       });
 
-      // ابدأ الـ Scan لو البلوتوث مفعّل
       if (_adapterState == BluetoothAdapterState.on) {
         startScan();
       } else {
@@ -98,7 +91,6 @@ class BluetoothManager {
     }
   }
 
-  // Scan for devices
   Future<void> startScan() async {
     if (_isScanning) {
       print("Scan already in progress");
@@ -113,7 +105,6 @@ class BluetoothManager {
     }
   }
 
-  // Connect to device
   Future<void> connectToDevice(BluetoothDevice device) async {
     try {
       if (_connection != null && _connection!.isConnected) {
@@ -125,7 +116,9 @@ class BluetoothManager {
       if (_connection != null && _connection!.isConnected) {
         print("Connected to ${device.name}");
         listenToDevice();
-        await retrySendingFromQueue();
+        if (needsSync) {
+          await sendAllMedicationsToArduino();
+        }
       } else {
         print("Failed to connect to ${device.name}");
       }
@@ -134,34 +127,194 @@ class BluetoothManager {
     }
   }
 
-  // Send data
-  Future<void> sendData(String data) async {
-    if (_connection != null && _connection!.isConnected) {
-      try {
-        try {
-          jsonDecode(data);
-          print("Sending valid JSON: $data");
-        } catch (e) {
-          print("Invalid JSON to send: $data, Error: $e");
-          return;
-        }
+  Future<bool> startHandshake() async {
+    if (_connection == null || !_connection!.isConnected) {
+      print("Cannot start handshake: Bluetooth not connected");
+      return false;
+    }
 
-        String dataWithNewline = "$data\n";
-        _connection!.writeString(dataWithNewline);
-        print("Data sent: $dataWithNewline");
+    try {
+      _connection!.writeString("SEND_DATA\n");
+      print("Sent SEND_DATA request");
 
-        // إضافة تأخير بسيط عشان الـ HC-05 يستقبل البيانات كاملة
-        await Future.delayed(const Duration(milliseconds: 500));
-      } catch (e) {
-        print("Send error: $e");
-        await addToQueue(data);
+      String response = await _responseStream.stream
+          .firstWhere((res) => res.trim() == "READY", orElse: () => "");
+      if (response.trim() != "READY") {
+        print("Expected READY, got: $response");
+        return false;
       }
-    } else {
-      print("Cannot send data: Bluetooth not connected");
-      await addToQueue(data);
+      print("Received READY from Arduino");
+      return true;
+    } catch (e) {
+      print("Handshake error: $e");
+      return false;
     }
   }
-  // Add to queue
+
+  Future<bool> sendDataWithHandshake(String data) async {
+    if (_connection == null || !_connection!.isConnected) {
+      print("Cannot send data: Bluetooth not connected");
+      await addToQueue(data);
+      return false;
+    }
+
+    try {
+      String dataWithNewline = "$data\n";
+      _connection!.writeString(dataWithNewline);
+      print("Data sent: $dataWithNewline");
+
+      String response = await _responseStream.stream
+          .firstWhere((res) => res.trim() == "READY_FOR_NEXT", orElse: () => "");
+      if (response.trim() != "READY_FOR_NEXT") {
+        print("Expected READY_FOR_NEXT, got: $response");
+        await addToQueue(data);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      print("Send error with handshake: $e");
+      await addToQueue(data);
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> sendAllMedicationsToArduino() async {
+    try {
+      print('Starting sendAllMedicationsToArduino...');
+      QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
+          .collection('medications')
+          .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      List<Map<String, dynamic>> medications = medicationsSnapshot.docs.map((doc) {
+        var data = doc.data() as Map<String, dynamic>;
+        String name = data["name"]?.toString() ?? "Unknown";
+        int dosage = data["dosage"] ?? 0;
+        int scheduleType = data["scheduleType"] ?? 0;
+        int scheduleValue = data["scheduleValue"] ?? 0;
+        List<String> times = (data["times"] as List<dynamic>?)?.cast<String>() ?? [];
+        List<int> bitmaskDays = (data["bitmaskDays"] as List<dynamic>?)?.cast<int>() ?? [0, 0, 0, 0, 0, 0, 0];
+        int pillsLeft = data["pillsLeft"] ?? 0;
+        int compartmentNumber = data["compartmentNumber"] ?? 0;
+
+        return {
+          "id": doc.id,
+          "name": name,
+          "dosage": dosage,
+          "scheduleType": scheduleType,
+          "scheduleValue": scheduleValue,
+          "times": times,
+          "bitmaskDays": bitmaskDays,
+          "pillsLeft": pillsLeft,
+          "compartmentNumber": compartmentNumber,
+        };
+      }).toList();
+
+      if (isConnected) {
+        bool handshakeSuccess = await startHandshake();
+        if (!handshakeSuccess) {
+          for (var med in medications) {
+            String dataToSend = jsonEncode({"medication": med});
+            await addToQueue(dataToSend);
+            await SmartMedicalDb.updateMedicationSyncStatus(
+              medId: med['id'],
+              syncStatus: 'Pending',
+            );
+          }
+          return {
+            "success": false,
+            "message": "Failed to start handshake with Arduino. Data will be sent later.",
+            "medicationsSynced": false,
+          };
+        }
+
+        // إرسال أمر UPDATE_MEDS مع أرقام الحجرات
+        List<int> compartmentNumbers = medications.map((med) => med['compartmentNumber'] as int).toList();
+        String updateMedsCommand = "UPDATE_MEDS ${compartmentNumbers.join(',')}\n";
+        bool updateMedsSuccess = await sendDataWithHandshake(updateMedsCommand);
+        if (!updateMedsSuccess) {
+          for (var med in medications) {
+            String dataToSend = jsonEncode({"medication": med});
+            await addToQueue(dataToSend);
+            await SmartMedicalDb.updateMedicationSyncStatus(
+              medId: med['id'],
+              syncStatus: 'Pending',
+            );
+          }
+          return {
+            "success": false,
+            "message": "Failed to send UPDATE_MEDS command.",
+            "medicationsSynced": false,
+          };
+        }
+
+        // إرسال بيانات كل دواء
+        for (var med in medications) {
+          String dataToSend = jsonEncode(med);
+          print("Preparing to send data to Arduino: $dataToSend");
+          bool success = await sendDataWithHandshake(dataToSend);
+          if (success) {
+            await SmartMedicalDb.updateMedicationSyncStatus(
+              medId: med['id'],
+              syncStatus: 'Synced',
+            );
+          } else {
+            await SmartMedicalDb.updateMedicationSyncStatus(
+              medId: med['id'],
+              syncStatus: 'Pending',
+            );
+            await addToQueue(dataToSend);
+            return {
+              "success": false,
+              "message": "Failed to send ${med['name']} to Arduino",
+              "medicationsSynced": false,
+            };
+          }
+        }
+
+        needsSync = false; // إعادة تعيين الـ flag بعد الإرسال الناجح
+        print("All medications synced, needs sync: $needsSync");
+        return {
+          "success": true,
+          "message": "All medications synced successfully.",
+          "medicationsSynced": true,
+        };
+      }
+      else {
+        for (var med in medications) {
+          String dataToSend = jsonEncode({"medication": med});
+          await addToQueue(dataToSend);
+          await SmartMedicalDb.updateMedicationSyncStatus(
+            medId: med['id'],
+            syncStatus: 'Pending',
+          );
+        }
+        return {
+          "success": false,
+          "message": "Bluetooth not connected. Data will be sent later.",
+          "medicationsSynced": false,
+        };
+      }
+    } catch (e) {
+      print("Error in sendAllMedicationsToArduino: $e");
+      QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
+          .collection('medications')
+          .where('patientId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+      for (var doc in medicationsSnapshot.docs) {
+        await SmartMedicalDb.updateMedicationSyncStatus(
+          medId: doc.id,
+          syncStatus: 'Pending',
+        );
+      }
+      return {
+        "success": false,
+        "message": "Error syncing medications: $e",
+        "medicationsSynced": false,
+      };
+    }
+  }
+
   Future<void> addToQueue(String data) async {
     if (_database == null || _database!.isOpen == false) {
       await initDatabase();
@@ -173,36 +326,31 @@ class BluetoothManager {
     print("Data added to queue: $data");
   }
 
-  // Retry sending from queue
   Future<void> retrySendingFromQueue() async {
     if (_database == null || _database!.isOpen == false) {
       await initDatabase();
     }
-    List<Map> queuedData = await _database!.query('queue');
-    for (var item in queuedData) {
-      await sendData(item['data']);
-      await _database!.delete('queue', where: 'id = ?', whereArgs: [item['id']]);
+    if (needsSync) {
+      await sendAllMedicationsToArduino();
     }
   }
 
-// Listen to incoming data
   void listenToDevice() {
-    String buffer = "";
     _readSubscription = _connection?.input?.listen((event) async {
       String receivedChunk = utf8.decode(event);
-      buffer += receivedChunk;
+      _buffer += receivedChunk;
 
-      int newlineIndex = buffer.indexOf('\n');
+      int newlineIndex = _buffer.indexOf('\n');
       while (newlineIndex != -1) {
-        String receivedData = buffer.substring(0, newlineIndex);
-        buffer = buffer.substring(newlineIndex + 1);
+        String receivedData = _buffer.substring(0, newlineIndex);
+        _buffer = _buffer.substring(newlineIndex + 1);
 
-        print("Received: $receivedData");
+        _responseStream.add(receivedData);
+        print("Received and processed: $receivedData");
+
         try {
-          // Parse the received data as a JSON array
           List<dynamic> logList = jsonDecode(receivedData);
           if (logList.isNotEmpty) {
-            // Take the first log entry (since it's an array with one element)
             Map<String, dynamic> logData = logList[0];
             await uploadLogToFirebase(logData);
           }
@@ -210,23 +358,19 @@ class BluetoothManager {
           print("Error parsing log: $e");
         }
 
-        newlineIndex = buffer.indexOf('\n');
+        newlineIndex = _buffer.indexOf('\n');
       }
+    }, onError: (error) {
+      print("Error listening to device: $error");
     });
   }
 
-// Upload log to Firebase
   Future<void> uploadLogToFirebase(Map<String, dynamic> logData) async {
     try {
-      // Extract the type to determine how to handle the log
       int logType = logData['type'];
 
       if (logType == 0) {
-        // Log type 0: Medication log
-        // Extract the compartmentNumber (received as medicineID in the log)
         int compartmentNumber = logData['medicineID'];
-
-        // Query the database to find the medication with this compartmentNumber
         String? medicationId;
         QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
             .collection('medications')
@@ -235,41 +379,33 @@ class BluetoothManager {
             .get();
 
         if (medicationsSnapshot.docs.isNotEmpty) {
-          // Take the first matching medication
           medicationId = medicationsSnapshot.docs.first.id;
-          print("Found medication with compartmentNumber $compartmentNumber, medicationId: $medicationId");
         } else {
-          print("No medication found for compartmentNumber: $compartmentNumber");
           medicationId = "unknown";
         }
 
-        // Save the medication log
         await SmartMedicalDb.addLog(
           logId: DateTime.now().millisecondsSinceEpoch.toString(),
           patientId: FirebaseAuth.instance.currentUser!.uid,
           medicationId: medicationId,
-          status: logData['isConfirmed'] == -1 ? 'missed' : 'taken',
-          spo2: logData['oxygen'] != -1 ? (logData['oxygen'] as num).toDouble() : null, // تحويل من int إلى double
-          heartRate: logData['heartRate'] != -1 ? (logData['heartRate'] as num).toDouble() : null, // تحويل من int إلى double
+          status: logData['isConfirmed'] == 0 ? 'missed' : 'taken',
+          spo2: logData['oxygen'] != -1 ? (logData['oxygen'] as num).toDouble() : null,
+          heartRate: logData['heartRate'] != -1 ? (logData['heartRate'] as num).toDouble() : null,
           dayOfYear: logData['dayOfYear'],
           minutesMidnight: logData['minutesMidnight'],
         );
-        print("Medication Log uploaded successfully with medicationId: $medicationId, compartmentNumber: $compartmentNumber");
       } else if (logType == 1) {
-        // Log type 1: Vital signs log (heartRate, oxygen)
         await SmartMedicalDb.addLog(
           logId: DateTime.now().millisecondsSinceEpoch.toString(),
           patientId: FirebaseAuth.instance.currentUser!.uid,
-          medicationId: null, // مافيش دواء مرتبط بالـ Log ده
-          status: null, // مافيش حالة دواء
-          spo2: logData['oxygen'] != -1 ? (logData['oxygen'] as num).toDouble() : null, // تحويل من int إلى double
-          heartRate: logData['heartRate'] != -1 ? (logData['heartRate'] as num).toDouble() : null, // تحويل من int إلى double
+          medicationId: null,
+          status: null,
+          spo2: logData['oxygen'] != -1 ? (logData['oxygen'] as num).toDouble() : null,
+          heartRate: logData['heartRate'] != -1 ? (logData['heartRate'] as num).toDouble() : null,
           dayOfYear: logData['dayOfYear'],
           minutesMidnight: logData['minutesMidnight'],
         );
-        print("Vital Signs Log uploaded successfully: heartRate=${logData['heartRate']}, oxygen=${logData['oxygen']}");
       } else {
-        // Log type غير معروف
         print("Unknown log type: $logType, skipping...");
         return;
       }
@@ -278,16 +414,14 @@ class BluetoothManager {
     }
   }
 
-  // Retry timer
   void startRetryTimer() {
-    Timer.periodic(Duration(seconds: 30), (timer) async {
-      if (_connection != null && _connection!.isConnected) {
-        await retrySendingFromQueue();
+    Timer.periodic(const Duration(seconds: 30), (timer) async {
+      if (_connection != null && _connection!.isConnected && needsSync) {
+        await sendAllMedicationsToArduino();
       }
     });
   }
 
-  // Cleanup
   void dispose() {
     _scanSubscription?.cancel();
     _readSubscription?.cancel();
@@ -295,5 +429,6 @@ class BluetoothManager {
     _scanningStateSubscription?.cancel();
     _connection?.dispose();
     _database?.close();
+    _responseStream.close();
   }
 }

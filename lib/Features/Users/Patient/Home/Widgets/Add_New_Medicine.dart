@@ -28,6 +28,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   final TextEditingController _numTimesController = TextEditingController();
   final TextEditingController _daysIntervalController = TextEditingController();
 
+  bool _isLoading = false;
   int _scheduleType = 0;
   List<String> _times = [];
   List<TimeOfDay?> _selectedTimes = [];
@@ -41,6 +42,18 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   void initState() {
     super.initState();
     _bluetoothManager.initBluetooth();
+  }
+
+  void _showLoadingOverlay(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  void _hideLoadingOverlay(BuildContext context) {
+    Navigator.of(context).pop();
   }
 
   void _updateTimesList() {
@@ -439,9 +452,6 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           );
                         } else if (_formKey.currentState!.validate()) {
                            addMedication();
-                          if (mounted) {
-                            Navigator.pop(context);
-                          }
                         }
                       },
                     ),
@@ -493,157 +503,119 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   User? user = FirebaseAuth.instance.currentUser;
 
   Future<void> addMedication() async {
-    var result = await SmartMedicalDb.addMedication(
-      patientId: user!.uid,
-      name: _medNameController.text,
-      dosage: int.parse(_dosageController.text),
-      scheduleType: (_scheduleType - 1),
-      scheduleValue: _numTimesController.text.isNotEmpty
-          ? int.parse(_numTimesController.text)
-          : (_daysIntervalController.text.isNotEmpty
-          ? int.parse(_daysIntervalController.text)
-          : 0),
-      times: _times,
-      bitmaskDays: _bitmaskDays,
-      pillsLeft: int.parse(_pillsController.text),
-      compartmentNumber: widget.compNum,
-    );
-
-    if (result['success']) {
-      // Schedule notifications after adding the medication
-       LocalNotificationService.scheduleMedicineNotifications();
-      // Send data to Arduino and update sync status
-      await sendAllMedicationsToArduino();
-      if (mounted) {
-        Navigator.pop(context); // Ensure navigation happens
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            result['message'],
-            style: TextStyle(color: AppColors.white),
-          ),
-        ),
-      );
+    if (_isLoading) {
+      print("addMedication: Already loading, returning.");
+      return;
     }
-  }
 
-  Future<void> sendAllMedicationsToArduino() async {
+    print("addMedication: Starting medication addition.");
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      print('Starting sendAllMedicationsToArduino...');
-      // Fetch all medications for the user
-      QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
-          .collection('medications')
-          .where('patientId', isEqualTo: user!.uid)
-          .get();
+      print("addMedication: Showing loading overlay.");
+      _showLoadingOverlay(context);
+      //await Future.delayed(const Duration(milliseconds: 500)); // تأخير بسيط لضمان ظهور الـ Dialog
 
-      print('Found ${medicationsSnapshot.docs.length} medications to sync.');
+      var result = await SmartMedicalDb.addMedication(
+        patientId: user!.uid,
+        name: _medNameController.text,
+        dosage: int.parse(_dosageController.text),
+        scheduleType: (_scheduleType - 1),
+        scheduleValue: _numTimesController.text.isNotEmpty
+            ? int.parse(_numTimesController.text)
+            : (_daysIntervalController.text.isNotEmpty
+            ? int.parse(_daysIntervalController.text)
+            : 0),
+        times: _times,
+        bitmaskDays: _bitmaskDays,
+        pillsLeft: int.parse(_pillsController.text),
+        compartmentNumber: widget.compNum,
+      );
 
-      // Transform data
-      List<Map<String, dynamic>> medications = medicationsSnapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
+      print("addMedication: Add medication result: $result");
 
-        // فحص الحقول اللي ممكن تكون null
-        String name = data["name"]?.toString() ?? "Unknown";
-        int dosage = data["dosage"] ?? 0;
-        int scheduleType = data["scheduleType"] ?? 0;
-        int scheduleValue = data["scheduleValue"] ?? 0;
-        List<String> times = (data["times"] as List<dynamic>?)?.cast<String>() ?? [];
-        List<int> bitmaskDays = (data["bitmaskDays"] as List<dynamic>?)?.cast<int>() ?? [0, 0, 0, 0, 0, 0, 0];
-        int pillsLeft = data["pillsLeft"] ?? 0;
-        int compartmentNumber = data["compartmentNumber"] ?? 0;
-
-        return {
-          "id": doc.id, // إضافة الـ id
-          "name": name,
-          "dosage": dosage,
-          "scheduleType": scheduleType,
-          "scheduleValue": scheduleValue,
-          "times": times,
-          "bitmaskDays": bitmaskDays,
-          "pillsLeft": pillsLeft,
-          "compartmentNumber": compartmentNumber,
-        };
-      }).toList();
-
-      // Send each medication individually
-      for (var med in medications) {
-        String dataToSend = jsonEncode({"medication": med}) + "\n";
-        print("Sending data to Arduino: $dataToSend");
-        try {
-          await _bluetoothManager.sendData(dataToSend);
-          print("Data sent successfully for medication: ${med['name']}");
-          // Update syncStatus to "Synced" only if the data was sent successfully
-          await SmartMedicalDb.updateMedicationSyncStatus(
-            medId: med['id'],
-            syncStatus: 'Synced',
-          );
-          print('Sync status updated to Synced for medication: ${med['id']}');
-        } catch (e) {
-          print("Error sending data for medication ${med['name']}: $e");
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  "Failed to send ${med['name']} to Arduino: $e",
-                  style: TextStyle(color: AppColors.white),
-                ),
+      if (result['success']) {
+        print("addMedication: Setting needsSync and syncing.");
+        BluetoothManager.needsSync = true; // تعيين الـ flag
+        await LocalNotificationService.scheduleMedicineNotifications();
+        await syncMedications();
+      } else {
+        if (mounted) {
+          print("addMedication: Showing error SnackBar: ${result['message']}");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                result['message'],
+                style: TextStyle(color: AppColors.white),
               ),
-            );
-          }
-          // If sending fails, ensure syncStatus remains "Pending"
-          await SmartMedicalDb.updateMedicationSyncStatus(
-            medId: med['id'],
-            syncStatus: 'Pending',
+            ),
           );
-          print('Sync status remains Pending for medication: ${med['id']}');
         }
-        await Future.delayed(const Duration(seconds: 2));
-      }
-
-      // Notify user if Bluetooth is not connected
-      if (!_bluetoothManager.isConnected && mounted) {
-        print('Bluetooth not connected. Showing snackbar.');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Bluetooth not connected. Data will be sent later."),
-          ),
-        );
-      }
-
-      // Show Data Synced Notification only if at least one medication was synced
-      if (medications.isNotEmpty && _bluetoothManager.isConnected) {
-        print('Showing data synced notification.');
-        await LocalNotificationService.showDataSyncedNotification();
       }
     } catch (e) {
-      print("Error in sendAllMedicationsToArduino: $e");
       if (mounted) {
+        print("addMedication: Exception caught: $e");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "Error syncing medications: $e",
+              "Error adding medication: $e",
+              style: TextStyle(color: AppColors.white),
+            ),
+          ),
+        );
+      }
+    } finally {
+      print("addMedication: Hiding loading overlay.");
+      if (Navigator.of(context).canPop()) {
+        _hideLoadingOverlay(context);
+      }
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        Navigator.pop(context); // التنقل للصفحة السابقة في كل الحالات
+      }
+    }
+  }
+
+  Future<void> syncMedications() async {
+    try {
+      // استدعاء الدالة من BluetoothManager
+      Map<String, dynamic> result = await _bluetoothManager.sendAllMedicationsToArduino();
+
+      // التعامل مع النتيجة
+      if (!result["success"] && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result["message"],
               style: TextStyle(color: AppColors.white),
             ),
           ),
         );
       }
 
-      // Ensure syncStatus is updated to "Pending" for all medications if there's a general error
-      QuerySnapshot medicationsSnapshot = await FirebaseFirestore.instance
-          .collection('medications')
-          .where('patientId', isEqualTo: user!.uid)
-          .get();
-      for (var doc in medicationsSnapshot.docs) {
-        print('Updating syncStatus after error for medication: ${doc.id}');
-        await SmartMedicalDb.updateMedicationSyncStatus(
-          medId: doc.id,
-          syncStatus: 'Pending',
+      // إظهار إشعار إذا تم مزامنة الأدوية بنجاح
+      if (result["medicationsSynced"] && mounted) {
+        await LocalNotificationService.showDataSyncedNotification();
+      }
+    } catch (e) {
+      print("Error in syncMedications: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Unexpected error syncing medications: $e",
+              style: TextStyle(color: AppColors.white),
+            ),
+          ),
         );
       }
     }
   }
+
   @override
   void dispose() {
     _medNameController.dispose();

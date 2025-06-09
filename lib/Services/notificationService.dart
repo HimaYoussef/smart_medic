@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -263,6 +262,7 @@ class LocalNotificationService {
       }
     }
   }
+
   static Future<void> handleMissedDose(String payload) async {
     List<String> parts = payload.split('|');
     if (parts.length < 2) return;

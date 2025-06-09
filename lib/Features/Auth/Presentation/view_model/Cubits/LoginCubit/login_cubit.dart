@@ -34,8 +34,15 @@ class LoginCubit extends Cubit<LoginState> {
       }
 
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        emit(Failed(errorMessage: 'No user found with this email'));
+      print(e);
+      print(e.message);
+      print(e.credential);
+      print(e.code);
+      print(e.email);
+      print(e.tenantId);
+      print(e.phoneNumber);
+      if (e.code == 'invalid-credential') {
+        emit(Failed(errorMessage: 'something wrong'));
       } else if (e.code == 'wrong-password') {
         emit(Failed(errorMessage: 'Incorrect password'));
       }
