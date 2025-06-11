@@ -22,18 +22,37 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "Add_New_Medicine_AddTime": MessageLookupByLibrary.simpleMessage(
+      "إضافة وقت",
+    ),
+    "Add_New_Medicine_Add_AnotherTime": MessageLookupByLibrary.simpleMessage(
+      "إضافة وقت آخر",
+    ),
     "Add_New_Medicine_Add_Time": MessageLookupByLibrary.simpleMessage(
       "إضافة وقت",
+    ),
+    "Add_New_Medicine_Analysis_Result": MessageLookupByLibrary.simpleMessage(
+      "نتيجة التحليل",
+    ),
+    "Add_New_Medicine_Analyze_Name": MessageLookupByLibrary.simpleMessage(
+      "تحليل اسم الدواء",
+    ),
+    "Add_New_Medicine_Analyze_Options": MessageLookupByLibrary.simpleMessage(
+      "تحليل الدواء",
     ),
     "Add_New_Medicine_Bluetooth_not_connected_Data_will_be_sent_later":
         MessageLookupByLibrary.simpleMessage(
           "البلوتوث غير متصل. سيتم إرسال البيانات لاحقًا.",
         ),
+    "Add_New_Medicine_ChangeTime": MessageLookupByLibrary.simpleMessage(
+      "تغيير الوقت",
+    ),
     "Add_New_Medicine_Compartment_Number": MessageLookupByLibrary.simpleMessage(
       "رقم الحجرة",
     ),
     "Add_New_Medicine_Daily": MessageLookupByLibrary.simpleMessage("يوميًا"),
     "Add_New_Medicine_Dosage": MessageLookupByLibrary.simpleMessage("الجرعة"),
+    "Add_New_Medicine_Error": MessageLookupByLibrary.simpleMessage("خطأ"),
     "Add_New_Medicine_Every_X_Days": MessageLookupByLibrary.simpleMessage(
       " كل (عدد) ايام",
     ),
@@ -47,12 +66,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "Add_New_Medicine_Med_Name": MessageLookupByLibrary.simpleMessage(
       "اسم الدواء",
     ),
+    "Add_New_Medicine_OK": MessageLookupByLibrary.simpleMessage("موافق"),
+    "Add_New_Medicine_Pick_From_Gallery": MessageLookupByLibrary.simpleMessage(
+      "اختر من المعرض",
+    ),
     "Add_New_Medicine_Pills": MessageLookupByLibrary.simpleMessage("الحبوب"),
+    "Add_New_Medicine_Please_Enter_Medicine_Name":
+        MessageLookupByLibrary.simpleMessage("يرجى إدخال اسم الدواء"),
     "Add_New_Medicine_Please_select_a_schedule_type":
         MessageLookupByLibrary.simpleMessage("يرجى اختيار نوع الجدول"),
     "Add_New_Medicine_Please_select_a_time_for_every_X_days_schedule":
         MessageLookupByLibrary.simpleMessage(
           " يرجى تحديد وقت  لعدد الايام في الجدول",
+        ),
+    "Add_New_Medicine_Please_select_a_time_for_specific_days_schedule":
+        MessageLookupByLibrary.simpleMessage(
+          "يرجى اختيار وقت لجدول الأيام المحددة",
         ),
     "Add_New_Medicine_Please_select_all_times_for_daily_schedule":
         MessageLookupByLibrary.simpleMessage(
@@ -64,6 +93,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "Add_New_Medicine_Schedule_Type": MessageLookupByLibrary.simpleMessage(
       "نوع الجدول",
+    ),
+    "Add_New_Medicine_Select_Option": MessageLookupByLibrary.simpleMessage(
+      "اختر خيارًا",
     ),
     "Add_New_Medicine_Select_Specific_Days":
         MessageLookupByLibrary.simpleMessage("اختر أيام محددة"),
@@ -77,6 +109,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "أيام محددة",
     ),
     "Add_New_Medicine_Submit": MessageLookupByLibrary.simpleMessage("إرسال"),
+    "Add_New_Medicine_Take_Photo": MessageLookupByLibrary.simpleMessage(
+      "التقط صورة",
+    ),
     "Add_New_Medicine_labelText1": MessageLookupByLibrary.simpleMessage(
       "أدخل اسم الدواء",
     ),

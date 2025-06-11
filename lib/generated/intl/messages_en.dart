@@ -22,37 +22,66 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "Add_New_Medicine_AddTime": MessageLookupByLibrary.simpleMessage(
+      "Add Time",
+    ),
+    "Add_New_Medicine_Add_AnotherTime": MessageLookupByLibrary.simpleMessage(
+      "Add Another Time",
+    ),
     "Add_New_Medicine_Add_Time": MessageLookupByLibrary.simpleMessage(
       "Add Time",
+    ),
+    "Add_New_Medicine_Analysis_Result": MessageLookupByLibrary.simpleMessage(
+      "Analysis Result",
+    ),
+    "Add_New_Medicine_Analyze_Name": MessageLookupByLibrary.simpleMessage(
+      "Analyze Medicine Name",
+    ),
+    "Add_New_Medicine_Analyze_Options": MessageLookupByLibrary.simpleMessage(
+      "Analyze Medicine",
     ),
     "Add_New_Medicine_Bluetooth_not_connected_Data_will_be_sent_later":
         MessageLookupByLibrary.simpleMessage(
           "Bluetooth not connected. Data will be sent later.",
         ),
+    "Add_New_Medicine_ChangeTime": MessageLookupByLibrary.simpleMessage(
+      "Change Time",
+    ),
     "Add_New_Medicine_Compartment_Number": MessageLookupByLibrary.simpleMessage(
       "Compartment Number",
     ),
     "Add_New_Medicine_Daily": MessageLookupByLibrary.simpleMessage("Daily"),
     "Add_New_Medicine_Dosage": MessageLookupByLibrary.simpleMessage("Dosage"),
+    "Add_New_Medicine_Error": MessageLookupByLibrary.simpleMessage("Error"),
     "Add_New_Medicine_Every_X_Days": MessageLookupByLibrary.simpleMessage(
       "Every X Days",
     ),
     "Add_New_Medicine_Every_how_many_days":
-        MessageLookupByLibrary.simpleMessage("Every how many days"),
+        MessageLookupByLibrary.simpleMessage("Every how many days?"),
     "Add_New_Medicine_Head": MessageLookupByLibrary.simpleMessage(
       "Add New Medicine",
     ),
     "Add_New_Medicine_How_many_times_per_day":
         MessageLookupByLibrary.simpleMessage("How many times per day?"),
     "Add_New_Medicine_Med_Name": MessageLookupByLibrary.simpleMessage(
-      "Med Name",
+      "Medicine Name",
+    ),
+    "Add_New_Medicine_OK": MessageLookupByLibrary.simpleMessage("OK"),
+    "Add_New_Medicine_Pick_From_Gallery": MessageLookupByLibrary.simpleMessage(
+      "Pick from Gallery",
     ),
     "Add_New_Medicine_Pills": MessageLookupByLibrary.simpleMessage("Pills"),
+    "Add_New_Medicine_Please_Enter_Medicine_Name":
+        MessageLookupByLibrary.simpleMessage("Please enter a medicine name"),
     "Add_New_Medicine_Please_select_a_schedule_type":
         MessageLookupByLibrary.simpleMessage("Please select a schedule type"),
     "Add_New_Medicine_Please_select_a_time_for_every_X_days_schedule":
         MessageLookupByLibrary.simpleMessage(
           "Please select a time for every X days schedule",
+        ),
+    "Add_New_Medicine_Please_select_a_time_for_specific_days_schedule":
+        MessageLookupByLibrary.simpleMessage(
+          "Please select a time for specific days schedule",
         ),
     "Add_New_Medicine_Please_select_all_times_for_daily_schedule":
         MessageLookupByLibrary.simpleMessage(
@@ -65,47 +94,53 @@ class MessageLookup extends MessageLookupByLibrary {
     "Add_New_Medicine_Schedule_Type": MessageLookupByLibrary.simpleMessage(
       "Schedule Type",
     ),
+    "Add_New_Medicine_Select_Option": MessageLookupByLibrary.simpleMessage(
+      "Select an Option",
+    ),
     "Add_New_Medicine_Select_Specific_Days":
         MessageLookupByLibrary.simpleMessage("Select Specific Days"),
     "Add_New_Medicine_Select_Type": MessageLookupByLibrary.simpleMessage(
-      "Select Type",
+      "Select Schedule Type",
     ),
     "Add_New_Medicine_SnackBar": MessageLookupByLibrary.simpleMessage(
-      "Number of times must be between 1 and 4",
+      "Please enter a number between 1 and 4",
     ),
     "Add_New_Medicine_Specific_Days": MessageLookupByLibrary.simpleMessage(
       "Specific Days",
     ),
     "Add_New_Medicine_Submit": MessageLookupByLibrary.simpleMessage("Submit"),
+    "Add_New_Medicine_Take_Photo": MessageLookupByLibrary.simpleMessage(
+      "Take Photo",
+    ),
     "Add_New_Medicine_labelText1": MessageLookupByLibrary.simpleMessage(
-      "Enter the name of the Medicine",
+      "Enter medicine name",
     ),
     "Add_New_Medicine_labelText2": MessageLookupByLibrary.simpleMessage(
-      "Enter the number of pills added",
+      "Number of pills",
     ),
     "Add_New_Medicine_labelText3": MessageLookupByLibrary.simpleMessage(
-      "Enter the number of pills every time",
+      "Enter dosage",
     ),
     "Add_New_Medicine_labelText4": MessageLookupByLibrary.simpleMessage(
-      "Enter number of times per day",
+      "Enter number of times",
     ),
     "Add_New_Medicine_labelText5": MessageLookupByLibrary.simpleMessage(
       "Enter number of days",
     ),
     "Add_New_Medicine_validatorText1": MessageLookupByLibrary.simpleMessage(
-      "Please enter the name of the medicine",
+      "Please enter a medicine name",
     ),
     "Add_New_Medicine_validatorText2": MessageLookupByLibrary.simpleMessage(
-      "Please enter the number of pills",
+      "Please enter number of pills",
     ),
     "Add_New_Medicine_validatorText3": MessageLookupByLibrary.simpleMessage(
-      "Please enter the number of the pills",
+      "Please enter dosage",
     ),
     "Add_New_Medicine_validatorText4": MessageLookupByLibrary.simpleMessage(
-      "Please enter the number of the times",
+      "Please enter a number between 1 and 4",
     ),
     "Add_New_Medicine_validatorText5": MessageLookupByLibrary.simpleMessage(
-      "Please enter the number of the days",
+      "Please enter number of days",
     ),
     "Add_Supervisor_Add_Supervisor": MessageLookupByLibrary.simpleMessage(
       "Add Supervisor",

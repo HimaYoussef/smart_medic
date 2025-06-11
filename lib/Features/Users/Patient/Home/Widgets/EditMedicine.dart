@@ -360,8 +360,6 @@ class _EditMedicineState extends State<EditMedicine> {
                 : AppColors.black,
           ),
         ),
-        title: Text(S.of(context).EditMedicine_Edit_Medicine),
-        centerTitle: true,
         actions: [
           Image.asset(
             'assets/pills.png',

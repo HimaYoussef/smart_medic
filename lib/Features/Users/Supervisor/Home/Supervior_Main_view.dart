@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_medic/Services/firebaseServices.dart';
 import '../../../../Services/firebaseServices.dart';
 import 'Widgets/PatientDetails.dart';
 import 'Widgets/Patients_card.dart';
@@ -49,63 +50,94 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
                     return const Center(child: Text('No patients found'));
                   }
 
-                  final patients = snapshot.data!.docs;
+                  final supervisionDocs = snapshot.data!.docs;
 
                   return ListView.builder(
-                    itemCount: patients.length,
+                    itemCount: supervisionDocs.length,
                     itemBuilder: (context, index) {
-                      final patient = patients[index];
-                      final patientId = patient['patientId'];
-                      final name = patient['name'] ?? 'Unknown';
-                      final email = patient['email'] ?? 'No email';
-                      final type = patient['type'] ?? 'Unknown';
+                      final supervisionDoc = supervisionDocs[index];
+                      final patientId = supervisionDoc['patientId'];
 
-                      return StreamBuilder<QuerySnapshot>(
-                        stream: SmartMedicalDb.readNotifications(user!.uid),
-                        builder: (context, notificationSnapshot) {
-                          int notificationsCount = 0;
-                          if (notificationSnapshot.hasData) {
-                            notificationsCount = notificationSnapshot.data!.docs
-                                .where((doc) =>
-                            doc['status'] == 'sent' &&
-                                doc['patientId'] == patientId)
-                                .length;
+                      // Fetch patient details from users collection
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: usersCollection.doc(patientId).get(),
+                        builder: (context, patientSnapshot) {
+                          if (patientSnapshot.hasError) {
+                            return const Center(
+                                child: Text('Error loading patient details'));
+                          }
+                          if (patientSnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (!patientSnapshot.hasData ||
+                              !patientSnapshot.data!.exists) {
+                            return const Center(
+                                child: Text('Patient not found'));
                           }
 
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: PatientCard(
-                              name: name,
-                              email: email,
-                              type: type,
-                              notificationsCount: notificationsCount,
-                              onDelete: () async {
-                                final result = await SmartMedicalDb.deleteSupervision(
-                                  supervisorId: user!.uid,
-                                  patientId: patientId,
-                                );
-                                if (result['success']) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(result['message'])),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(result['message'])),
-                                  );
-                                }
-                              },
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PatientDetailsView(
+                          final patientData = patientSnapshot.data!.data()
+                              as Map<String, dynamic>;
+                          final name = patientData['name'] ?? 'Unknown';
+                          final email = patientData['email'] ?? 'No email';
+                          final type = patientData['type'] ?? 'Unknown';
+
+                          return StreamBuilder<QuerySnapshot>(
+                            stream: SmartMedicalDb.readNotifications(user!.uid),
+                            builder: (context, notificationSnapshot) {
+                              int notificationsCount = 0;
+                              if (notificationSnapshot.hasData) {
+                                notificationsCount = notificationSnapshot
+                                    .data!.docs
+                                    .where((doc) =>
+                                        doc['status'] == 'sent' &&
+                                        doc['patientId'] == patientId)
+                                    .length;
+                              }
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: PatientCard(
+                                  name: name,
+                                  email: email,
+                                  type: type,
+                                  notificationsCount: notificationsCount,
+                                  onDelete: () async {
+                                    final result =
+                                        await SmartMedicalDb.deleteSupervision(
+                                      supervisorId: user!.uid,
                                       patientId: patientId,
-                                      patientName: name,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+                                    );
+                                    if (result['success']) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(result['message'])),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(result['message'])),
+                                      );
+                                    }
+                                  },
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            PatientDetailsView(
+                                          patientId: patientId,
+                                          patientName: name,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
                           );
                         },
                       );
@@ -120,4 +152,3 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
     );
   }
 }
-

@@ -420,6 +420,36 @@ class S {
     );
   }
 
+  /// `Pills`
+  String get Add_New_Medicine_Pills {
+    return Intl.message(
+      'Pills',
+      name: 'Add_New_Medicine_Pills',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Time`
+  String get Add_New_Medicine_Add_Time {
+    return Intl.message(
+      'Add Time',
+      name: 'Add_New_Medicine_Add_Time',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bluetooth not connected. Data will be sent later.`
+  String get Add_New_Medicine_Bluetooth_not_connected_Data_will_be_sent_later {
+    return Intl.message(
+      'Bluetooth not connected. Data will be sent later.',
+      name: 'Add_New_Medicine_Bluetooth_not_connected_Data_will_be_sent_later',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add New Medicine`
   String get Add_New_Medicine_Head {
     return Intl.message(
@@ -440,60 +470,50 @@ class S {
     );
   }
 
-  /// `Med Name`
+  /// `Medicine Name`
   String get Add_New_Medicine_Med_Name {
     return Intl.message(
-      'Med Name',
+      'Medicine Name',
       name: 'Add_New_Medicine_Med_Name',
       desc: '',
       args: [],
     );
   }
 
-  /// `Enter the name of the Medicine`
+  /// `Enter medicine name`
   String get Add_New_Medicine_labelText1 {
     return Intl.message(
-      'Enter the name of the Medicine',
+      'Enter medicine name',
       name: 'Add_New_Medicine_labelText1',
       desc: '',
       args: [],
     );
   }
 
-  /// `Please enter the name of the medicine`
+  /// `Please enter a medicine name`
   String get Add_New_Medicine_validatorText1 {
     return Intl.message(
-      'Please enter the name of the medicine',
+      'Please enter a medicine name',
       name: 'Add_New_Medicine_validatorText1',
       desc: '',
       args: [],
     );
   }
 
-  /// `Pills`
-  String get Add_New_Medicine_Pills {
-    return Intl.message(
-      'Pills',
-      name: 'Add_New_Medicine_Pills',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter the number of pills added`
+  /// `Number of pills`
   String get Add_New_Medicine_labelText2 {
     return Intl.message(
-      'Enter the number of pills added',
+      'Number of pills',
       name: 'Add_New_Medicine_labelText2',
       desc: '',
       args: [],
     );
   }
 
-  /// `Please enter the number of pills`
+  /// `Please enter number of pills`
   String get Add_New_Medicine_validatorText2 {
     return Intl.message(
-      'Please enter the number of pills',
+      'Please enter number of pills',
       name: 'Add_New_Medicine_validatorText2',
       desc: '',
       args: [],
@@ -510,20 +530,20 @@ class S {
     );
   }
 
-  /// `Enter the number of pills every time`
+  /// `Enter dosage`
   String get Add_New_Medicine_labelText3 {
     return Intl.message(
-      'Enter the number of pills every time',
+      'Enter dosage',
       name: 'Add_New_Medicine_labelText3',
       desc: '',
       args: [],
     );
   }
 
-  /// `Please enter the number of the pills`
+  /// `Please enter dosage`
   String get Add_New_Medicine_validatorText3 {
     return Intl.message(
-      'Please enter the number of the pills',
+      'Please enter dosage',
       name: 'Add_New_Medicine_validatorText3',
       desc: '',
       args: [],
@@ -540,6 +560,46 @@ class S {
     );
   }
 
+  /// `Select Schedule Type`
+  String get Add_New_Medicine_Select_Type {
+    return Intl.message(
+      'Select Schedule Type',
+      name: 'Add_New_Medicine_Select_Type',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Daily`
+  String get Add_New_Medicine_Daily {
+    return Intl.message(
+      'Daily',
+      name: 'Add_New_Medicine_Daily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Every X Days`
+  String get Add_New_Medicine_Every_X_Days {
+    return Intl.message(
+      'Every X Days',
+      name: 'Add_New_Medicine_Every_X_Days',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Specific Days`
+  String get Add_New_Medicine_Specific_Days {
+    return Intl.message(
+      'Specific Days',
+      name: 'Add_New_Medicine_Specific_Days',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `How many times per day?`
   String get Add_New_Medicine_How_many_times_per_day {
     return Intl.message(
@@ -550,50 +610,40 @@ class S {
     );
   }
 
-  /// `Enter number of times per day`
+  /// `Enter number of times`
   String get Add_New_Medicine_labelText4 {
     return Intl.message(
-      'Enter number of times per day',
+      'Enter number of times',
       name: 'Add_New_Medicine_labelText4',
       desc: '',
       args: [],
     );
   }
 
-  /// `Please enter the number of the times`
+  /// `Please enter a number between 1 and 4`
   String get Add_New_Medicine_validatorText4 {
     return Intl.message(
-      'Please enter the number of the times',
+      'Please enter a number between 1 and 4',
       name: 'Add_New_Medicine_validatorText4',
       desc: '',
       args: [],
     );
   }
 
-  /// `Number of times must be between 1 and 4`
+  /// `Please enter a number between 1 and 4`
   String get Add_New_Medicine_SnackBar {
     return Intl.message(
-      'Number of times must be between 1 and 4',
+      'Please enter a number between 1 and 4',
       name: 'Add_New_Medicine_SnackBar',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add Time`
-  String get Add_New_Medicine_Add_Time {
-    return Intl.message(
-      'Add Time',
-      name: 'Add_New_Medicine_Add_Time',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Every how many days`
+  /// `Every how many days?`
   String get Add_New_Medicine_Every_how_many_days {
     return Intl.message(
-      'Every how many days',
+      'Every how many days?',
       name: 'Add_New_Medicine_Every_how_many_days',
       desc: '',
       args: [],
@@ -610,10 +660,10 @@ class S {
     );
   }
 
-  /// `Please enter the number of the days`
+  /// `Please enter number of days`
   String get Add_New_Medicine_validatorText5 {
     return Intl.message(
-      'Please enter the number of the days',
+      'Please enter number of days',
       name: 'Add_New_Medicine_validatorText5',
       desc: '',
       args: [],
@@ -682,51 +732,126 @@ class S {
     );
   }
 
-  /// `Select Type`
-  String get Add_New_Medicine_Select_Type {
+  /// `Please select a time for specific days schedule`
+  String get Add_New_Medicine_Please_select_a_time_for_specific_days_schedule {
     return Intl.message(
-      'Select Type',
-      name: 'Add_New_Medicine_Select_Type',
+      'Please select a time for specific days schedule',
+      name: 'Add_New_Medicine_Please_select_a_time_for_specific_days_schedule',
       desc: '',
       args: [],
     );
   }
 
-  /// `Daily`
-  String get Add_New_Medicine_Daily {
+  /// `Select an Option`
+  String get Add_New_Medicine_Select_Option {
     return Intl.message(
-      'Daily',
-      name: 'Add_New_Medicine_Daily',
+      'Select an Option',
+      name: 'Add_New_Medicine_Select_Option',
       desc: '',
       args: [],
     );
   }
 
-  /// `Every X Days`
-  String get Add_New_Medicine_Every_X_Days {
+  /// `Take Photo`
+  String get Add_New_Medicine_Take_Photo {
     return Intl.message(
-      'Every X Days',
-      name: 'Add_New_Medicine_Every_X_Days',
+      'Take Photo',
+      name: 'Add_New_Medicine_Take_Photo',
       desc: '',
       args: [],
     );
   }
 
-  /// `Specific Days`
-  String get Add_New_Medicine_Specific_Days {
+  /// `Pick from Gallery`
+  String get Add_New_Medicine_Pick_From_Gallery {
     return Intl.message(
-      'Specific Days',
-      name: 'Add_New_Medicine_Specific_Days',
+      'Pick from Gallery',
+      name: 'Add_New_Medicine_Pick_From_Gallery',
       desc: '',
       args: [],
     );
   }
 
-  /// `Bluetooth not connected. Data will be sent later.`
-  String get Add_New_Medicine_Bluetooth_not_connected_Data_will_be_sent_later {
+  /// `Analyze Medicine Name`
+  String get Add_New_Medicine_Analyze_Name {
     return Intl.message(
-      'Bluetooth not connected. Data will be sent later.',
-      name: 'Add_New_Medicine_Bluetooth_not_connected_Data_will_be_sent_later',
+      'Analyze Medicine Name',
+      name: 'Add_New_Medicine_Analyze_Name',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter a medicine name`
+  String get Add_New_Medicine_Please_Enter_Medicine_Name {
+    return Intl.message(
+      'Please enter a medicine name',
+      name: 'Add_New_Medicine_Please_Enter_Medicine_Name',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Analyze Medicine`
+  String get Add_New_Medicine_Analyze_Options {
+    return Intl.message(
+      'Analyze Medicine',
+      name: 'Add_New_Medicine_Analyze_Options',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Time`
+  String get Add_New_Medicine_AddTime {
+    return Intl.message(
+      'Add Time',
+      name: 'Add_New_Medicine_AddTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change Time`
+  String get Add_New_Medicine_ChangeTime {
+    return Intl.message(
+      'Change Time',
+      name: 'Add_New_Medicine_ChangeTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Another Time`
+  String get Add_New_Medicine_Add_AnotherTime {
+    return Intl.message(
+      'Add Another Time',
+      name: 'Add_New_Medicine_Add_AnotherTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Analysis Result`
+  String get Add_New_Medicine_Analysis_Result {
+    return Intl.message(
+      'Analysis Result',
+      name: 'Add_New_Medicine_Analysis_Result',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `OK`
+  String get Add_New_Medicine_OK {
+    return Intl.message('OK', name: 'Add_New_Medicine_OK', desc: '', args: []);
+  }
+
+  /// `Error`
+  String get Add_New_Medicine_Error {
+    return Intl.message(
+      'Error',
+      name: 'Add_New_Medicine_Error',
       desc: '',
       args: [],
     );

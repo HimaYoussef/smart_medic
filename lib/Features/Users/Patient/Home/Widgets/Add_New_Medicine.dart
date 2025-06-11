@@ -37,12 +37,14 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   List<int> _bitmaskDays = [0, 0, 0, 0, 0, 0, 0];
   String _commonTimeForSpecificDays = "";
   final BluetoothManager _bluetoothManager = BluetoothManager();
-
-  // State variables for image and OCR handling
-  bool _hasImage = false;
-  File? _imageFile;
+  File? _image;
   bool _isLoading = false;
-  String _medicineName = '';
+  final ImagePicker _picker = ImagePicker();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  static const String _apiKey = 'AIzaSyB29LATB5vUReQSnTfDcPR0HyeQX1rb6n0';
+  static const String _apiUrl =
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
   @override
   void initState() {
@@ -62,55 +64,459 @@ class _Add_new_Medicine extends State<addNewMedicine> {
     return num != null && num > 0 && num <= 4;
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final XFile? picked = await picker.pickImage(source: ImageSource.camera);
-    if (picked != null) {
+  void _showImageSourceOptions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(S.of(context).Add_New_Medicine_Select_Option),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera),
+                title: Text(S.of(context).Add_New_Medicine_Take_Photo),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: Text(S.of(context).Add_New_Medicine_Pick_From_Gallery),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.text_fields),
+                title: Text(S.of(context).Add_New_Medicine_Analyze_Name),
+                onTap: () {
+                  Navigator.pop(context);
+                  _analyzeMedicineName();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
       setState(() {
-        _imageFile = File(picked.path);
-        _hasImage = true;
-        _medicineName = '';
-        _medNameController.clear();
+        _image = File(pickedFile.path);
+        _isLoading = true;
+        _medNameController.clear(); // Clear previous medicine name
+      });
+
+      await _extractAndAnalyzeMedicine(File(pickedFile.path));
+    }
+  }
+
+  Future<void> _analyzeMedicineName() async {
+    if (_medNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            S.of(context).Add_New_Medicine_Please_Enter_Medicine_Name,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Fetch existing meds
+      List<String> existingMeds = [];
+      final user = _auth.currentUser;
+      if (user != null) {
+        final medicationsSnapshot = await FirebaseFirestore.instance
+            .collection('medications')
+            .where('patientId', isEqualTo: user.uid)
+            .get();
+
+        existingMeds = medicationsSnapshot.docs
+            .map((doc) => doc.data()['name'] as String)
+            .toList();
+      }
+
+      // Ask Gemini about side effects and interactions
+      final systemInstruction = '''
+You are given the name of a new medicine and a list of previously used medicines. Your task is to perform the following:
+
+1. Provide up to 3 common side effects of the new medicine.
+2. Evaluate potential drug interactions between the new medicine and each medicine in the provided list.
+3. Generate a concise JSON output with the following structure:
+{
+  "name": "<new medicine name>",
+  "summary": "<sentence listing side effects and interaction warnings>"
+}
+
+Constraints:
+- Response must be a single JSON object with no extra text.
+- Language should be simple and patient-friendly.
+- If there are no known interactions, explicitly state so.
+''';
+
+      final existingMedsJson =
+          jsonEncode(existingMeds.map((name) => {"name": name}).toList());
+
+      final requestBodyAnalyze = {
+        'contents': [
+          {
+            'role': 'user',
+            'parts': [
+              {
+                'text':
+                    'New Medicine: ${_medNameController.text}\nExisting Medicines:\n$existingMedsJson',
+              },
+            ],
+          },
+        ],
+        'systemInstruction': {
+          'parts': [
+            {
+              'text': systemInstruction,
+            },
+          ],
+        },
+        'generationConfig': {
+          'temperature': 0,
+          'responseMimeType': 'application/json',
+        },
+      };
+
+      final analyzeResponse = await http.post(
+        Uri.parse('$_apiUrl?key=$_apiKey'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBodyAnalyze),
+      );
+
+      if (analyzeResponse.statusCode == 200) {
+        final data = jsonDecode(analyzeResponse.body);
+        final output =
+            jsonDecode(data['candidates'][0]['content']['parts'][0]['text']);
+
+        // Show result in AlertDialog with RichText
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(S.of(context).Add_New_Medicine_Analysis_Result),
+                content: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 18.0, // Larger font size
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'Medicine: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: '${output['name']}\n'),
+                      TextSpan(
+                        text: 'Summary: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: output['summary']),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                    },
+                    child: Text(S.of(context).Add_New_Medicine_OK),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } else {
+        final result =
+            'Error analyzing medicine: ${analyzeResponse.reasonPhrase}';
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(S.of(context).Add_New_Medicine_Error),
+                content: Text(
+                  result,
+                  style: const TextStyle(fontSize: 10.0), // Larger font size
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                    },
+                    child: Text(S.of(context).Add_New_Medicine_OK),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      }
+    } catch (e) {
+      final result = 'Error: $e';
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(S.of(context).Add_New_Medicine_Error),
+              content: Text(
+                result,
+                style: const TextStyle(fontSize: 18.0), // Larger font size
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close the dialog
+                  },
+                  child: Text(S.of(context).Add_New_Medicine_OK),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
 
-  Future<void> _uploadImage() async {
-    if (_imageFile == null) return;
-
-    setState(() => _isLoading = true);
-
+  Future<void> _extractAndAnalyzeMedicine(File imageFile) async {
     try {
-      final uri = Uri.parse('https://36f2-102-47-121-220.ngrok-free.app/ocr');
-      final req = http.MultipartRequest('POST', uri)
-        ..files
-            .add(await http.MultipartFile.fromPath('image', _imageFile!.path));
+      // Step 1: Extract medicine name from image
+      final bytes = await imageFile.readAsBytes();
+      final base64Image = base64Encode(bytes);
 
-      final res = await req.send();
+      final requestBodyExtract = {
+        'contents': [
+          {
+            'role': 'user',
+            'parts': [
+              {
+                'inlineData': {
+                  'mimeType': 'image/png',
+                  'data': base64Image,
+                },
+              },
+              {
+                'text':
+                    'What is the name of the medicine shown on this label? Only respond with the medicine name.',
+              },
+            ],
+          },
+        ],
+        'generationConfig': {'temperature': 0},
+      };
 
-      if (res.statusCode == 200) {
-        final body = await res.stream.bytesToString();
-        final data = json.decode(body) as Map<String, dynamic>;
-        setState(() {
-          _medicineName = data['medicine_name'] ?? 'Unknown';
-          _medNameController.text = _medicineName;
-          _hasImage = false;
-          _imageFile = null;
-        });
+      final response = await http.post(
+        Uri.parse('$_apiUrl?key=$_apiKey'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBodyExtract),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to extract medicine name: ${response.reasonPhrase}');
+      }
+
+      final data = jsonDecode(response.body);
+      String medicineName =
+          data['candidates'][0]['content']['parts'][0]['text'].trim();
+
+      setState(() {
+        _medNameController.text = medicineName; // Always update medicine name
+      });
+
+      // Step 2: Fetch existing meds
+      List<String> existingMeds = [];
+      final user = _auth.currentUser;
+      if (user != null) {
+        final medicationsSnapshot = await FirebaseFirestore.instance
+            .collection('medications')
+            .where('patientId', isEqualTo: user.uid)
+            .get();
+
+        existingMeds = medicationsSnapshot.docs
+            .map((doc) => doc.data()['name'] as String)
+            .toList();
+      }
+
+      // Step 3: Ask Gemini about side effects and interactions
+      final systemInstruction = '''
+You are given the name of a new medicine and a list of previously used medicines. Your task is to perform the following:
+
+1. Provide up to 3 common side effects of the new medicine.
+2. Evaluate potential drug interactions between the new medicine and each medicine in the provided list.
+3. Generate a concise JSON output with the following structure:
+{
+  "name": "<new medicine name>",
+  "summary": "<sentence listing side effects and interaction warnings>"
+}
+
+Constraints:
+- Response must be a single JSON object with no extra text.
+- Language should be simple and patient-friendly.
+- If there are no known interactions, explicitly state so.
+''';
+
+      final existingMedsJson =
+          jsonEncode(existingMeds.map((name) => {"name": name}).toList());
+
+      final requestBodyAnalyze = {
+        'contents': [
+          {
+            'role': 'user',
+            'parts': [
+              {
+                'text':
+                    'New Medicine: ${_medNameController.text}\nExisting Medicines:\n$existingMedsJson',
+              },
+            ],
+          },
+        ],
+        'systemInstruction': {
+          'parts': [
+            {
+              'text': systemInstruction,
+            },
+          ],
+        },
+        'generationConfig': {
+          'temperature': 0,
+          'responseMimeType': 'application/json',
+        },
+      };
+
+      final analyzeResponse = await http.post(
+        Uri.parse('$_apiUrl?key=$_apiKey'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBodyAnalyze),
+      );
+
+      if (analyzeResponse.statusCode == 200) {
+        final data = jsonDecode(analyzeResponse.body);
+        final output =
+            jsonDecode(data['candidates'][0]['content']['parts'][0]['text']);
+
+        // Show result in AlertDialog with RichText
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(S.of(context).Add_New_Medicine_Analysis_Result),
+                content: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 15.0, // Larger font size
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'Medicine: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: '${output['name']}\n'),
+                      TextSpan(
+                        text: 'Summary: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: output['summary']),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                    },
+                    child: Text(S.of(context).Add_New_Medicine_OK),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       } else {
-        debugPrint('Upload failed: ${res.statusCode}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to analyze photo')),
-        );
+        final result =
+            'Error analyzing medicine: ${analyzeResponse.reasonPhrase}';
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(S.of(context).Add_New_Medicine_Error),
+                content: Text(
+                  result,
+                  style: const TextStyle(fontSize: 12.0), // Larger font size
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                    },
+                    child: Text(S.of(context).Add_New_Medicine_OK),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       }
     } catch (e) {
-      debugPrint('Error uploading image: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error analyzing photo')),
-      );
+      final result = 'Error: $e';
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(S.of(context).Add_New_Medicine_Error),
+              content: Text(
+                result,
+                style: const TextStyle(fontSize: 12.0), // Larger font size
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close the dialog
+                  },
+                  child: Text(S.of(context).Add_New_Medicine_OK),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    setState(() => _isLoading = false);
   }
 
   @override
@@ -195,26 +601,22 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                         const SizedBox(width: 10),
                         FloatingActionButton(
                           backgroundColor: AppColors.mainColor,
-                          onPressed: _isLoading
-                              ? null
-                              : () async {
-                                  if (_hasImage) {
-                                    await _uploadImage();
-                                  } else {
-                                    await _pickImage();
-                                  }
-                                },
-                          tooltip: _hasImage ? 'Analyze Photo' : 'Take Photo',
-                          child: Icon(
-                            _hasImage ? Icons.analytics : Icons.camera_alt,
-                            color: AppColors.app_parColor,
+                          onPressed:
+                              _isLoading ? null : _showImageSourceOptions,
+                          tooltip:
+                              S.of(context).Add_New_Medicine_Analyze_Options,
+                          child: const Icon(
+                            Icons.add_a_photo,
+                            color: Colors.white,
                           ),
                         ),
                       ],
                     ),
                     if (_isLoading)
-                      const SizedBox(
-                          height: 10, child: CircularProgressIndicator()),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 10),
+                        child: CircularProgressIndicator(),
+                      ),
                     const SizedBox(height: 25),
                     const CustomText(text: 'Pills', fonSize: 15),
                     const SizedBox(height: 10),
@@ -296,8 +698,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           int.tryParse(_numTimesController.text) != null &&
                           int.parse(_numTimesController.text) > 0 &&
                           int.parse(_numTimesController.text) <= 4) ...[
-                        Builder(
-                          builder: (context) {
+                        Builder(builder: (context) {
                           int numTimes = int.parse(_numTimesController.text);
                           if (_selectedTimes.length != numTimes) {
                             _selectedTimes =
@@ -315,7 +716,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
-                                 children: List.generate(numTimes, (i) {
+                                children: List.generate(numTimes, (i) {
                                   return _selectedTimes[i] != null
                                       ? Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -504,31 +905,6 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                               ),
                               const SizedBox(width: 8),
                             ],
-                            // ActionChip(
-                            //   label: Text(
-                            //     _commonTimeForSpecificDays.isEmpty
-                            //         ? 'Add Time'
-                            //         : 'Change Time',
-                            //     style: TextStyle(color: AppColors.white),
-                            //   ),
-                            //   onPressed: () async {
-                            //     TimeOfDay? time = await showTimePicker(
-                            //       context: context,
-                            //       initialTime: TimeOfDay.now(),
-                            //     );
-                            //     if (time != null) {
-                            //       setState(() {
-                            //         _commonTimeForSpecificDays =
-                            //             time.format(context);
-                            //         _times = [time.format(context)];
-                            //       });
-                            //     }
-                            //   },
-                            //   backgroundColor: Theme.of(context).brightness ==
-                            //           Brightness.dark
-                            //       ? AppColors.mainColorDark
-                            //       : AppColors.mainColor,
-                            // ),
                             ActionChip(
                               label: Text(
                                 _commonTimeForSpecificDays.isEmpty
@@ -618,13 +994,15 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Please select a time for every X days schedule',
+                                S
+                                    .of(context)
+                                    .Add_New_Medicine_Please_select_a_time_for_specific_days_schedule,
                                 style: TextStyle(color: AppColors.white),
                               ),
                             ),
                           );
                         } else if (_formKey.currentState!.validate()) {
-                          addMedication();
+                          await addMedication();
                           if (mounted) {
                             Navigator.pop(context);
                           }

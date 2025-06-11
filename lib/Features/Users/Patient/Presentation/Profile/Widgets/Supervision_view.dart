@@ -17,9 +17,9 @@ class SupervisorsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title:  Text(
-         S.of(context).Supervision_view_Head,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        title: Text(
+          S.of(context).Supervision_view_Head,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         elevation: 0,
@@ -40,23 +40,64 @@ class SupervisorsScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return  Center(child: Text( S.of(context).Supervision_view_Error_loading_supervisors));
+              return Center(
+                  child: Text(S
+                      .of(context)
+                      .Supervision_view_Error_loading_supervisors));
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return  Center(child: Text(S.of(context).Supervision_view_No_supervisors_found));
+              return Center(
+                  child: Text(
+                      S.of(context).Supervision_view_No_supervisors_found));
             }
 
-            return ListView(
-              children: snapshot.data!.docs.map((doc) {
-                var supervisor = doc.data() as Map<String, dynamic>;
-                String supervisorId = supervisor['supervisorId'] ?? doc.id;
-                return Column(
-                  children: [
-                    GestureDetector(
+            final docs = snapshot.data!.docs;
+
+            return ListView.builder(
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                var doc = docs[index];
+                var supervision = doc.data() as Map<String, dynamic>;
+                String supervisorId = supervision['supervisorId'];
+
+                return FutureBuilder<DocumentSnapshot>(
+                  future: usersCollection.doc(supervisorId).get(),
+                  builder: (context, supervisorSnapshot) {
+                    if (supervisorSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const SizedBox(
+                        height: 100,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (supervisorSnapshot.hasError) {
+                      return const SizedBox(
+                        height: 100,
+                        child: Center(
+                            child: Text('Error loading supervisor details')),
+                      );
+                    }
+                    if (!supervisorSnapshot.hasData ||
+                        !supervisorSnapshot.data!.exists) {
+                      return const SizedBox(
+                        height: 100,
+                        child: Center(child: Text('Supervisor not found')),
+                      );
+                    }
+
+                    var supervisorData =
+                        supervisorSnapshot.data!.data() as Map<String, dynamic>;
+                    String name = supervisorData['name'] ?? 'Unknown';
+                    String email = supervisorData['email'] ?? 'Unknown';
+                    String type = supervision['type'] ??
+                        'Unknown'; // Fetch type from supervision
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
                       child: SupervisorCard(
-                        name: supervisor['name'] ?? 'Unknown',
-                        email: supervisor['email'] ?? 'Unknown',
-                        type: supervisor['type'] ?? 'Unknown',
+                        name: name,
+                        email: email,
+                        type: type,
                         onDelete: () async {
                           var result = await SmartMedicalDb.deleteSupervision(
                             supervisorId: supervisorId,
@@ -72,11 +113,10 @@ class SupervisorsScreen extends StatelessWidget {
                           );
                         },
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                    );
+                  },
                 );
-              }).toList(),
+              },
             );
           },
         ),

@@ -76,6 +76,21 @@
     "Add_New_Medicine_Every_X_Days": " كل (عدد) ايام",
     "Add_New_Medicine_Specific_Days": "أيام محددة",
     "Add_New_Medicine_Bluetooth_not_connected_Data_will_be_sent_later": "البلوتوث غير متصل. سيتم إرسال البيانات لاحقًا.",
+    "Add_New_Medicine_Please_select_a_time_for_specific_days_schedule": "يرجى اختيار وقت لجدول الأيام المحددة",
+    "Add_New_Medicine_Select_Option": "اختر خيارًا",
+    "Add_New_Medicine_Take_Photo": "التقط صورة",
+    "Add_New_Medicine_Pick_From_Gallery": "اختر من المعرض",
+    "Add_New_Medicine_Analyze_Name": "تحليل اسم الدواء",
+    "Add_New_Medicine_Please_Enter_Medicine_Name": "يرجى إدخال اسم الدواء",
+    "Add_New_Medicine_Analyze_Options": "تحليل الدواء",
+    "Add_New_Medicine_AddTime": "إضافة وقت",
+    "Add_New_Medicine_ChangeTime": "تغيير الوقت",
+    "Add_New_Medicine_Add_AnotherTime": "إضافة وقت آخر",
+    "Add_New_Medicine_Analysis_Result": "نتيجة التحليل",
+    "Add_New_Medicine_OK": "موافق",
+    "Add_New_Medicine_Error": "خطأ",
+
+
 
     "EditMedicine_Please_select_a_schedule_type": "يرجى اختيار نوع الجدول",
     "EditMedicine_Please_select_all_times_for_daily_schedule": "يرجى تحديد جميع الأوقات للجدول اليومي",
