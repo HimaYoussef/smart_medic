@@ -6,7 +6,7 @@ import 'package:smart_medic/core/widgets/Custom_button.dart';
 import 'package:smart_medic/core/widgets/BuildText.dart';
 import 'package:smart_medic/core/widgets/build_text_field.dart';
 import '../../../../../Services/firebaseServices.dart';
-import '../../../../../Services/notificationService.dart'; // Import LocalNotificationService
+import '../../../../../Services/notificationService.dart';
 
 class EditMedicine extends StatefulWidget {
   final String medicineId;

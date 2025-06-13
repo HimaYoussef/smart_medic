@@ -36,11 +36,6 @@ class LoginCubit extends Cubit<LoginState> {
     } on FirebaseAuthException catch (e) {
       print(e);
       print(e.message);
-      print(e.credential);
-      print(e.code);
-      print(e.email);
-      print(e.tenantId);
-      print(e.phoneNumber);
       if (e.code == 'invalid-credential') {
         emit(Failed(errorMessage: 'something wrong'));
       } else if (e.code == 'wrong-password') {

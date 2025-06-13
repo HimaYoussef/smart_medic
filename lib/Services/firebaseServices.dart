@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-final FirebaseStorage _storage = FirebaseStorage.instance;
 final CollectionReference usersCollection = _firestore.collection("users");
 final CollectionReference smartMedicalBoxCollection = _firestore.collection("smartMedicalBox");
 final CollectionReference medicationsCollection = _firestore.collection("medications");
@@ -109,6 +109,7 @@ class SmartMedicalDb {
       String supervisorId = supervisorDoc.id;
       String supervisorName = supervisorDoc['name'] ?? 'Unknown';
 
+      // التحقق من وجود علاقة مسبقة
       QuerySnapshot existingSupervisor = await supervisionCollection
           .where('patientId', isEqualTo: patientId)
           .where('supervisorId', isEqualTo: supervisorId)
@@ -122,7 +123,8 @@ class SmartMedicalDb {
         };
       }
 
-      DocumentReference supervisorRef = supervisionCollection.doc(supervisorId);
+      // إنشاء document جديد بـ ID فريد
+      DocumentReference supervisorRef = supervisionCollection.doc();
       await supervisorRef.set({
         'supervisorId': supervisorId,
         'name': supervisorName,
@@ -131,8 +133,9 @@ class SmartMedicalDb {
         'patientId': patientId,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      });
 
+      // إضافة السجل في subcollection تحت المريض
       await usersCollection
           .doc(patientId)
           .collection('supervisors')
@@ -268,10 +271,51 @@ class SmartMedicalDb {
   }
 
   // Read patients supervised by a specific supervisor
-  static Stream<QuerySnapshot> readPatientsForSupervisor(String supervisorId) {
-    return supervisionCollection
+  static Stream<List<Map<String, dynamic>>> readPatientsForSupervisor(String supervisorId) async* {
+    // جلب البيانات من supervision collection
+    await for (QuerySnapshot supervisionSnapshot in supervisionCollection
         .where('supervisorId', isEqualTo: supervisorId)
-        .snapshots();
+        .snapshots()) {
+      List<Map<String, dynamic>> patientsWithDetails = [];
+
+      // جلب بيانات كل مريض من users collection
+      List<Future<Map<String, dynamic>>> futures = supervisionSnapshot.docs.map((doc) async {
+        String patientId = doc['patientId'];
+        Map<String, dynamic> supervisionData = doc.data() as Map<String, dynamic>;
+        supervisionData['id'] = doc.id; // إضافة ID الـ document
+
+        try {
+          DocumentSnapshot patientDoc = await FirebaseFirestore.instance.collection('users').doc(patientId).get();
+          if (patientDoc.exists) {
+            Map<String, dynamic> patientData = patientDoc.data() as Map<String, dynamic>;
+            return {
+              ...supervisionData,
+              'patientEmail': patientData['email'] ?? 'No email',
+              'patientName': patientData['name'] ?? 'Unknown',
+            };
+          } else {
+            return {
+              ...supervisionData,
+              'patientEmail': 'No email',
+              'patientName': 'Unknown',
+            };
+          }
+        } catch (e) {
+          print('Error fetching patient details for $patientId: $e');
+          return {
+            ...supervisionData,
+            'patientEmail': 'No email',
+            'patientName': 'Unknown',
+          };
+        }
+      }).toList();
+
+      // الانتظار لجلب كل البيانات
+      List<Map<String, dynamic>> results = await Future.wait(futures);
+      patientsWithDetails.addAll(results);
+
+      yield patientsWithDetails; // إرجاع القائمة المحدثة
+    }
   }
 
   // Delete a supervisor
@@ -522,13 +566,94 @@ class SmartMedicalDb {
         'heartRate': heartRate ?? 0,
         'dayOfYear': dayOfYear,
         'minutesMidnight': minutesMidnight,
-        'timestamp': FieldValue.serverTimestamp(),
+        'timestamp': Timestamp.now(),
       };
 
       await documentReferencer.set(data);
+
+      if (medicationId != null && status == "taken") {
+        DocumentSnapshot medicationDoc = await medicationsCollection.doc(medicationId).get();
+
+        if (!medicationDoc.exists) {
+          return {
+            'success': false,
+            'message': 'Medication not found for ID: $medicationId',
+          };
+        }
+
+        var medicationData = medicationDoc.data() as Map<String, dynamic>;
+        int pillsLeft = medicationData['pillsLeft'] ?? 0;
+        int dosage = medicationData['dosage'] ?? 0;
+
+        if (dosage <= 0) {
+          return {
+            'success': false,
+            'message': 'Invalid dosage for medication ID: $medicationId',
+          };
+        }
+
+        int newPillsLeft = pillsLeft - dosage;
+        if (newPillsLeft < 0) {
+          newPillsLeft = 0;
+        }
+
+        await medicationsCollection.doc(medicationId).update({
+          'pillsLeft': newPillsLeft,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        });
+
+      }
+      else if(medicationId != null && status == "missed"){
+        DocumentSnapshot medicationDoc = await medicationsCollection.doc(medicationId).get();
+
+        if (!medicationDoc.exists) {
+          return {
+            'success': false,
+            'message': 'Medication not found for ID: $medicationId',
+          };
+        }
+        var medicationData = medicationDoc.data() as Map<String, dynamic>;
+        int missedCount = medicationData['missedCount'] ?? 0;
+        String name = medicationData['name'] ?? 'Unknown Medicine';
+
+        if (missedCount >= 2) {
+          // Get patient name from users collection
+          DocumentSnapshot userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(patientId)
+              .get();
+          String patientName = userDoc.exists
+              ? (userDoc.data() as Map<String, dynamic>)['name'] ?? 'Unknown Patient'
+              : 'Unknown Patient';
+
+          User? user = FirebaseAuth.instance.currentUser;
+          QuerySnapshot supervisors = await FirebaseFirestore.instance
+              .collection('supervision')
+              .where('patientId', isEqualTo: user?.uid)
+              .get();
+
+          for (var supervisor in supervisors.docs) {
+            String supervisorId = supervisor['supervisorId'];
+            await SmartMedicalDb.addNotification(
+              notificationId: DateTime.now().millisecondsSinceEpoch.toString(),
+              patientId: user!.uid,
+              supervisorId: supervisorId,
+              message: '$patientName missed 3 doses of $name',
+            );
+          }
+
+          await FirebaseFirestore.instance
+              .collection('medications')
+              .doc(medicationId)
+              .update({
+            'missedCount': 0,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          });
+        }
+      }
       return {
         'success': true,
-        'message': 'Log added successfully',
+        'message': 'Log added successfully${medicationId != null && status == "taken" ? ' and pillsLeft updated.' : ''}',
       };
     } catch (e) {
       return {
