@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:smart_medic/Services/rewardsService.dart';
+
+import 'notificationService.dart';
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 final CollectionReference usersCollection = _firestore.collection("users");
@@ -27,6 +30,8 @@ class SmartMedicalDb {
         "email": email,
         "type": type,
         "createdAt": FieldValue.serverTimestamp(),
+        'currentStreak': 0,
+        'lastDoseStatus': '',
       };
 
       await documentReferencer.set(data);
@@ -556,54 +561,38 @@ class SmartMedicalDb {
     required int minutesMidnight,
   }) async {
     try {
-      DocumentReference documentReferencer = logsCollection.doc(logId);
 
-      Map<String, dynamic> data = <String, dynamic>{
+      await logsCollection.doc(logId).set({
         'patientId': patientId,
         'medicationId': medicationId,
         'status': status,
-        'spo2': spo2 ?? 0.0,
-        'heartRate': heartRate ?? 0,
+        'spo2': spo2,
+        'heartRate': heartRate,
         'dayOfYear': dayOfYear,
         'minutesMidnight': minutesMidnight,
         'timestamp': Timestamp.now(),
-      };
+      });
 
-      await documentReferencer.set(data);
+      // Handle currentStreak for rewards
+      DocumentReference userRef = usersCollection.doc(patientId);
+      DocumentSnapshot userDoc = await userRef.get();
+      int currentStreak = userDoc.exists ? (userDoc.data() as Map<String, dynamic>)['currentStreak'] ?? 0 : 0;
 
-      if (medicationId != null && status == "taken") {
-        DocumentSnapshot medicationDoc = await medicationsCollection.doc(medicationId).get();
-
-        if (!medicationDoc.exists) {
-          return {
-            'success': false,
-            'message': 'Medication not found for ID: $medicationId',
-          };
-        }
-
-        var medicationData = medicationDoc.data() as Map<String, dynamic>;
-        int pillsLeft = medicationData['pillsLeft'] ?? 0;
-        int dosage = medicationData['dosage'] ?? 0;
-
-        if (dosage <= 0) {
-          return {
-            'success': false,
-            'message': 'Invalid dosage for medication ID: $medicationId',
-          };
-        }
-
-        int newPillsLeft = pillsLeft - dosage;
-        if (newPillsLeft < 0) {
-          newPillsLeft = 0;
-        }
-
-        await medicationsCollection.doc(medicationId).update({
-          'pillsLeft': newPillsLeft,
-          'lastUpdated': FieldValue.serverTimestamp(),
-        });
-
+      if (status == 'taken') {
+        currentStreak++;
+      } else if (status == 'missed') {
+        currentStreak = 0;
       }
-      else if(medicationId != null && status == "missed"){
+
+      await userRef.set({
+        'currentStreak': currentStreak,
+        'lastDoseStatus': status ?? '',
+      }, SetOptions(merge: true));
+
+      // Check for reward eligibility
+      await RewardsService().checkRewardEligibility(patientId, currentStreak);
+
+      if (medicationId !=null && status == "missed") {
         DocumentSnapshot medicationDoc = await medicationsCollection.doc(medicationId).get();
 
         if (!medicationDoc.exists) {
@@ -616,8 +605,12 @@ class SmartMedicalDb {
         int missedCount = medicationData['missedCount'] ?? 0;
         String name = medicationData['name'] ?? 'Unknown Medicine';
 
-        if (missedCount >= 2) {
-          // Get patient name from users collection
+        await medicationsCollection.doc(medicationId).update({
+          'missedCount': missedCount + 1,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        });
+
+        if (missedCount  >= 2) {
           DocumentSnapshot userDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(patientId)
@@ -626,40 +619,50 @@ class SmartMedicalDb {
               ? (userDoc.data() as Map<String, dynamic>)['name'] ?? 'Unknown Patient'
               : 'Unknown Patient';
 
-          User? user = FirebaseAuth.instance.currentUser;
           QuerySnapshot supervisors = await FirebaseFirestore.instance
               .collection('supervision')
-              .where('patientId', isEqualTo: user?.uid)
+              .where('patientId', isEqualTo: patientId)
               .get();
 
           for (var supervisor in supervisors.docs) {
             String supervisorId = supervisor['supervisorId'];
             await SmartMedicalDb.addNotification(
               notificationId: DateTime.now().millisecondsSinceEpoch.toString(),
-              patientId: user!.uid,
+              patientId: patientId,
               supervisorId: supervisorId,
               message: '$patientName missed 3 doses of $name',
             );
           }
 
-          await FirebaseFirestore.instance
-              .collection('medications')
-              .doc(medicationId)
-              .update({
+          await logsCollection.doc(DateTime.now().millisecondsSinceEpoch.toString()).set({
+            'patientId': patientId,
+            'medicationId': medicationId,
+            'status': 'supervisor_notified',
+            'spo2': null,
+            'heartRate': null,
+            'dayOfYear': dayOfYear,
+            'minutesMidnight': minutesMidnight,
+            'timestamp': Timestamp.now(),
+          });
+
+          await medicationsCollection.doc(medicationId).update({
             'missedCount': 0,
             'lastUpdated': FieldValue.serverTimestamp(),
           });
+
+          // Add notification to queue for supervisor
+          LocalNotificationService.notificationQueue.add({
+            'id': logId.hashCode,
+            'title': 'Patient Alert',
+            'body': '$patientName missed 3 doses of $name',
+            'payload': 'supervisor|$logId,$patientId',
+          });
         }
       }
-      return {
-        'success': true,
-        'message': 'Log added successfully${medicationId != null && status == "taken" ? ' and pillsLeft updated.' : ''}',
-      };
+
+      return {'success': true, 'message': 'Log added successfully'};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Error adding log: $e',
-      };
+      return {'success': false, 'message': 'Error adding log: $e'};
     }
   }
 
@@ -705,9 +708,40 @@ class SmartMedicalDb {
 
   // Read Notifications
   static Stream<QuerySnapshot> readNotifications(String supervisorId) {
-    return notificationsCollection
-        .where("supervisorId", isEqualTo: supervisorId)
-        .orderBy("timestamp", descending: true)
+    return FirebaseFirestore.instance
+        .collection('notifications')
+        .where('supervisorId', isEqualTo: supervisorId)
+        .where('status', isEqualTo: 'sent')
         .snapshots();
+  }
+
+  static Stream<QuerySnapshot> readNotificationsForPatient(String patientId) {
+    return FirebaseFirestore.instance
+        .collection('notifications')
+        .where('patientId', isEqualTo: patientId)
+        .snapshots();
+  }
+
+
+
+  static Future<Map<String, dynamic>> markRewardAsUsed(String rewardId) async {
+    try {
+      await FirebaseFirestore.instance.collection('rewards').doc(rewardId).update({
+        'status': 'used',
+      });
+      return {'success': true, 'message': 'Reward marked as used'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error marking reward as used: $e'};
+    }
+  }
+
+  Future<void> initializeUserFields() async {
+    QuerySnapshot users = await FirebaseFirestore.instance.collection('users').get();
+    for (var user in users.docs) {
+      await user.reference.set({
+        'currentStreak': 0,
+        'lastDoseStatus': '',
+      }, SetOptions(merge: true));
+    }
   }
 }

@@ -7,6 +7,7 @@ import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 import '../../../../../Services/firebaseServices.dart';
 import '../../../../../main.dart';
+import 'Widgets/rewardsView.dart';
 
 class PatientProfileView extends StatefulWidget {
   const PatientProfileView({super.key});
@@ -202,6 +203,26 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                         );
                       },
                     ),
+                  ),
+                  const Divider(),
+                  // Rewards Section
+                  ListTile(
+                    leading: Icon(
+                      Icons.card_giftcard,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.mainColorDark
+                          : AppColors.mainColor,
+                    ),
+                    title: const Text('Rewards'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RewardsView(patientId: user!.uid),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(),
                   // Supervisor Section

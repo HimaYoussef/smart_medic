@@ -6,7 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import '../../../../../Services/firebaseServices.dart'; // Import SmartMedicalDb
+import '../../../../../Services/firebaseServices.dart';
 
 class LocalNotificationService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -14,9 +14,9 @@ class LocalNotificationService {
   static StreamController<NotificationResponse> streamController =
   StreamController.broadcast();
   static tz.Location? localTimeZone;
+  static final List<Map<String, dynamic>> notificationQueue = [];
 
   static Future<void> onTap(NotificationResponse notificationResponse) async {
-    // Initialize Firebase in the background isolate if not already initialized
     try {
       await Firebase.initializeApp(
           options: const FirebaseOptions(
@@ -30,10 +30,8 @@ class LocalNotificationService {
 
     if (notificationResponse.payload != null) {
       if (notificationResponse.actionId == 'snooze') {
-        // Handle Snooze action
         await rescheduleNotification(notificationResponse.payload!);
       } else if (notificationResponse.actionId == 'taken') {
-        // Handle Taken action
         List<String> parts = notificationResponse.payload!.split('|');
         if (parts[0] == 'medicine') {
           List<String> medData = parts[1].split(',');
@@ -41,16 +39,11 @@ class LocalNotificationService {
           try {
             DateTime now = DateTime.now();
             DateTime startOfYear = DateTime(now.year, 1, 1);
-            int dayOfYear = now
-                .difference(startOfYear)
-                .inDays + 1;
+            int dayOfYear = now.difference(startOfYear).inDays + 1;
             int minutesMidnight = now.hour * 60 + now.minute;
 
             await SmartMedicalDb.addLog(
-                logId: DateTime
-                    .now()
-                    .millisecondsSinceEpoch
-                    .toString(),
+                logId: DateTime.now().millisecondsSinceEpoch.toString(),
                 patientId: FirebaseAuth.instance.currentUser!.uid,
                 medicationId: medId,
                 status: 'taken',
@@ -59,9 +52,7 @@ class LocalNotificationService {
                 dayOfYear: dayOfYear,
                 minutesMidnight: minutesMidnight);
 
-            //Decrease missedCount by 1
-            DocumentSnapshot medicationDoc = await medicationsCollection.doc(
-                medId).get();
+            DocumentSnapshot medicationDoc = await medicationsCollection.doc(medId).get();
 
             var medicationData = medicationDoc.data() as Map<String, dynamic>;
             int missedCount = medicationData['missedCount'] ?? 0;
@@ -72,12 +63,10 @@ class LocalNotificationService {
           } catch (e) {
             print('Error logging taken dose: $e');
           }
-        }
-        else if (notificationResponse.actionId == 'ignore') {
+        } else if (notificationResponse.actionId == 'ignore') {
           print('User ignored notification: ${notificationResponse.payload}');
         }
       } else {
-        // Handle regular tap or other actions
         streamController.add(notificationResponse);
       }
     }
@@ -91,30 +80,26 @@ class LocalNotificationService {
     String medId = medData[0];
     int dosage = int.parse(medData[1]);
     String time = medData[2];
-    String name = 'Unknown Medicine'; // Default name in case of error
+    String name = 'Unknown Medicine';
 
-    // Try to get medication details
     try {
       DocumentSnapshot medDoc = await FirebaseFirestore.instance
           .collection('medications')
           .doc(medId)
           .get();
       if (medDoc.exists) {
-        name = (medDoc.data() as Map<String, dynamic>)['name'] ??
-            'Unknown Medicine';
+        name = (medDoc.data() as Map<String, dynamic>)['name'] ?? 'Unknown Medicine';
       }
     } catch (e) {
       print('Error fetching medication details: $e');
     }
 
-    // Check if localTimeZone is initialized
     if (localTimeZone == null) {
       tz.initializeTimeZones();
       final String timeZoneName = await FlutterTimezone.getLocalTimezone();
       localTimeZone = tz.getLocation(timeZoneName);
     }
 
-    // Schedule notification 10 minutes from now
     tz.TZDateTime now = tz.TZDateTime.now(localTimeZone!);
     tz.TZDateTime snoozeTime = now.add(const Duration(minutes: 1));
 
@@ -160,15 +145,12 @@ class LocalNotificationService {
       onDidReceiveBackgroundNotificationResponse: onTap,
     );
 
-    // Initialize timezone
     tz.initializeTimeZones();
     final String timeZoneName = await FlutterTimezone.getLocalTimezone();
     localTimeZone = tz.getLocation(timeZoneName);
 
-    // Create notification channels
     await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(const AndroidNotificationChannel(
       'medicine_channel',
       'Medicine Reminders',
@@ -176,8 +158,7 @@ class LocalNotificationService {
     ));
 
     await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(const AndroidNotificationChannel(
       'low_pills_channel',
       'Low Pills Notifications',
@@ -185,18 +166,23 @@ class LocalNotificationService {
     ));
 
     await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(const AndroidNotificationChannel(
       'supervisor_channel',
       'Supervisor Notifications',
       importance: Importance.max,
     ));
 
-    // Request permissions for Android 13+
     await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(const AndroidNotificationChannel(
+      'rewards_channel',
+      'Rewards Notifications',
+      importance: Importance.max,
+    ));
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
   }
 
@@ -226,7 +212,7 @@ class LocalNotificationService {
   }
 
   static Future<void> scheduleMedicineNotifications() async {
-    await cancelAllNotifications(); // Clear previous notifications
+    await cancelAllNotifications();
 
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -259,8 +245,7 @@ class LocalNotificationService {
         int scheduleType = med['scheduleType'] ?? 0;
         int scheduleValue = med['scheduleValue'] ?? 1;
         List<String> times = List<String>.from(med['times'] ?? []);
-        List<int> bitmaskDays = List<int>.from(
-            med['bitmaskDays'] ?? [0, 0, 0, 0, 0, 0, 0]);
+        List<int> bitmaskDays = List<int>.from(med['bitmaskDays'] ?? [0, 0, 0, 0, 0, 0, 0]);
 
         if (pillsLeft < dosage) {
           const AndroidNotificationDetails lowPillsAndroid = AndroidNotificationDetails(
@@ -280,8 +265,7 @@ class LocalNotificationService {
           );
         }
 
-        print(
-            'Scheduling notifications for medication: $name, Schedule Type: $scheduleType');
+        print('Scheduling notifications for medication: $name, Schedule Type: $scheduleType');
 
         for (String time in times) {
           var parts = time.split(':');
@@ -295,7 +279,6 @@ class LocalNotificationService {
           print('Current time: $now');
 
           if (scheduleType == 0) {
-            // Daily schedule
             tz.TZDateTime scheduledDate = tz.TZDateTime(
               localTimeZone!,
               now.year,
@@ -324,7 +307,6 @@ class LocalNotificationService {
               matchDateTimeComponents: DateTimeComponents.time,
             );
           } else if (scheduleType == 1) {
-            // Every X days schedule
             tz.TZDateTime scheduledDate = tz.TZDateTime(
               localTimeZone!,
               now.year,
@@ -334,11 +316,9 @@ class LocalNotificationService {
               minute,
             );
 
-            // Check if the time has already passed today
             if (scheduledDate.isBefore(now)) {
               scheduledDate = scheduledDate.add(Duration(days: scheduleValue));
             } else if (scheduleValue == 1) {
-              // If scheduleValue is 1, it should behave like daily
               scheduledDate = tz.TZDateTime(
                 localTimeZone!,
                 now.year,
@@ -350,8 +330,7 @@ class LocalNotificationService {
             }
 
             String payload = 'medicine|$medId,$dosage,$time';
-            print(
-                'Scheduling every $scheduleValue days notification for $name at $scheduledDate');
+            print('Scheduling every $scheduleValue days notification for $name at $scheduledDate');
             await flutterLocalNotificationsPlugin.zonedSchedule(
               '$medId-$time'.hashCode,
               'Time to take your medicine',
@@ -363,14 +342,12 @@ class LocalNotificationService {
               matchDateTimeComponents: DateTimeComponents.dateAndTime,
             );
           } else if (scheduleType == 2) {
-            // Specific days schedule
-            int currentDayOfWeek = now.weekday % 7; // 0 = Saturday, 6 = Friday
+            int currentDayOfWeek = now.weekday % 7;
             print('Current day of week (0=Sat, 6=Fri): $currentDayOfWeek');
 
             for (int i = 0; i < 7; i++) {
               if (bitmaskDays[i] == 1) {
                 int daysUntilNext = (i - currentDayOfWeek + 7) % 7;
-                // If it's the same day and the time has passed, schedule for next week
                 tz.TZDateTime scheduledDate = tz.TZDateTime(
                   localTimeZone!,
                   now.year,
@@ -381,13 +358,11 @@ class LocalNotificationService {
                 );
 
                 if (daysUntilNext == 0 && now.isAfter(scheduledDate)) {
-                  daysUntilNext = 7; // Schedule for next week
+                  daysUntilNext = 7;
                 }
 
-                scheduledDate =
-                    scheduledDate.add(Duration(days: daysUntilNext));
-                print(
-                    'Scheduling specific day notification for $name on day $i at $scheduledDate');
+                scheduledDate = scheduledDate.add(Duration(days: daysUntilNext));
+                print('Scheduling specific day notification for $name on day $i at $scheduledDate');
 
                 String payload = 'medicine|$medId,$dosage,$time';
                 await flutterLocalNotificationsPlugin.zonedSchedule(
@@ -410,12 +385,19 @@ class LocalNotificationService {
     }
   }
 
-  static Future showSupervisorNotification({ required int id, required String title, required String body, required String payload, }) async {
+  static Future showSupervisorNotification({
+    required int id,
+    required String title,
+    required String body,
+    required String payload,
+  }) async {
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'supervisor_channel', 'Supervisor Notifications',
-      importance: Importance.max, priority: Priority.high,);
-    const NotificationDetails notificationDetails = NotificationDetails(
-        android: androidDetails);
+      'supervisor_channel',
+      'Supervisor Notifications',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
     await flutterLocalNotificationsPlugin.show(
       id,
       title,
@@ -423,5 +405,32 @@ class LocalNotificationService {
       notificationDetails,
       payload: payload,
     );
+  }
+
+  static void processQueuedNotifications({int retryCount = 0, int maxRetries = 3}) {
+    if (notificationQueue.isNotEmpty) {
+      for (var notification in List.from(notificationQueue)) {
+        try {
+          showSupervisorNotification(
+            id: notification['id'],
+            title: notification['title'],
+            body: notification['body'],
+            payload: notification['payload'],
+          );
+          notificationQueue.remove(notification);
+        } catch (e) {
+          print('Failed to send notification: $e');
+          if (retryCount < maxRetries) {
+            notificationQueue.add(notification);
+            Future.delayed(const Duration(seconds: 10), () {
+              processQueuedNotifications(retryCount: retryCount + 1);
+            });
+          } else {
+            notificationQueue.remove(notification);
+            print('Max retries reached for notification: ${notification['body']}');
+          }
+        }
+      }
+    }
   }
 }

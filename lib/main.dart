@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -9,12 +10,36 @@ import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
 import 'package:smart_medic/Services/notificationService.dart';
+import 'package:workmanager/workmanager.dart';
 import 'dart:async';
 import 'Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
 import 'Services/firebaseServices.dart';
 import 'Theme/themes.dart';
 
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    try {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: 'AIzaSyDV-Qnv-_7vxGZ1Wa_WC7aVGLLAwZHJ5hQ',
+          appId: 'com.example.smart_medic',
+          messagingSenderId: '352505676305',
+          projectId: 'smartmedicbox-2025',
+        ),
+      );
+      await LocalNotificationService.init();
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Process any queued notifications
+        LocalNotificationService.processQueuedNotifications();
+      }
+    } catch (e) {
+      print('Error in background task: $e');
+    }
+    return Future.value(true);
+  });
+}
 Future<void> main() async {
   //--- initilaize firebase on my app
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +59,18 @@ Future<void> main() async {
 
   await LocalNotificationService.init();
 
+  // Initialize WorkManager
+  await Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: false, // Set to false in production
+  );
+
+  // Register periodic task (runs every 15 minutes)
+  Workmanager().registerPeriodicTask(
+    "check-notifications",
+    "checkNotificationsTask",
+    frequency: const Duration(minutes: 15),
+  );
   runApp(const MainApp());
 }
 

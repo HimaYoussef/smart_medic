@@ -9,11 +9,13 @@ import '../../../../../core/utils/Style.dart';
 class PatientDetailsView extends StatefulWidget {
   final String patientId;
   final String patientName;
+  final int initialTabIndex; // New parameter to set initial tab
 
   const PatientDetailsView({
     super.key,
     required this.patientId,
     required this.patientName,
+    this.initialTabIndex = 0, // Default to Logs tab
   });
 
   @override
@@ -26,7 +28,7 @@ class _PatientDetailsViewState extends State<PatientDetailsView> with SingleTick
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTabIndex);
   }
 
   @override
@@ -114,6 +116,7 @@ class _PatientDetailsViewState extends State<PatientDetailsView> with SingleTick
           tabs: const [
             Tab(text: 'Logs'),
             Tab(text: 'Medications'),
+            Tab(text: 'Notifications'),
           ],
         ),
       ),
@@ -248,7 +251,6 @@ class _PatientDetailsViewState extends State<PatientDetailsView> with SingleTick
               },
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: StreamBuilder<QuerySnapshot>(
@@ -331,6 +333,71 @@ class _PatientDetailsViewState extends State<PatientDetailsView> with SingleTick
                                 Text(
                                   'Compartment: $compartmentNumber',
                                   style: const TextStyle(color: Colors.white, fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          // New Notifications Tab
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: SmartMedicalDb.readNotificationsForPatient(widget.patientId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  print('StreamBuilder error: ${snapshot.error}');
+                  return const Center(child: Text("Error loading notifications"));
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text("No notifications available"));
+                }
+
+                final notifications = snapshot.data!.docs;
+
+                return ListView.builder(
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index].data() as Map<String, dynamic>;
+                    final message = notification['message'] ?? 'No message';
+                    final timestamp = notification['timestamp'] as Timestamp?;
+                    final time = timestamp != null
+                        ? DateFormat('HH:mm').format(timestamp.toDate())
+                        : 'Unknown';
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.cointainerDarkColor
+                            : AppColors.mainColor,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  message,
+                                  style: getTitleStyle(color: AppColors.white, fontSize: 16),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Time: $time',
+                                  style: const TextStyle(color: Colors.white, fontSize: 14),
                                 ),
                               ],
                             ),

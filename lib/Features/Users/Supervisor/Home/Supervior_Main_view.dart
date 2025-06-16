@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,34 +17,23 @@ class Supervior_Main_view extends StatefulWidget {
 
 class _SuperviorMainViewState extends State<Supervior_Main_view> {
   final User? user = FirebaseAuth.instance.currentUser;
+  Timer? _timer;
 
   @override
   void initState() {
-    super.initState(); // Initialize LocalNotificationService
-    LocalNotificationService.init(); // Listen for new notifications
-    FirebaseFirestore.instance
-        .collection('notifications')
-        .where('supervisorId', isEqualTo: user!.uid)
-        .where('status', isEqualTo: 'sent')
-        .snapshots()
-        .listen((snapshot) {
-      for (var change in snapshot.docChanges) {
-        if (change.type == DocumentChangeType.added) {
-          var notification = change.doc.data() as Map<String, dynamic>;
-          String message = notification['message'] ?? 'No message';
-          String patientId = notification['patientId'];
-          String notificationId = change.doc.id;
-
-          // Show local notification
-          LocalNotificationService.showSupervisorNotification(
-            id: notificationId.hashCode,
-            title: 'Patient Alert',
-            body: message,
-            payload: 'supervisor|$notificationId,$patientId',
-          );
-        }
-      }
+    super.initState();
+    // Initialize LocalNotificationService
+    LocalNotificationService.init();
+    // Start timer to process queue every minute
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      LocalNotificationService.processQueuedNotifications();
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel timer when widget is disposed
+    super.dispose();
   }
 
   @override
@@ -64,6 +55,10 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            ElevatedButton(
+              onPressed: _addLogManually,
+              child: const Text('Add Missed Log Manually'),
+            ),
             // List of Patients
             Expanded(
               child: StreamBuilder<List<Map<String, dynamic>>>(
@@ -125,16 +120,60 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
                                   );
                                 }
                               },
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PatientDetailsView(
-                                      patientId: patientId,
-                                      patientName: patientName,
-                                    ),
-                                  ),
+                              onTap: () async {
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) => const Center(child: CircularProgressIndicator()),
                                 );
+
+                                if (notificationSnapshot.hasData) {
+                                  int unreadCount = notificationSnapshot.data!.docs
+                                      .where((doc) => doc['patientId'] == patientId && doc['status'] == 'sent')
+                                      .length;
+                                  if (unreadCount > 0) {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PatientDetailsView(
+                                          patientId: patientId,
+                                          patientName: patientName,
+                                          initialTabIndex: 2, // Go to Notifications tab
+                                        ),
+                                      ),
+                                    );
+                                    // Update status to 'read' after returning
+                                    for (var doc in notificationSnapshot.data!.docs) {
+                                      if (doc['patientId'] == patientId && doc['status'] == 'sent') {
+                                        await FirebaseFirestore.instance
+                                            .collection('notifications')
+                                            .doc(doc.id)
+                                            .update({'status': 'read'});
+                                      }
+                                    }
+                                  } else {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PatientDetailsView(
+                                          patientId: patientId,
+                                          patientName: patientName,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } else {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PatientDetailsView(
+                                        patientId: patientId,
+                                        patientName: patientName,
+                                      ),
+                                    ),
+                                  );
+                                }
+                                Navigator.pop(context); // Close the progress dialog
                               },
                             ),
                           );
@@ -148,6 +187,22 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _addLogManually() async {
+    await SmartMedicalDb.addLog(
+      logId: DateTime.now().millisecondsSinceEpoch.toString(),
+      patientId: "BLIk7tcGM3UmSB5N1f0Enq4ZPsg2",
+      medicationId: "pNaSpBMbTdRIAMgpWMTw",
+      status: "taken",
+      dayOfYear: 165,
+      minutesMidnight: 660,
+      spo2: null,
+      heartRate: null,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Log added manually, check queue!')),
     );
   }
 }
