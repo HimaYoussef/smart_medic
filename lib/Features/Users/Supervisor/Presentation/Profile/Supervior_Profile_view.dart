@@ -4,8 +4,9 @@ import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 import '../../../../../Services/firebaseServices.dart';
+import '../../../../../core/widgets/changePassPage.dart';
 import '../../../../../main.dart';
-import '../../../Patient/Presentation/Widgets/Edit_Profile.dart';
+import '../../../Patient/Presentation/Profile/Widgets/Edit_Profile.dart';
 
 class Supervior_Profile_view extends StatefulWidget {
   const Supervior_Profile_view({super.key});
@@ -215,6 +216,26 @@ class _SuperviorProfileViewState extends State<Supervior_Profile_view> {
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       // Add functionality for language change
+                    },
+                  ),
+                  const Divider(),
+                  // Password Change Option
+                  ListTile(
+                    leading: Icon(
+                      Icons.lock_reset,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.mainColorDark
+                          : AppColors.mainColor,
+                    ),
+                    title: const Text('Change Password '),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChangePassPage(),
+                        ),
+                      );
                     },
                   ),
                   const Divider(),

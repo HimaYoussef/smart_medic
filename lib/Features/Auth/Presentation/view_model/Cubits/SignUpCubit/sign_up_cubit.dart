@@ -24,6 +24,14 @@ class SignUpCubit extends Cubit<SignUpState> {
   }
 
   Future<void> signUp({required String name,required String email, required String password,required String type}) async {
+    if (name.trim().isEmpty) {
+      emit(SignUpFailure('Name cannot be empty'));
+      return;
+    }
+    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(name)) {
+      emit(SignUpFailure('Name must contain only letters and spaces'));
+      return;
+    }
     emit(SignUpLoading());
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
@@ -31,9 +39,11 @@ class SignUpCubit extends Cubit<SignUpState> {
           password: password
       );
       User user= userCredential.user!;
-      SmartMedicalDb.addUser(userId: user.uid, name: name, type: type, email: email).then((response) {
-        print("User added successfully"); // "User added successfully"
-      });
+      final response = await SmartMedicalDb.addUser(userId: user.uid, name: name, type: type, email: email);
+      if (!response['success']) {
+        emit(SignUpFailure(response['message'] ?? 'Failed to save user data'));
+        return;
+      }
       emit(SignUpSuccess());
       await sendEmailVerification();
     } on FirebaseAuthException catch (e) {
@@ -44,8 +54,8 @@ class SignUpCubit extends Cubit<SignUpState> {
       }
     } catch (e) {
       emit(SignUpFailure('Unexpected error occurred'));
-    } finally{
-      await Future.delayed(const Duration(seconds: 1));
+    } finally {
+      await Future.delayed(const Duration(milliseconds: 100));
       emit(SignUpInitial());
     }
   }

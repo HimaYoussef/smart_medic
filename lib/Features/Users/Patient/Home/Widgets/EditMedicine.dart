@@ -34,9 +34,9 @@ class _EditMedicineState extends State<EditMedicine> {
   late int _scheduleType;
   late List<String> _times;
   late List<TimeOfDay?> _selectedTimes;
-  TimeOfDay? _selectedTime; // For single time in scheduleType 2 and 3
+  TimeOfDay? _selectedTime;
   late List<int> _bitmaskDays;
-  String _commonTimeForSpecificDays = ""; // Single time for all selected days in scheduleType 3
+  String _commonTimeForSpecificDays = "";
   bool _isLoading = false;
 
   final BluetoothManager _bluetoothManager = BluetoothManager();
@@ -45,17 +45,15 @@ class _EditMedicineState extends State<EditMedicine> {
   void initState() {
     super.initState();
     _bluetoothManager.initBluetooth();
-    // Initialize fields with existing medicine data
     _medNameController = TextEditingController(text: widget.medicineData['name'] ?? '');
     _pillsController = TextEditingController(text: widget.medicineData['pillsLeft']?.toString() ?? '');
     _dosageController = TextEditingController(text: widget.medicineData['dosage']?.toString() ?? '');
     _numTimesController = TextEditingController(text: widget.medicineData['scheduleValue']?.toString() ?? '');
     _daysIntervalController = TextEditingController(text: widget.medicineData['scheduleValue']?.toString() ?? '');
-    _scheduleType = widget.medicineData['scheduleType'] + 1; // Adjust for dropdown (0-based to 1-based)
+    _scheduleType = widget.medicineData['scheduleType'] + 1;
     _times = List<String>.from(widget.medicineData['times'] ?? []);
     _bitmaskDays = List<int>.from(widget.medicineData['bitmaskDays'] ?? [0, 0, 0, 0, 0, 0, 0]);
 
-    // Initialize times based on scheduleType
     if (_scheduleType == 1) {
       _selectedTimes = _times.map((time) {
         final parts = time.split(':');
@@ -75,7 +73,7 @@ class _EditMedicineState extends State<EditMedicine> {
       if (period == 'AM' && hour == 12) hour = 0;
       _selectedTime = TimeOfDay(hour: hour, minute: minute);
     } else if (_scheduleType == 3 && _times.isNotEmpty) {
-      _commonTimeForSpecificDays = _times[0]; // Use the first time from times
+      _commonTimeForSpecificDays = _times[0];
     }
   }
 
@@ -100,19 +98,55 @@ class _EditMedicineState extends State<EditMedicine> {
   }
 
   void _hideLoadingOverlay(BuildContext context) {
-    Navigator.of(context).pop();
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _updateMedicine() async {
     if (_isLoading) return;
 
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please fill all required fields correctly.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+
+    int pillsLeft = int.parse(_pillsController.text);
+    if (pillsLeft > 50) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Total pills cannot exceed 50.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+
     if (_scheduleType == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please select a schedule type',
+            'Please select a schedule type.',
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -121,9 +155,12 @@ class _EditMedicineState extends State<EditMedicine> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please select all times for daily schedule',
+            'Please select all times for daily schedule.',
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -132,9 +169,12 @@ class _EditMedicineState extends State<EditMedicine> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please select a time for every X days schedule',
+            'Please select a time for every X days schedule.',
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -143,9 +183,12 @@ class _EditMedicineState extends State<EditMedicine> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please select at least one day for specific days schedule',
+            'Please select at least one day for specific days schedule.',
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -154,109 +197,129 @@ class _EditMedicineState extends State<EditMedicine> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please select a common time for the selected days',
+            'Please select a common time for the selected days.',
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
     }
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-      _showLoadingOverlay(context);
 
-      try {
-        Map<String, dynamic> updates = {
-          'name': _medNameController.text,
-          'pillsLeft': int.parse(_pillsController.text),
-          'dosage': int.parse(_dosageController.text),
-          'scheduleType': _scheduleType - 1,
-          'scheduleValue': _numTimesController.text.isNotEmpty
-              ? int.parse(_numTimesController.text)
-              : (_daysIntervalController.text.isNotEmpty
-              ? int.parse(_daysIntervalController.text)
-              : 0),
-          'times': _times,
-          'bitmaskDays': _bitmaskDays,
-          'compartmentNumber': widget.compartmentNumber,
-        };
+    setState(() {
+      _isLoading = true;
+    });
+    _showLoadingOverlay(context);
 
-        var result = await SmartMedicalDb.updateMedicine(
-          medicineId: widget.medicineId,
-          updates: updates,
-        );
+    try {
+      Map<String, dynamic> updates = {
+        'name': _medNameController.text.trim(),
+        'pillsLeft': pillsLeft,
+        'dosage': int.parse(_dosageController.text),
+        'scheduleType': _scheduleType - 1,
+        'scheduleValue': _numTimesController.text.isNotEmpty
+            ? int.parse(_numTimesController.text)
+            : (_daysIntervalController.text.isNotEmpty
+            ? int.parse(_daysIntervalController.text)
+            : 0),
+        'times': _times,
+        'bitmaskDays': _bitmaskDays,
+        'compartmentNumber': widget.compartmentNumber,
+      };
 
-        if (result['success']) {
-          BluetoothManager.needsSync = true; // تعيين الـ flag
-          await LocalNotificationService.scheduleMedicineNotifications();
-          await syncMedications();
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  result['message'],
-                  style: TextStyle(color: AppColors.white),
-                ),
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Error updating medication: $e",
-                style: TextStyle(color: AppColors.white),
-              ),
+      var result = await SmartMedicalDb.updateMedicine(
+        medicineId: widget.medicineId,
+        updates: updates,
+      );
+
+      if (result['success']) {
+        BluetoothManager.needsSync = true;
+        await LocalNotificationService.scheduleMedicineNotifications();
+        await syncMedications();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Medicine updated successfully!',
+              style: TextStyle(color: AppColors.white),
             ),
-          );
-        }
-      } finally {
-        _hideLoadingOverlay(context);
-        setState(() {
-          _isLoading = false;
-        });
-        if (mounted) {
-          Navigator.pop(context); // التنقل للصفحة السابقة في كل الحالات
-        }
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+          ),
+        );
+        _medNameController.clear();
+        _pillsController.clear();
+        _dosageController.clear();
+        _numTimesController.clear();
+        _daysIntervalController.clear();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['message'],
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error updating medication: $e',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+    } finally {
+      _hideLoadingOverlay(context);
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        Navigator.pop(context);
       }
     }
   }
 
   Future<void> syncMedications() async {
     try {
-      // استدعاء الدالة من BluetoothManager
       Map<String, dynamic> result = await _bluetoothManager.sendAllMedicationsToArduino();
-
-      // التعامل مع النتيجة
-      if (!result["success"] && mounted) {
+      if (!result['success'] && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              result["message"],
+              result['message'],
               style: TextStyle(color: AppColors.white),
             ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
           ),
         );
       }
-
-      // إظهار إشعار إذا تم مزامنة الأدوية بنجاح
-      if (result["medicationsSynced"] && mounted) {
+      if (result['medicationsSynced'] && mounted) {
         await LocalNotificationService.showDataSyncedNotification();
       }
     } catch (e) {
-      print("Error in syncMedications: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "Unexpected error syncing medications: $e",
+              'Unexpected error syncing medications: $e',
               style: TextStyle(color: AppColors.white),
             ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
           ),
         );
       }
@@ -265,7 +328,7 @@ class _EditMedicineState extends State<EditMedicine> {
 
   @override
   Widget build(BuildContext context) {
-    const List<String> daysOfWeek = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+    const List<String> daysOfWeek = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
     return Scaffold(
       appBar: AppBar(
@@ -309,7 +372,7 @@ class _EditMedicineState extends State<EditMedicine> {
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CustomText(text: 'Edit Medicine', fonSize: 20)
+                        CustomText(text: 'Edit Medicine', fonSize: 20),
                       ],
                     ),
                     const Gap(30),
@@ -319,36 +382,41 @@ class _EditMedicineState extends State<EditMedicine> {
                       controller: TextEditingController(text: widget.compartmentNumber.toString()),
                       readOnly: true,
                       enablation: false,
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Med Name', fonSize: 15),
+                    const CustomText(text: 'Medicine Name', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: _medNameController,
-                      labelText: 'Enter the name of the Medicine',
-                      validatorText: 'Please enter the name of the medicine',
+                      labelText: 'Enter the name of the medicine',
+                      validatorText: 'Please enter a valid medicine name',
                       keyboardType: TextInputType.text,
                       readOnly: false,
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Pills', fonSize: 15),
+                    const CustomText(text: 'Number of Pills', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: _pillsController,
-                      labelText: 'Enter the number of pills added',
+                      labelText: 'Enter the number of pills',
                       keyboardType: TextInputType.number,
                       readOnly: false,
-                      validatorText: 'Please enter the number of pills',
+                      validatorText: 'Please enter a valid number of pills',
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
                     const CustomText(text: 'Dosage', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: _dosageController,
-                      labelText: 'Enter the number of pills every time',
+                      labelText: 'Enter the number of pills per dose',
                       keyboardType: TextInputType.number,
                       readOnly: false,
-                      validatorText: 'Please enter the number of the pills',
+                      validatorText: 'Please enter a valid dosage (1-4)',
+                      maxValue: 4,
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
                     const CustomText(text: 'Schedule Type', fonSize: 15),
@@ -361,8 +429,8 @@ class _EditMedicineState extends State<EditMedicine> {
                       CustomTextField(
                         controller: _numTimesController,
                         readOnly: false,
-                        labelText: 'Enter number of times per day',
-                        validatorText: 'Please enter the number of the times',
+                        labelText: 'Enter number of times per day (1-4)',
+                        validatorText: 'Please enter a valid number of times (1-4)',
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
                           setState(() {
@@ -373,9 +441,12 @@ class _EditMedicineState extends State<EditMedicine> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'Number of times must be between 1 and 4',
+                                      'Number of times must be between 1 and 4.',
                                       style: TextStyle(color: AppColors.white),
                                     ),
+                                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                                        ? AppColors.mainColorDark
+                                        : AppColors.mainColor,
                                   ),
                                 );
                               }
@@ -383,6 +454,7 @@ class _EditMedicineState extends State<EditMedicine> {
                           });
                         },
                         maxValue: 4,
+                        textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 25),
                       if (_numTimesController.text.isNotEmpty &&
@@ -450,8 +522,7 @@ class _EditMedicineState extends State<EditMedicine> {
                                         });
                                       }
                                     },
-                                    backgroundColor:
-                                    Theme.of(context).brightness == Brightness.dark
+                                    backgroundColor: Theme.of(context).brightness == Brightness.dark
                                         ? AppColors.mainColorDark
                                         : AppColors.mainColor,
                                   ),
@@ -469,13 +540,14 @@ class _EditMedicineState extends State<EditMedicine> {
                         readOnly: false,
                         keyboardType: TextInputType.number,
                         labelText: 'Enter number of days',
-                        validatorText: 'Please enter the number of the days',
+                        validatorText: 'Please enter a valid number of days',
                         onChanged: (value) {
                           setState(() {
                             _times = [];
                             _selectedTime = null;
                           });
                         },
+                        textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 25),
                       if (_daysIntervalController.text.isNotEmpty &&
@@ -517,8 +589,7 @@ class _EditMedicineState extends State<EditMedicine> {
                                   });
                                 }
                               },
-                              backgroundColor:
-                              Theme.of(context).brightness == Brightness.dark
+                              backgroundColor: Theme.of(context).brightness == Brightness.dark
                                   ? AppColors.mainColorDark
                                   : AppColors.mainColor,
                             ),
@@ -567,7 +638,7 @@ class _EditMedicineState extends State<EditMedicine> {
                                 label: Text(_commonTimeForSpecificDays),
                                 onDeleted: () {
                                   setState(() {
-                                    _commonTimeForSpecificDays = "";
+                                    _commonTimeForSpecificDays = '';
                                     _times = [];
                                   });
                                 },
@@ -589,12 +660,11 @@ class _EditMedicineState extends State<EditMedicine> {
                                 if (time != null) {
                                   setState(() {
                                     _commonTimeForSpecificDays = time.format(context);
-                                    _times = [time.format(context)]; // Store in times
+                                    _times = [time.format(context)];
                                   });
                                 }
                               },
-                              backgroundColor:
-                              Theme.of(context).brightness == Brightness.dark
+                              backgroundColor: Theme.of(context).brightness == Brightness.dark
                                   ? AppColors.mainColorDark
                                   : AppColors.mainColor,
                             ),
@@ -603,7 +673,9 @@ class _EditMedicineState extends State<EditMedicine> {
                       ],
                     ],
                     const SizedBox(height: 30),
-                    CustomButton(
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : CustomButton(
                       text: 'Update',
                       onPressed: _updateMedicine,
                     ),
@@ -630,7 +702,7 @@ class _EditMedicineState extends State<EditMedicine> {
           _selectedTimes = [];
           _selectedTime = null;
           _bitmaskDays = [0, 0, 0, 0, 0, 0, 0];
-          _commonTimeForSpecificDays = "";
+          _commonTimeForSpecificDays = '';
         });
       },
       items: [

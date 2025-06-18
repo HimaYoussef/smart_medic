@@ -55,10 +55,6 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: _addLogManually,
-              child: const Text('Add Missed Log Manually'),
-            ),
             // List of Patients
             Expanded(
               child: StreamBuilder<List<Map<String, dynamic>>>(
@@ -187,22 +183,6 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
           ],
         ),
       ),
-    );
-  }
-
-  Future<void> _addLogManually() async {
-    await SmartMedicalDb.addLog(
-      logId: DateTime.now().millisecondsSinceEpoch.toString(),
-      patientId: "BLIk7tcGM3UmSB5N1f0Enq4ZPsg2",
-      medicationId: "pNaSpBMbTdRIAMgpWMTw",
-      status: "taken",
-      dayOfYear: 165,
-      minutesMidnight: 660,
-      spo2: null,
-      heartRate: null,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Log added manually, check queue!')),
     );
   }
 }

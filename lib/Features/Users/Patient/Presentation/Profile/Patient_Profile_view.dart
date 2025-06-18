@@ -2,10 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Supervision_view.dart';
-import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
+import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Edit_Profile.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 import '../../../../../Services/firebaseServices.dart';
+import '../../../../../core/widgets/changePassPage.dart';
 import '../../../../../main.dart';
 import 'Widgets/rewardsView.dart';
 
@@ -205,6 +206,21 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                     ),
                   ),
                   const Divider(),
+                  // Language Change Option
+                  ListTile(
+                    leading: Icon(
+                      Icons.language,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.mainColorDark
+                          : AppColors.mainColor,
+                    ),
+                    title: const Text('Change Language'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      // Add functionality for language change
+                    },
+                  ),
+                  const Divider(),
                   // Rewards Section
                   ListTile(
                     leading: Icon(
@@ -245,18 +261,23 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                     },
                   ),
                   const Divider(),
-                  // Language Change Option
+                  // Password Change Option
                   ListTile(
                     leading: Icon(
-                      Icons.language,
+                      Icons.lock_reset,
                       color: Theme.of(context).brightness == Brightness.dark
                           ? AppColors.mainColorDark
                           : AppColors.mainColor,
                     ),
-                    title: const Text('Change Language'),
+                    title: const Text('Change Password '),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
-                      // Add functionality for language change
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChangePassPage(),
+                        ),
+                      );
                     },
                   ),
                   const Divider(),

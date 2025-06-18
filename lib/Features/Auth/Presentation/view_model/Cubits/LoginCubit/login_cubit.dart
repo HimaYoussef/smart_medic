@@ -37,7 +37,7 @@ class LoginCubit extends Cubit<LoginState> {
       print(e);
       print(e.message);
       if (e.code == 'invalid-credential') {
-        emit(Failed(errorMessage: 'something wrong'));
+        emit(Failed(errorMessage: 'Invalid email or password'));
       } else if (e.code == 'wrong-password') {
         emit(Failed(errorMessage: 'Incorrect password'));
       }
@@ -45,10 +45,7 @@ class LoginCubit extends Cubit<LoginState> {
     catch (e){
       emit(Failed(errorMessage: 'Unexpected error occurred'));
       print("Error: $e");
-    } /*finally {
-      await Future.delayed(const Duration(seconds: 1));
-      emit(LoginInitial());
-    }*/
+    }
     }
 
   void togglePasswordVisibility() {

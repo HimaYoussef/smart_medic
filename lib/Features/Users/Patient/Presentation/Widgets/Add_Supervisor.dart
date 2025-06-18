@@ -13,44 +13,82 @@ class Add_SuperVisor extends StatefulWidget {
   const Add_SuperVisor({super.key});
 
   @override
-  State<Add_SuperVisor> createState() => _Add_SuperVisor();
+  State<Add_SuperVisor> createState() => _AddSuperVisorState();
 }
 
-class _Add_SuperVisor extends State<Add_SuperVisor> {
+class _AddSuperVisorState extends State<Add_SuperVisor> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _SuperVisorEmailController = TextEditingController();
-  String _SuperVisor_Type = SuperVisor_type[0];
-
+  final TextEditingController _superVisorEmailController = TextEditingController();
+  String _superVisorType = SuperVisor_type[0];
   User? user = FirebaseAuth.instance.currentUser;
   bool _isLoading = false;
 
   Future<void> _addSupervisor() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_superVisorType == "Choose") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select a valid Supervisor type',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    var result = await SmartMedicalDb.addSupervisor(
-      email: _SuperVisorEmailController.text.trim(),
-      type: _SuperVisor_Type,
-      patientId: user!.uid,
-    );
+    try {
+      var result = await SmartMedicalDb.addSupervisor(
+        email: _superVisorEmailController.text.trim(),
+        type: _superVisorType,
+        patientId: user!.uid,
+      );
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (result['success']) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             result['message'],
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
         ),
       );
-      Navigator.pop(context);
-    } else {
-      showErrorDialog(context, result['message']);
+
+      if (result['success']) {
+        _superVisorEmailController.clear();
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'An error occurred. Please try again.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -85,7 +123,6 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                   ? AppColors.cointainerDarkColor
                   : AppColors.cointainerColor,
             ),
-            height: 450, // Reduced height since we removed name field
             child: Form(
               key: _formKey,
               child: Padding(
@@ -104,11 +141,13 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                     const CustomText(text: 'Email', fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
-                      controller: _SuperVisorEmailController,
+                      controller: _superVisorEmailController,
                       readOnly: false,
                       keyboardType: TextInputType.emailAddress,
                       validatorText: 'Please enter a valid email',
                       labelText: 'Enter the Email of the Supervisor',
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _addSupervisor(),
                     ),
                     const SizedBox(height: 25),
                     const CustomText(text: 'Supervisor type', fonSize: 15),
@@ -125,10 +164,10 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                           isExpanded: true,
                           iconEnabledColor: AppColors.black,
                           icon: const Icon(Icons.expand_circle_down_outlined),
-                          value: _SuperVisor_Type,
+                          value: _superVisorType,
                           onChanged: (String? newValue) {
                             setState(() {
-                              _SuperVisor_Type = newValue ?? _SuperVisor_Type;
+                              _superVisorType = newValue ?? _superVisorType;
                             });
                           },
                           items: SuperVisor_type.map((String value) {
@@ -141,25 +180,12 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                       ),
                     ),
                     const Gap(30),
-                    if (_isLoading)
-                      const Center(child: CircularProgressIndicator())
-                    else
-                      CustomButton(
-                        text: 'Add',
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            if (_SuperVisor_Type == "Choose") {
-                              showErrorDialog(
-                                context,
-                                'Please select a valid Supervisor type',
-                              );
-                              return;
-                            }
-                            _formKey.currentState!.save();
-                            _addSupervisor();
-                          }
-                        },
-                      ),
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : CustomButton(
+                      text: 'Add',
+                      onPressed: _addSupervisor,
+                    ),
                   ],
                 ),
               ),
@@ -172,7 +198,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
 
   @override
   void dispose() {
-    _SuperVisorEmailController.dispose();
+    _superVisorEmailController.dispose();
     super.dispose();
   }
 }

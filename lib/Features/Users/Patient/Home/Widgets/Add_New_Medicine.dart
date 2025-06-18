@@ -14,12 +14,11 @@ class addNewMedicine extends StatefulWidget {
   const addNewMedicine({super.key, required this.compNum});
 
   @override
-  State<addNewMedicine> createState() => _Add_new_Medicine();
+  State<addNewMedicine> createState() => _AddNewMedicineState();
 }
 
-final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-class _Add_new_Medicine extends State<addNewMedicine> {
+class _AddNewMedicineState extends State<addNewMedicine> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _medNameController = TextEditingController();
   final TextEditingController _pillsController = TextEditingController();
   final TextEditingController _dosageController = TextEditingController();
@@ -30,11 +29,12 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   int _scheduleType = 0;
   List<String> _times = [];
   List<TimeOfDay?> _selectedTimes = [];
-  TimeOfDay? _selectedTime; // For single time in scheduleType 2 and 3
+  TimeOfDay? _selectedTime;
   List<int> _bitmaskDays = [0, 0, 0, 0, 0, 0, 0];
-  String _commonTimeForSpecificDays = ""; // Single time for all selected days in scheduleType 3
+  String _commonTimeForSpecificDays = '';
 
   final BluetoothManager _bluetoothManager = BluetoothManager();
+  User? user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -51,7 +51,9 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   }
 
   void _hideLoadingOverlay(BuildContext context) {
-    Navigator.of(context).pop();
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
   }
 
   void _updateTimesList() {
@@ -66,9 +68,228 @@ class _Add_new_Medicine extends State<addNewMedicine> {
     return num != null && num > 0 && num <= 4;
   }
 
+  Future<void> addMedication() async {
+    if (_isLoading) return;
+
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please fill all required fields correctly.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+
+    int pillsLeft = int.parse(_pillsController.text);
+    if (pillsLeft > 50) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Total pills cannot exceed 50.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+
+    if (_scheduleType == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select a schedule type.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+    if (_scheduleType == 1 && (_selectedTimes.isEmpty || _selectedTimes.contains(null))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select all times for daily schedule.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+    if (_scheduleType == 2 && _selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select a time for every X days schedule.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+    if (_scheduleType == 3 && !_bitmaskDays.contains(1)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select at least one day for specific days schedule.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+    if (_scheduleType == 3 && _bitmaskDays.contains(1) && _commonTimeForSpecificDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please select a common time for the selected days.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+    _showLoadingOverlay(context);
+
+    try {
+      var result = await SmartMedicalDb.addMedication(
+        patientId: user!.uid,
+        name: _medNameController.text.trim(),
+        dosage: int.parse(_dosageController.text),
+        scheduleType: _scheduleType - 1,
+        scheduleValue: _numTimesController.text.isNotEmpty
+            ? int.parse(_numTimesController.text)
+            : (_daysIntervalController.text.isNotEmpty
+            ? int.parse(_daysIntervalController.text)
+            : 0),
+        times: _times,
+        bitmaskDays: _bitmaskDays,
+        pillsLeft: pillsLeft,
+        compartmentNumber: widget.compNum,
+      );
+
+      if (result['success']) {
+        BluetoothManager.needsSync = true;
+        await LocalNotificationService.scheduleMedicineNotifications();
+        await syncMedications();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Medicine added successfully!',
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+          ),
+        );
+        _medNameController.clear();
+        _pillsController.clear();
+        _dosageController.clear();
+        _numTimesController.clear();
+        _daysIntervalController.clear();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['message'],
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error adding medication: $e',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+    } finally {
+      _hideLoadingOverlay(context);
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Future<void> syncMedications() async {
+    try {
+      Map<String, dynamic> result = await _bluetoothManager.sendAllMedicationsToArduino();
+      if (!result['success'] && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['message'],
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+          ),
+        );
+      }
+      if (result['medicationsSynced'] && mounted) {
+        await LocalNotificationService.showDataSyncedNotification();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Unexpected error syncing medications: $e',
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    const List<String> daysOfWeek = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+    const List<String> daysOfWeek = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
     return Scaffold(
       appBar: AppBar(
@@ -103,46 +324,52 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CustomText(text: 'Add New Medicine', fonSize: 20)
+                        CustomText(text: 'Add New Medicine', fonSize: 20),
                       ],
                     ),
                     const Gap(30),
                     const CustomText(text: 'Compartment Number', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
-                      controller: TextEditingController(
-                          text: (widget.compNum).toString()),
+                      controller: TextEditingController(text: widget.compNum.toString()),
                       readOnly: true,
                       enablation: false,
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Med Name', fonSize: 15),
+                    const CustomText(text: 'Medicine Name', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
                       controller: _medNameController,
-                      labelText: 'Enter the name of the Medicine',
-                      validatorText: 'Please enter the name of the medicine',
+                      labelText: 'Enter the name of the medicine',
+                      validatorText: 'Please enter a valid medicine name',
                       keyboardType: TextInputType.text,
                       readOnly: false,
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Pills', fonSize: 15),
+                    const CustomText(text: 'Number of Pills', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
-                        controller: _pillsController,
-                        labelText: 'Enter the number of pills added',
-                        keyboardType: TextInputType.number,
-                        readOnly: false,
-                        validatorText: 'Please enter the number of pills'),
+                      controller: _pillsController,
+                      labelText: 'Enter the number of pills',
+                      keyboardType: TextInputType.number,
+                      readOnly: false,
+                      validatorText: 'Please enter a valid number of pills',
+                      textInputAction: TextInputAction.next,
+                    ),
                     const SizedBox(height: 25),
                     const CustomText(text: 'Dosage', fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
-                        controller: _dosageController,
-                        labelText: 'Enter the number of pills every time',
-                        keyboardType: TextInputType.number,
-                        readOnly: false,
-                        validatorText: 'Please enter the number of the pills'),
+                      controller: _dosageController,
+                      labelText: 'Enter the number of pills per dose',
+                      keyboardType: TextInputType.number,
+                      readOnly: false,
+                      validatorText: 'Please enter a valid dosage (1-4)',
+                      maxValue: 4,
+                      textInputAction: TextInputAction.next,
+                    ),
                     const SizedBox(height: 25),
                     const CustomText(text: 'Schedule Type', fonSize: 15),
                     const SizedBox(height: 10),
@@ -154,8 +381,8 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                       CustomTextField(
                         controller: _numTimesController,
                         readOnly: false,
-                        labelText: 'Enter number of times per day',
-                        validatorText: 'Please enter the number of the times',
+                        labelText: 'Enter number of times per day (1-4)',
+                        validatorText: 'Please enter a valid number of times (1-4)',
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
                           setState(() {
@@ -166,9 +393,12 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      'Number of times must be between 1 and 4',
+                                      'Number of times must be between 1 and 4.',
                                       style: TextStyle(color: AppColors.white),
                                     ),
+                                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                                        ? AppColors.mainColorDark
+                                        : AppColors.mainColor,
                                   ),
                                 );
                               }
@@ -176,12 +406,13 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                           });
                         },
                         maxValue: 4,
+                        textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 25),
                       if (_numTimesController.text.isNotEmpty &&
                           int.tryParse(_numTimesController.text) != null &&
                           int.parse(_numTimesController.text) > 0 &&
-                          int.parse(_numTimesController.text) <= 4) ...[
+                          int.parse(_numTimesController.text) <= 6) ...[
                         Builder(
                           builder: (context) {
                             int numTimes = int.parse(_numTimesController.text);
@@ -219,14 +450,14 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                         : const SizedBox.shrink();
                                   }),
                                 ),
-                                const SizedBox(height: 5),
-                                if (_selectedTimes.where((time) => time != null).length < numTimes)
+                                const SizedBox(height: 1),
+                                if (_selectedTimes.where((element) => element != null).length < numTimes)
                                   ActionChip(
                                     label: Text(
-                                      _selectedTimes.where((time) => time != null).isEmpty
+                                      _selectedTimes.where((element) => element != null).isEmpty
                                           ? 'Add Time'
                                           : 'Add Another Time',
-                                      style: TextStyle(color: AppColors.white),
+                                      style: TextStyle(color: Colors.white),
                                     ),
                                     onPressed: () async {
                                       TimeOfDay? time = await showTimePicker(
@@ -243,8 +474,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                         });
                                       }
                                     },
-                                    backgroundColor:
-                                    Theme.of(context).brightness == Brightness.dark
+                                    backgroundColor: Theme.of(context).brightness == Brightness.dark
                                         ? AppColors.mainColorDark
                                         : AppColors.mainColor,
                                   ),
@@ -262,13 +492,14 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                         readOnly: false,
                         keyboardType: TextInputType.number,
                         labelText: 'Enter number of days',
+                        validatorText: 'Please enter a valid number of days',
                         onChanged: (value) {
                           setState(() {
                             _times = [];
                             _selectedTime = null;
                           });
                         },
-                        validatorText: 'Please enter the number of the days',
+                        textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 25),
                       if (_daysIntervalController.text.isNotEmpty &&
@@ -301,7 +532,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                               onPressed: () async {
                                 TimeOfDay? time = await showTimePicker(
                                   context: context,
-                                  initialTime: TimeOfDay.now(),
+                                  initialTime: _selectedTime ?? TimeOfDay.now(),
                                 );
                                 if (time != null) {
                                   setState(() {
@@ -310,8 +541,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                   });
                                 }
                               },
-                              backgroundColor:
-                              Theme.of(context).brightness == Brightness.dark
+                              backgroundColor: Theme.of(context).brightness == Brightness.dark
                                   ? AppColors.mainColorDark
                                   : AppColors.mainColor,
                             ),
@@ -360,7 +590,8 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                 label: Text(_commonTimeForSpecificDays),
                                 onDeleted: () {
                                   setState(() {
-                                    _commonTimeForSpecificDays = "";
+                                    _commonTimeForSpecificDays = '';
+                                    _times = [];
                                   });
                                 },
                               ),
@@ -381,12 +612,11 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                                 if (time != null) {
                                   setState(() {
                                     _commonTimeForSpecificDays = time.format(context);
-                                    _times = [time.format(context)]; // Store in times
+                                    _times = [time.format(context)];
                                   });
                                 }
                               },
-                              backgroundColor:
-                              Theme.of(context).brightness == Brightness.dark
+                              backgroundColor: Theme.of(context).brightness == Brightness.dark
                                   ? AppColors.mainColorDark
                                   : AppColors.mainColor,
                             ),
@@ -395,63 +625,11 @@ class _Add_new_Medicine extends State<addNewMedicine> {
                       ],
                     ],
                     const SizedBox(height: 30),
-                    CustomButton(
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : CustomButton(
                       text: 'Submit',
-                      onPressed: () async {
-                        if (_scheduleType == 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select a schedule type',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 1 &&
-                            (_selectedTimes.isEmpty ||
-                                _selectedTimes.contains(null))) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select all times for daily schedule',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 3 &&
-                            _bitmaskDays.contains(1) &&
-                            _commonTimeForSpecificDays.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select a common time for the selected days',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 3 &&
-                            !_bitmaskDays.contains(1)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select at least one day for specific days schedule',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 2 && _selectedTime == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please select a time for every X days schedule',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_formKey.currentState!.validate()) {
-                           addMedication();
-                        }
-                      },
+                      onPressed: addMedication,
                     ),
                     const SizedBox(height: 5),
                   ],
@@ -476,7 +654,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
           _selectedTimes = [];
           _selectedTime = null;
           _bitmaskDays = [0, 0, 0, 0, 0, 0, 0];
-          _commonTimeForSpecificDays = "";
+          _commonTimeForSpecificDays = '';
         });
       },
       items: [
@@ -496,122 +674,6 @@ class _Add_new_Medicine extends State<addNewMedicine> {
         const DropdownMenuItem<int>(value: 3, child: Text('Specific Days')),
       ],
     );
-  }
-
-  User? user = FirebaseAuth.instance.currentUser;
-
-  Future<void> addMedication() async {
-    if (_isLoading) {
-      print("addMedication: Already loading, returning.");
-      return;
-    }
-
-    print("addMedication: Starting medication addition.");
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      print("addMedication: Showing loading overlay.");
-      _showLoadingOverlay(context);
-      //await Future.delayed(const Duration(milliseconds: 500)); // تأخير بسيط لضمان ظهور الـ Dialog
-
-      var result = await SmartMedicalDb.addMedication(
-        patientId: user!.uid,
-        name: _medNameController.text,
-        dosage: int.parse(_dosageController.text),
-        scheduleType: (_scheduleType - 1),
-        scheduleValue: _numTimesController.text.isNotEmpty
-            ? int.parse(_numTimesController.text)
-            : (_daysIntervalController.text.isNotEmpty
-            ? int.parse(_daysIntervalController.text)
-            : 0),
-        times: _times,
-        bitmaskDays: _bitmaskDays,
-        pillsLeft: int.parse(_pillsController.text),
-        compartmentNumber: widget.compNum,
-      );
-
-      print("addMedication: Add medication result: $result");
-
-      if (result['success']) {
-        print("addMedication: Setting needsSync and syncing.");
-        BluetoothManager.needsSync = true; // تعيين الـ flag
-        await LocalNotificationService.scheduleMedicineNotifications();
-        await syncMedications();
-      } else {
-        if (mounted) {
-          print("addMedication: Showing error SnackBar: ${result['message']}");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                result['message'],
-                style: TextStyle(color: AppColors.white),
-              ),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        print("addMedication: Exception caught: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Error adding medication: $e",
-              style: TextStyle(color: AppColors.white),
-            ),
-          ),
-        );
-      }
-    } finally {
-      print("addMedication: Hiding loading overlay.");
-      if (Navigator.of(context).canPop()) {
-        _hideLoadingOverlay(context);
-      }
-      setState(() {
-        _isLoading = false;
-      });
-      if (mounted) {
-        Navigator.pop(context); // التنقل للصفحة السابقة في كل الحالات
-      }
-    }
-  }
-
-  Future<void> syncMedications() async {
-    try {
-      // استدعاء الدالة من BluetoothManager
-      Map<String, dynamic> result = await _bluetoothManager.sendAllMedicationsToArduino();
-
-      // التعامل مع النتيجة
-      if (!result["success"] && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              result["message"],
-              style: TextStyle(color: AppColors.white),
-            ),
-          ),
-        );
-      }
-
-      // إظهار إشعار إذا تم مزامنة الأدوية بنجاح
-      if (result["medicationsSynced"] && mounted) {
-        await LocalNotificationService.showDataSyncedNotification();
-      }
-    } catch (e) {
-      print("Error in syncMedications: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Unexpected error syncing medications: $e",
-              style: TextStyle(color: AppColors.white),
-            ),
-          ),
-        );
-      }
-    }
   }
 
   @override

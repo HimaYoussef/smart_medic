@@ -11,6 +11,10 @@ class CustomTextField extends StatelessWidget {
   final bool? enablation;
   final Function(String)? onChanged;
   final int? maxValue;
+  final bool obscureText;
+  final Widget? suffixIcon;
+  final TextInputAction? textInputAction; // Added
+  final Function(String)? onFieldSubmitted; // Added
 
   const CustomTextField({
     super.key,
@@ -22,6 +26,10 @@ class CustomTextField extends StatelessWidget {
     this.enablation,
     this.onChanged,
     this.maxValue,
+    this.obscureText = false,
+    this.suffixIcon,
+    this.textInputAction, // Added
+    this.onFieldSubmitted, // Added
   });
 
   @override
@@ -32,7 +40,8 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       readOnly: readOnly,
-      textInputAction: TextInputAction.next,
+      obscureText: obscureText,
+      textInputAction: textInputAction ?? TextInputAction.next, // Use provided or default
       style: TextStyle(
         color: Theme.of(context).brightness == Brightness.dark
             ? AppColors.white
@@ -40,18 +49,24 @@ class CustomTextField extends StatelessWidget {
       ),
       decoration: InputDecoration(
         hintText: labelText,
+        suffixIcon: suffixIcon,
       ),
       validator: (value) {
         if (value!.isEmpty) {
           return validatorText;
         }
-        else if (keyboardType==TextInputType.emailAddress && !emailValidate(value)) {
+        if (keyboardType == TextInputType.emailAddress && !emailValidate(value)) {
           return 'Please Enter A valid email';
         }
-        else if(labelText=='Please Enter Your Age'&&(int.tryParse(value) == null || int.parse(value) <= 0)){
+        if (obscureText && value.length < 6) {
+          return 'Password must be at least 6 characters';
+        }
+        if (obscureText && !RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$').hasMatch(value)) {
+          return 'Password must include uppercase, lowercase, and digits';
+        }
+        if (labelText == 'Please Enter Your Age' && (int.tryParse(value) == null || int.parse(value) <= 0 || int.parse(value) > 99)) {
           return 'Please Enter a valid Age';
-        };
-
+        }
         if (maxValue != null && keyboardType == TextInputType.number) {
           int? parsedValue = int.tryParse(value);
           if (parsedValue == null || parsedValue > maxValue!) {
@@ -64,6 +79,7 @@ class CustomTextField extends StatelessWidget {
         return null;
       },
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted, // Use the provided callback
     );
   }
 }

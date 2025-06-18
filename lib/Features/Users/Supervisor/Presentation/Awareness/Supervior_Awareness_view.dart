@@ -15,10 +15,6 @@ class _SupervisorAwarenessViewState extends State<Supervisor_Awareness_View> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           'Awareness',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
