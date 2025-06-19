@@ -10,9 +10,9 @@ import 'package:smart_medic/Services/firebaseServices.dart';
 import 'package:smart_medic/Services/notificationService.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
+import 'package:smart_medic/core/widgets/BuildText.dart';
+import 'package:smart_medic/core/widgets/build_text_field.dart';
 import 'package:smart_medic/generated/l10n.dart';
-import '../../../../../core/widgets/BuildText.dart';
-import '../../../../../core/widgets/build_text_field.dart';
 import 'package:http/http.dart' as http;
 
 class addNewMedicine extends StatefulWidget {
@@ -135,167 +135,13 @@ class _Add_new_Medicine extends State<addNewMedicine> {
     });
 
     try {
-      // Fetch existing meds
-      List<String> existingMeds = [];
-      final user = _auth.currentUser;
-      if (user != null) {
-        final medicationsSnapshot = await FirebaseFirestore.instance
-            .collection('medications')
-            .where('patientId', isEqualTo: user.uid)
-            .get();
-
-        existingMeds = medicationsSnapshot.docs
-            .map((doc) => doc.data()['name'] as String)
-            .toList();
-      }
-
-      // Ask Gemini about side effects and interactions
-      final systemInstruction = '''
-You are given the name of a new medicine and a list of previously used medicines. Your task is to perform the following:
-
-1. Provide up to 3 common side effects of the new medicine.
-2. Evaluate potential drug interactions between the new medicine and each medicine in the provided list.
-3. Generate a concise JSON output with the following structure:
-{
-  "name": "<new medicine name>",
-  "summary": "<sentence listing side effects and interaction warnings>"
-}
-
-Constraints:
-- Response must be a single JSON object with no extra text.
-- Language should be simple and patient-friendly.
-- If there are no known interactions, explicitly state so.
-''';
-
-      final existingMedsJson =
-          jsonEncode(existingMeds.map((name) => {"name": name}).toList());
-
-      final requestBodyAnalyze = {
-        'contents': [
-          {
-            'role': 'user',
-            'parts': [
-              {
-                'text':
-                    'New Medicine: ${_medNameController.text}\nExisting Medicines:\n$existingMedsJson',
-              },
-            ],
-          },
-        ],
-        'systemInstruction': {
-          'parts': [
-            {
-              'text': systemInstruction,
-            },
-          ],
-        },
-        'generationConfig': {
-          'temperature': 0,
-          'responseMimeType': 'application/json',
-        },
-      };
-
-      final analyzeResponse = await http.post(
-        Uri.parse('$_apiUrl?key=$_apiKey'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBodyAnalyze),
-      );
-
-      if (analyzeResponse.statusCode == 200) {
-        final data = jsonDecode(analyzeResponse.body);
-        final output =
-            jsonDecode(data['candidates'][0]['content']['parts'][0]['text']);
-
-        // Show result in AlertDialog with RichText
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(S.of(context).Add_New_Medicine_Analysis_Result),
-                content: RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 18.0, // Larger font size
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: 'Medicine: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: '${output['name']}\n'),
-                      TextSpan(
-                        text: 'Summary: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: output['summary']),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Close the dialog
-                    },
-                    child: Text(S.of(context).Add_New_Medicine_OK),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-      } else {
-        final result =
-            'Error analyzing medicine: ${analyzeResponse.reasonPhrase}';
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(S.of(context).Add_New_Medicine_Error),
-                content: Text(
-                  result,
-                  style: const TextStyle(fontSize: 10.0), // Larger font size
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Close the dialog
-                    },
-                    child: Text(S.of(context).Add_New_Medicine_OK),
-                  ),
-                ],
-              );
-            },
-          );
-        }
+      var output = await _getMedicineAnalysis(_medNameController.text);
+      if (mounted) {
+        _showAnalysisResultDialog(output);
       }
     } catch (e) {
-      final result = 'Error: $e';
       if (mounted) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(S.of(context).Add_New_Medicine_Error),
-              content: Text(
-                result,
-                style: const TextStyle(fontSize: 18.0), // Larger font size
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close the dialog
-                  },
-                  child: Text(S.of(context).Add_New_Medicine_OK),
-                ),
-              ],
-            );
-          },
-        );
+        _showErrorDialog('Error: $e');
       }
     } finally {
       setState(() {
@@ -305,11 +151,14 @@ Constraints:
   }
 
   Future<void> _extractAndAnalyzeMedicine(File imageFile) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      // Step 1: Extract medicine name from image
+      // Extract medicine name from image
       final bytes = await imageFile.readAsBytes();
       final base64Image = base64Encode(bytes);
-
       final requestBodyExtract = {
         'contents': [
           {
@@ -323,7 +172,7 @@ Constraints:
               },
               {
                 'text':
-                    'What is the name of the medicine shown on this label? Only respond with the medicine name.',
+                    'What is the name of the medicine shown on this label? Only respond with the medicine name if its a medicine else return not a medicine.',
               },
             ],
           },
@@ -347,176 +196,168 @@ Constraints:
           data['candidates'][0]['content']['parts'][0]['text'].trim();
 
       setState(() {
-        _medNameController.text = medicineName; // Always update medicine name
+        _medNameController.text = medicineName;
       });
 
-      // Step 2: Fetch existing meds
-      List<String> existingMeds = [];
-      final user = _auth.currentUser;
-      if (user != null) {
-        final medicationsSnapshot = await FirebaseFirestore.instance
-            .collection('medications')
-            .where('patientId', isEqualTo: user.uid)
-            .get();
-
-        existingMeds = medicationsSnapshot.docs
-            .map((doc) => doc.data()['name'] as String)
-            .toList();
-      }
-
-      // Step 3: Ask Gemini about side effects and interactions
-      final systemInstruction = '''
-You are given the name of a new medicine and a list of previously used medicines. Your task is to perform the following:
-
-1. Provide up to 3 common side effects of the new medicine.
-2. Evaluate potential drug interactions between the new medicine and each medicine in the provided list.
-3. Generate a concise JSON output with the following structure:
-{
-  "name": "<new medicine name>",
-  "summary": "<sentence listing side effects and interaction warnings>"
-}
-
-Constraints:
-- Response must be a single JSON object with no extra text.
-- Language should be simple and patient-friendly.
-- If there are no known interactions, explicitly state so.
-''';
-
-      final existingMedsJson =
-          jsonEncode(existingMeds.map((name) => {"name": name}).toList());
-
-      final requestBodyAnalyze = {
-        'contents': [
-          {
-            'role': 'user',
-            'parts': [
-              {
-                'text':
-                    'New Medicine: ${_medNameController.text}\nExisting Medicines:\n$existingMedsJson',
-              },
-            ],
-          },
-        ],
-        'systemInstruction': {
-          'parts': [
-            {
-              'text': systemInstruction,
-            },
-          ],
-        },
-        'generationConfig': {
-          'temperature': 0,
-          'responseMimeType': 'application/json',
-        },
-      };
-
-      final analyzeResponse = await http.post(
-        Uri.parse('$_apiUrl?key=$_apiKey'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBodyAnalyze),
-      );
-
-      if (analyzeResponse.statusCode == 200) {
-        final data = jsonDecode(analyzeResponse.body);
-        final output =
-            jsonDecode(data['candidates'][0]['content']['parts'][0]['text']);
-
-        // Show result in AlertDialog with RichText
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(S.of(context).Add_New_Medicine_Analysis_Result),
-                content: RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 15.0, // Larger font size
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: 'Medicine: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: '${output['name']}\n'),
-                      TextSpan(
-                        text: 'Summary: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: output['summary']),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Close the dialog
-                    },
-                    child: Text(S.of(context).Add_New_Medicine_OK),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-      } else {
-        final result =
-            'Error analyzing medicine: ${analyzeResponse.reasonPhrase}';
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(S.of(context).Add_New_Medicine_Error),
-                content: Text(
-                  result,
-                  style: const TextStyle(fontSize: 12.0), // Larger font size
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Close the dialog
-                    },
-                    child: Text(S.of(context).Add_New_Medicine_OK),
-                  ),
-                ],
-              );
-            },
-          );
-        }
+      // Analyze the extracted medicine name
+      var output = await _getMedicineAnalysis(medicineName);
+      if (mounted) {
+        _showAnalysisResultDialog(output);
       }
     } catch (e) {
-      final result = 'Error: $e';
       if (mounted) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(S.of(context).Add_New_Medicine_Error),
-              content: Text(
-                result,
-                style: const TextStyle(fontSize: 12.0), // Larger font size
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close the dialog
-                  },
-                  child: Text(S.of(context).Add_New_Medicine_OK),
-                ),
-              ],
-            );
-          },
-        );
+        _showErrorDialog('Error: $e');
       }
     } finally {
       setState(() {
         _isLoading = false;
       });
     }
+  }
+
+  Future<Map<String, dynamic>> _getMedicineAnalysis(String medicineName) async {
+    // Fetch existing medications from Firestore
+    List<String> existingMeds = [];
+    final user = _auth.currentUser;
+    if (user != null) {
+      final medicationsSnapshot = await FirebaseFirestore.instance
+          .collection('medications')
+          .where('patientId', isEqualTo: user.uid)
+          .get();
+      existingMeds = medicationsSnapshot.docs
+          .map((doc) => doc.data()['name'] as String)
+          .toList();
+    }
+
+    // Define the system instruction for the Gemini API
+    final systemInstruction = '''
+You are given the photo of a medicine box. 
+If it's not a medicine, 
+make the name \"Not Medicine\" and request to scan real medicine 
+in summary Your task is to analyze the image and perform the following steps in sequence:
+\n\nExtract the medicine name from the photo.
+\n\nIdentify up to 3 common side effects associated with the medicine, if available.
+\n\nEvaluate potential drug interactions between the extracted medicine and a list of previously taken medicines provided in the form of a JSON array.
+ Each entry contains only a \"name\" field.\n\nExample of the input JSON:
+ \n\njson\n[\n  {\n    \"name\": \"Claritine\"\n  },\n  {\n    \"name\": \"Augmentin\"\n  }\n]\nBased on this information, 
+ generate a single concise JSON output with the following structure:\n\njson\n{\n  \"name\": \"<Extracted medicine name>\",\n  \"summary\": \"<Sentence listing up to 3 side effects.
+  If any medicine from the input list has known interactions with the new medicine, provide a clear and short warning.
+   End the summary with either reassurance of no interaction or a recommendation to consult a professional.
+   >\"\n}\nConstraints:\n\nYour response must be only a single JSON object, with no extra text before or after.
+   \n\nThe language should be clear, simple, and patient-friendly.
+   \n\nIf there are no probability of known side effects or interactions, explicitly state so.
+   \n\nAlways begin the summary by listing the side effects, unless none are known.\n\nAlways compare the new medicine against all entries in the provided list.\n\n
+''';
+
+    // Prepare the API request
+    final existingMedsJson =
+        jsonEncode(existingMeds.map((name) => {"name": name}).toList());
+    final requestBodyAnalyze = {
+      'contents': [
+        {
+          'role': 'user',
+          'parts': [
+            {
+              'text':
+                  'New Medicine: $medicineName\nExisting Medicines:\n$existingMedsJson',
+            },
+          ],
+        },
+      ],
+      'systemInstruction': {
+        'parts': [
+          {
+            'text': systemInstruction,
+          },
+        ],
+      },
+      'generationConfig': {
+        'temperature': 0,
+        'responseMimeType': 'application/json',
+      },
+    };
+
+    // Send the POST request to the Gemini API
+    final analyzeResponse = await http.post(
+      Uri.parse('$_apiUrl?key=$_apiKey'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBodyAnalyze),
+    );
+
+    // Handle the response
+    if (analyzeResponse.statusCode == 200) {
+      final data = jsonDecode(analyzeResponse.body);
+      final output =
+          jsonDecode(data['candidates'][0]['content']['parts'][0]['text']);
+      return output;
+    } else {
+      throw Exception(
+          'Error analyzing medicine: ${analyzeResponse.reasonPhrase}');
+    }
+  }
+
+  void _showAnalysisResultDialog(Map<String, dynamic> output) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(S.of(context).Add_New_Medicine_Analysis_Result),
+          content: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 18.0,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
+              ),
+              children: [
+                TextSpan(
+                  text: 'Medicine: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                TextSpan(text: '${output['name']}\n'),
+                TextSpan(
+                  text: 'Summary: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                TextSpan(text: output['summary']),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(S.of(context).Add_New_Medicine_OK),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(S.of(context).Add_New_Medicine_Error),
+          content: Text(
+            errorMessage,
+            style: const TextStyle(fontSize: 18.0),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(S.of(context).Add_New_Medicine_OK),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
