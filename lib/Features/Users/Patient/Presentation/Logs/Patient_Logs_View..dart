@@ -84,8 +84,7 @@ class _PatientLogsViewState extends State<PatientLogsView> {
           }
         }
       }
-    }
-    );
+    });
   }
 
   // Helper function to format time from minutesMidnight or timestamp
@@ -145,10 +144,10 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                   await SmartMedicalDb.getMedicineById(log['medicationId']);
               medicationNames[log['medicationId']] = medicineData['success']
                   ? medicineData['data']['name'] ?? 'Unknown'
-                  : 'Not found';
+                  : const SizedBox.shrink();
             } catch (e) {
               print('Error fetching medicine ${log['medicationId']}: $e');
-              medicationNames[log['medicationId']] = 'Error';
+              const SizedBox.shrink();
             }
           }
         }
@@ -174,7 +173,7 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                 if (log['medicationId'] != null) {
                   // Medication log
                   text =
-                      "${medicationNames[log['medicationId']] ?? 'Unknown'}${log['status']}";
+                      "${medicationNames[log['medicationId']] ?? 'Unknown'} ${log['status']}";
                 } else {
                   // Health measurement log
                   text =

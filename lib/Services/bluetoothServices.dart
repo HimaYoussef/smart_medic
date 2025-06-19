@@ -248,7 +248,7 @@ class BluetoothManager {
           logId: DateTime.now().millisecondsSinceEpoch.toString(),
           patientId: FirebaseAuth.instance.currentUser!.uid,
           medicationId: medicationId,
-          status: logData['isConfirmed'] == -1 ? 'missed' : 'taken',
+          status: logData['isConfirmed'] == 0 ? 'missed' : 'taken',
           spo2: logData['oxygen'] != -1 ? (logData['oxygen'] as num).toDouble() : null, // تحويل من int إلى double
           heartRate: logData['heartRate'] != -1 ? (logData['heartRate'] as num).toDouble() : null, // تحويل من int إلى double
           dayOfYear: logData['dayOfYear'],
