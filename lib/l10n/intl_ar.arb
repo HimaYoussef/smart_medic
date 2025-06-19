@@ -45,6 +45,11 @@
     "Role_Selection_Supervisor": "مشرف",
     "Role_Selection_Next": "التالي",
 
+     "Nav_bar_Home": "هذه هي صفحة الرئيسية لإدارة أدويتك.",
+  "Nav_bar_Logs": "اعرض سجلات أدويتك هنا.",
+  "Nav_bar_Awar": "يمكنك الوصول إلى محتوى التوعية الصحية هنا.",
+  "Nav_bar_Profile": "قم بإدارة إعدادات ملفك الشخصي هنا.",
+
     "Add_New_Medicine_Head": "إضافة دواء جديد",
     "Add_New_Medicine_Compartment_Number": "رقم الحجرة",
     "Add_New_Medicine_Med_Name": "اسم الدواء",
@@ -131,8 +136,10 @@
 
     "Patient_Main_view_Home": "الرئيسية",
     "Patient_Main_view_Error_loading_medications": "حدث خطأ أثناء تحميل الأدوية",
+  "Patient_Main_view_Empty_Icon": "اضغط هنا لإضافة دواء",
 
-    "Awareness_view_Awareness": "التوعية",
+
+    "Awareness_view_Awareness": "التوعية",  
     "Awareness_view_title1": "الصحة النفسية",
     "Awareness_view_description1": "خلال جائحة كوفيد-19، واجه الشباب صعوبات نفسية متزايدة، وكانت الفتيات الأكثر تأثرًا.",
     "Awareness_view_title2": "السعرات الحرارية اليومية",
@@ -149,6 +156,8 @@
     "Supervision_view_Head": "المشرفون",
     "Supervision_view_Error_loading_supervisors": "حدث خطأ أثناء تحميل المشرفين",
     "Supervision_view_No_supervisors_found": "لم يتم العثور على مشرفين",
+      "Supervision_view_Add_Supervisor": "اضغط هنا لإضافة مشرف جديد",
+
 
     "Patient_Profile_view_Profile": "الملف الشخصي",
     "Patient_Profile_view_Please_log_in_to_view_your_profile": "يرجى تسجيل الدخول لعرض ملفك الشخصي",
@@ -156,7 +165,18 @@
     "Patient_Profile_view_Supervisor": "المشرف",
     "Patient_Profile_view_Change_Language": "تغيير اللغة",
     "Patient_Profile_view_Log_out": "تسجيل الخروج",
+    "Patient_Profile_view_Tap_here_to_edit_your_profile_information": "اضغط هنا لتعديل معلومات ملفك الشخصي",
+    "Patient_Profile_view_Toggle_between_light_and_dark_themes": "اضغط هنا للتبديل بين الوضع الفاتح والداكن",
+    "Patient_Profile_view_View_or_manage_your_supervisors": "اضغط هنا لإضافة المشرف الخاص بك",
+    "Patient_Profile_view_Switch_between_languages": "اضغط هنا لتغيير اللغة",
+    "Patient_Profile_view_Sign_out_of_your_account": "اضغط هنا لتسجيل الخروج من حسابك",
+   
 
+     "Admin_Profile_Supervisor_Data": "اضغط هنا لعرض المشرفين في النظام",
+    "Admin_Profile_Patient_Data": "اضغط هنا لعرض المرضى في النظام",
+    "Admin_Profile_Patient_Data_Display": "بيانات المرضى",
+  "Admin_Profile_Supervisor_Data_Display": "بيانات المشرفين",
+  
     "Add_Supervisor_Add_Supervisor": "إضافة مشرف",
     "Add_Supervisor_Name": "الاسم",
     "Add_Supervisor_labelText1": "أدخل اسم المشرف",

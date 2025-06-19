@@ -8,6 +8,11 @@ import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
 import '../../../../../Services/firebaseServices.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:pdf/pdf.dart' as pw;
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
+import 'dart:io';
 
 import '../../../../../Services/notificationService.dart';
 
@@ -26,7 +31,8 @@ class _PatientLogsViewState extends State<PatientLogsView> {
     super.initState();
     // Initialize LocalNotificationService and set up the stream listener
     LocalNotificationService.init();
-    LocalNotificationService.streamController.stream.listen((notificationResponse) async {
+    LocalNotificationService.streamController.stream
+        .listen((notificationResponse) async {
       String? payload = notificationResponse.payload;
       if (payload != null) {
         if (payload.startsWith('medicine')) {
@@ -46,58 +52,67 @@ class _PatientLogsViewState extends State<PatientLogsView> {
               });
 
               // Update pillsLeft
-              DocumentReference medRef = FirebaseFirestore.instance.collection('medications').doc(medId);
+              DocumentReference medRef = FirebaseFirestore.instance
+                  .collection('medications')
+                  .doc(medId);
               DocumentSnapshot medDoc = await medRef.get();
-              int pillsLeft = (medDoc.data() as Map<String, dynamic>)['pillsLeft'] ?? 0;
+              int pillsLeft =
+                  (medDoc.data() as Map<String, dynamic>)['pillsLeft'] ?? 0;
               await medRef.update({'pillsLeft': pillsLeft - dosage});
 
               // Cancel any pending missed dose checks for this medication
-              await LocalNotificationService.cancelNotification('missed_$medId'.hashCode);
+              await LocalNotificationService.cancelNotification(
+                  'missed_$medId'.hashCode);
             } else if (notificationResponse.actionId == 'snooze') {
-          print('Snooze action triggered for notification: ${notificationResponse.payload}');
-          // Extract the original time from the payload
-          var parts = time.split(':');
-          int hour = int.parse(parts[0]);
-          int minute = int.parse(parts[1].split(' ')[0]);
-          String period = parts[1].split(' ')[1];
-          if (period == 'PM' && hour != 12) hour += 12;
-          if (period == 'AM' && hour == 12) hour = 0;
+              print(
+                  'Snooze action triggered for notification: ${notificationResponse.payload}');
+              // Extract the original time from the payload
+              var parts = time.split(':');
+              int hour = int.parse(parts[0]);
+              int minute = int.parse(parts[1].split(' ')[0]);
+              String period = parts[1].split(' ')[1];
+              if (period == 'PM' && hour != 12) hour += 12;
+              if (period == 'AM' && hour == 12) hour = 0;
 
-          int newHour = hour;
-          int newMinute = minute + 10;
-          if (newMinute >= 60) {
-            newHour = (newHour + 1) % 24;
-            newMinute -= 60;
-          }
+              int newHour = hour;
+              int newMinute = minute + 10;
+              if (newMinute >= 60) {
+                newHour = (newHour + 1) % 24;
+                newMinute -= 60;
+              }
 
-          const AndroidNotificationDetails android = AndroidNotificationDetails(
-            'medicine_channel',
-            'Medicine Reminders',
-            importance: Importance.max,
-            priority: Priority.high,
-            actions: [
-              AndroidNotificationAction('taken', 'Taken'),
-              AndroidNotificationAction('snooze', 'Snooze (10 mins)'),
-            ],
-          );
-          const NotificationDetails details = NotificationDetails(android: android);
+              const AndroidNotificationDetails android =
+                  AndroidNotificationDetails(
+                'medicine_channel',
+                'Medicine Reminders',
+                importance: Importance.max,
+                priority: Priority.high,
+                actions: [
+                  AndroidNotificationAction('taken', 'Taken'),
+                  AndroidNotificationAction('snooze', 'Snooze (10 mins)'),
+                ],
+              );
+              const NotificationDetails details =
+                  NotificationDetails(android: android);
 
-          var snoozeTime = tz.TZDateTime.now(LocalNotificationService.localTimeZone!)
-              .add(Duration(minutes: 10));
-          print('Scheduling snooze notification at: $snoozeTime');
+              var snoozeTime =
+                  tz.TZDateTime.now(LocalNotificationService.localTimeZone!)
+                      .add(Duration(minutes: 10));
+              print('Scheduling snooze notification at: $snoozeTime');
 
-          await LocalNotificationService.flutterLocalNotificationsPlugin.zonedSchedule(
-            notificationResponse.id!,
-            'Snoozed: Time to take your medicine',
-            'Rescheduled for ${newHour % 12 == 0 ? 12 : newHour % 12}:${newMinute.toString().padLeft(2, '0')} ${newHour >= 12 ? 'PM' : 'AM'}',
-            snoozeTime,
-            details,
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            payload: notificationResponse.payload,
-            matchDateTimeComponents: DateTimeComponents.time,
-          );
-          print('Snooze notification scheduled successfully');
-        }
+              await LocalNotificationService.flutterLocalNotificationsPlugin
+                  .zonedSchedule(
+                notificationResponse.id!,
+                'Snoozed: Time to take your medicine',
+                'Rescheduled for ${newHour % 12 == 0 ? 12 : newHour % 12}:${newMinute.toString().padLeft(2, '0')} ${newHour >= 12 ? 'PM' : 'AM'}',
+                snoozeTime,
+                details,
+                androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+                payload: notificationResponse.payload,
+                matchDateTimeComponents: DateTimeComponents.time,
+              );
+              print('Snooze notification scheduled successfully');
+            }
           }
         } else if (payload.startsWith('missed_check')) {
           await LocalNotificationService.handleMissedDose(payload);
@@ -128,6 +143,159 @@ class _PatientLogsViewState extends State<PatientLogsView> {
     }
   }
 
+  // Function to generate and download the PDF report
+  Future<void> generateAndDownloadPDF() async {
+    try {
+      final pdf = pw.Document();
+      final logsSnapshot = await SmartMedicalDb.readLogs(user!.uid).first;
+      Map<String, List<Map<String, dynamic>>> logsByDate = {};
+
+      // Group logs by date
+      for (var doc in logsSnapshot.docs) {
+        try {
+          var log = doc.data() as Map<String, dynamic>;
+          Timestamp? timestamp = log['timestamp'];
+          if (timestamp != null) {
+            String date = DateFormat('dd/MM/yyyy').format(timestamp.toDate());
+            if (!logsByDate.containsKey(date)) {
+              logsByDate[date] = [];
+            }
+            logsByDate[date]!.add(log);
+          }
+        } catch (e) {
+          print('Error processing log ${doc.id}: $e');
+        }
+      }
+
+      // Pre-fetch medication names
+      Map<String, String> medicationNames = {};
+      for (var entry in logsByDate.entries) {
+        for (var log in entry.value) {
+          if (log['medicationId'] != null &&
+              !medicationNames.containsKey(log['medicationId'])) {
+            try {
+              var medicineData =
+                  await SmartMedicalDb.getMedicineById(log['medicationId']);
+              medicationNames[log['medicationId']] = medicineData['success']
+                  ? medicineData['data']['name'] ?? 'Unknown'
+                  : 'Not found';
+            } catch (e) {
+              print('Error fetching medicine ${log['medicationId']}: $e');
+              medicationNames[log['medicationId']] = 'Error';
+            }
+          }
+        }
+      }
+
+      // Create PDF content
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: pw.PdfPageFormat.a4,
+          build: (pw.Context context) {
+            List<pw.Widget> dateWidgets = [];
+            for (var entry in logsByDate.entries) {
+              String date = entry.key;
+              List<Map<String, dynamic>> logs = entry.value;
+              List<pw.Widget> logWidgets = [];
+
+              // Process each log entry
+              for (var log in logs) {
+                String time = formatLogTime(log);
+                String text;
+                String? bpm;
+
+                if (log['medicationId'] != null) {
+                  // Medication log
+                  text =
+                      "${medicationNames[log['medicationId']] ?? 'Unknown'}${log['status']}";
+                } else {
+                  // Health measurement log
+                  text =
+                      log['spo2'] != null ? "SpO2: ${log['spo2']}%" : "Unknown";
+                  bpm = log['heartRate'] != null && log['heartRate'] != 0
+                      ? "Heart Rate: ${log['heartRate']}"
+                      : null;
+                }
+
+                logWidgets.add(
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        '$time - $text${bpm != null ? ' - $bpm' : ''}',
+                        style: const pw.TextStyle(fontSize: 14),
+                      ),
+                      pw.Divider(),
+                    ],
+                  ),
+                );
+              }
+
+              dateWidgets.add(
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Header(
+                      level: 1,
+                      child: pw.Text(
+                        date,
+                        style: pw.TextStyle(
+                            fontSize: 18, fontWeight: pw.FontWeight.bold),
+                      ),
+                    ),
+                    pw.SizedBox(height: 10),
+                    ...logWidgets,
+                    pw.SizedBox(height: 10),
+                  ],
+                ),
+              );
+            }
+
+            return [
+              pw.Header(
+                level: 0,
+                child: pw.Text(
+                  'Patient Medication and Health Log Report',
+                  style: pw.TextStyle(
+                      fontSize: 24, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.Paragraph(
+                // text: 'Patient ID: ${user!.uid}',
+
+                text: 'Patient Name: ${user!.displayName}',
+                style: const pw.TextStyle(fontSize: 16),
+              ),
+              pw.Paragraph(
+                text:
+                    'Generated on: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                style: const pw.TextStyle(fontSize: 16),
+              ),
+              pw.SizedBox(height: 20),
+              ...dateWidgets,
+            ];
+          },
+        ),
+      );
+
+      // Save the PDF to a file
+      final output = await getTemporaryDirectory();
+      final file = File(
+          "${output.path}/patient_log_report_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf");
+      await file.writeAsBytes(await pdf.save());
+
+      // Open the PDF file
+      final result = await OpenFilex.open(file.path);
+      if (result.type != ResultType.done) {
+        throw Exception('Failed to open PDF: ${result.message}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generating PDF: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,6 +307,17 @@ class _PatientLogsViewState extends State<PatientLogsView> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: 'Download Logs as PDF',
+            onPressed: () async {
+              await generateAndDownloadPDF();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('PDF report generated and opened')),
+              );
+            },
+          ),
           Image.asset(
             'assets/pills.png',
             width: 60,
@@ -169,7 +348,8 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                 var log = doc.data() as Map<String, dynamic>;
                 Timestamp? timestamp = log['timestamp'];
                 if (timestamp != null) {
-                  String date = DateFormat('dd/MM/yyyy').format(timestamp.toDate());
+                  String date =
+                      DateFormat('dd/MM/yyyy').format(timestamp.toDate());
                   if (!logsByDate.containsKey(date)) {
                     logsByDate[date] = [];
                   }
@@ -206,9 +386,10 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                       Text(
                         date,
                         style: getTitleStyle(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? AppColors.black
-                                : AppColors.white,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppColors.black
+                                    : AppColors.white,
                             fontSize: 20),
                       ),
                       const SizedBox(height: 25),
@@ -221,43 +402,49 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                           String text;
 
                           if (log['medicationId'] != null) {
-                            // Medication log - Fetch medicine name
+                            // Medication log - Fetch medicine name and check existence
                             return FutureBuilder<Map<String, dynamic>>(
-                              future: SmartMedicalDb.getMedicineById(log['medicationId']),
+                              future: SmartMedicalDb.getMedicineById(
+                                  log['medicationId']),
                               builder: (context, medicineSnapshot) {
-                                if (medicineSnapshot.connectionState == ConnectionState.waiting) {
-                                  return const Center(child: CircularProgressIndicator());
+                                if (medicineSnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
                                 }
                                 if (medicineSnapshot.hasError ||
                                     !medicineSnapshot.hasData ||
                                     !medicineSnapshot.data!['success']) {
-                                  text = "Medicine: Not found";
+                                  return const SizedBox
+                                      .shrink(); // Skip this log
                                 } else {
-                                  var medicineData = medicineSnapshot.data!['data'];
-                                  text = "Medicine: ${medicineData['name'] ?? 'Unknown'}";
+                                  var medicineData =
+                                      medicineSnapshot.data!['data'];
+                                  text = "${medicineData['name'] ?? 'Unknown'}";
                                   isChecked = log['status'] == 'taken';
+                                  return Column(
+                                    children: [
+                                      LogItem(
+                                        time: time,
+                                        text: text,
+                                        isChecked: isChecked,
+                                        bpm: bpm,
+                                      ),
+                                      const Divider(color: Colors.white),
+                                    ],
+                                  );
                                 }
-
-                                return Column(
-                                  children: [
-                                    LogItem(
-                                      time: time,
-                                      text: text,
-                                      isChecked: isChecked,
-                                      bpm: bpm,
-                                    ),
-                                    const Divider(color: Colors.white),
-                                  ],
-                                );
                               },
                             );
                           } else {
                             // Health measurement log
-                            text = log['spo2'] != null ? "SpO2: ${log['spo2']}%" : "Unknown";
-                            bpm = log['heartRate'] != null && log['heartRate'] != 0
+                            text = log['spo2'] != null
+                                ? "SpO2: ${log['spo2']}%"
+                                : "Unknown";
+                            bpm = log['heartRate'] != null &&
+                                    log['heartRate'] != 0
                                 ? log['heartRate'].toString()
                                 : null;
-
                             return Column(
                               children: [
                                 LogItem(

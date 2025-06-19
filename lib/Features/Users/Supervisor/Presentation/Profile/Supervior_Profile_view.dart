@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_medic/Features/Auth/Presentation/view/Login.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/LocalProvider.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
@@ -66,7 +67,7 @@ class _SuperviorProfileViewState extends State<Supervior_Profile_view> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => RoleSelectionScreen(),
+        builder: (context) => LoginScreen(),
       ),
     );
   }

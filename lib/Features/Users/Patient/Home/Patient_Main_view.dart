@@ -2,13 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Refill_Medicine.dart';
+import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/CustomBoxFilled.dart';
 import 'package:smart_medic/core/widgets/CustomBoxIcon.dart';
 import 'package:smart_medic/generated/l10n.dart';
+import 'package:showcaseview/showcaseview.dart';
 import '../../../../Services/firebaseServices.dart';
 
 class PatientMainView extends StatefulWidget {
-  const PatientMainView({super.key});
+  final List<GlobalKey>
+      navBarKeys; // Keys for nav bar showcases from PatientHomeView
+
+  const PatientMainView({super.key, required this.navBarKeys});
 
   @override
   State<PatientMainView> createState() => _PatientMainViewState();
@@ -16,12 +21,21 @@ class PatientMainView extends StatefulWidget {
 
 class _PatientMainViewState extends State<PatientMainView> {
   User? user = FirebaseAuth.instance.currentUser;
+  final GlobalKey _firstCompartmentKey =
+      GlobalKey(); // Key for compartment 1 showcase
+  bool _hasStartedShowcase = false; // Flag to prevent multiple showcase starts
+
+  @override
+  void initState() {
+    super.initState();
+    // Showcase will be started after data is loaded
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text(S.of(context).Patient_Main_view_Home),
+        title: Text(S.of(context).Patient_Main_view_Home),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -41,16 +55,38 @@ class _PatientMainViewState extends State<PatientMainView> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return  Center(child: Text(S.of(context).Patient_Main_view_Error_loading_medications));
+              return Center(
+                child: Text(
+                  S.of(context).Patient_Main_view_Error_loading_medications,
+                ),
+              );
             }
 
             // Extract medications from snapshot
             List<Map<String, dynamic>> medications = snapshot.data!.docs
                 .map((doc) => {
-              ...doc.data() as Map<String, dynamic>,
-              'id': doc.id, // Store document ID for deletion/edit
-            })
+                      ...doc.data() as Map<String, dynamic>,
+                      'id': doc.id,
+                    })
                 .toList();
+
+            // Start showcase after data is loaded and UI is built
+            if (snapshot.connectionState == ConnectionState.active &&
+                !_hasStartedShowcase) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  // Combine compartment key with nav bar keys
+                  List<GlobalKey> showcaseKeys = [
+                    _firstCompartmentKey,
+                    ...widget.navBarKeys
+                  ];
+                  ShowCaseWidget.of(context).startShowCase(showcaseKeys);
+                  setState(() {
+                    _hasStartedShowcase = true;
+                  });
+                }
+              });
+            }
 
             return LayoutBuilder(
               builder: (context, constraints) {
@@ -75,21 +111,40 @@ class _PatientMainViewState extends State<PatientMainView> {
                       (med) => med['compartmentNumber'] == (index + 1),
                       orElse: () => {},
                     );
-
+                    
                     if (medForCompartment.isNotEmpty) {
-                      // If there is a medication, show CustomBoxFilled
+                      // Show filled box if medication exists
                       return CustomBoxFilled(
                         medicineName: medForCompartment['name'] ?? 'Unknown',
                         compartmentNumber: index + 1,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Refill_Medicine(compartmentNum: index+1,),
+                            builder: (context) => Refill_Medicine(
+                              compartmentNum: index + 1,
+                            ),
                           ),
                         ),
                       );
+                    } else if (index == 0) {
+                      // Show showcase for first empty compartment
+                      return Showcase(
+                        key: _firstCompartmentKey,
+                        description: S.of(context).Patient_Main_view_Empty_Icon,
+                        tooltipBackgroundColor: Theme.of(context).primaryColor,
+                        textColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.white
+                                : AppColors.black,
+                        descTextStyle: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        tooltipPadding: EdgeInsets.all(10),
+                        child: CustomBoxIcon(index: index),
+                      );
                     } else {
-                      // If no medication, show CustomBoxIcon
+                      // For other compartments, if empty, show CustomBoxIcon without Showcase
                       return CustomBoxIcon(index: index);
                     }
                   },

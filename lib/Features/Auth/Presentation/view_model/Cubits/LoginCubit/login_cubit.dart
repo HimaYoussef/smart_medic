@@ -1,10 +1,11 @@
-// LoginCubit with role validation
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_medic/Services/firebaseServices.dart';
-// import 'package:path/path.dart';
 import 'package:smart_medic/generated/l10n.dart';
+
 part 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
@@ -16,12 +17,16 @@ class LoginCubit extends Cubit<LoginState> {
       : _auth = auth ?? FirebaseAuth.instance,
         super(LoginInitial());
 
+  String role = "";
+
   Future<void> login({
     required String email,
     required String pass,
     required BuildContext context,
-  }) async {    emit(Loading());
+  }) async {
+    emit(Loading());
     try {
+      // Proceed with Firebase authentication for non-static accounts
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: pass,
@@ -45,13 +50,9 @@ class LoginCubit extends Cubit<LoginState> {
         emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage3));
         return;
       }
-
-      final actualRole = userData['type'];
-      if (actualRole != expectedRole) {
-        emit(Failed(errorMessage: 'This email is not registered as $expectedRole.'));
-        return;
-      }
-
+      // final actualRole = userData['type'];
+      
+      role = userData['type'];
       emit(Success());
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -59,9 +60,10 @@ class LoginCubit extends Cubit<LoginState> {
       } else if (e.code == 'wrong-password') {
         emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage5));
       } else {
-  emit(Failed(
-            errorMessage:
-                e.message ?? S.of(context).login_cubit_errorMessage6));      }
+        emit(Failed(
+          errorMessage: e.message ?? S.of(context).login_cubit_errorMessage6,
+        ));
+      }
     } catch (e) {
       emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage7));
       print("Error: $e");

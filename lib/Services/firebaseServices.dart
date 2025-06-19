@@ -52,9 +52,8 @@ class SmartMedicalDb {
   }
 
   // Delete User
-  static Future<Map<String, dynamic>> deleteUser({
-    required String userId,
-  }) async {
+  static Future<Map<String, dynamic>> deleteUser(
+      {required String userId}) async {
     try {
       DocumentReference documentReferencer = usersCollection.doc(userId);
       await documentReferencer.delete();
@@ -367,6 +366,17 @@ class SmartMedicalDb {
         .snapshots();
   }
 
+// Fetch all users of type 'Supervisor'
+  static Stream<QuerySnapshot> readAllSupervisors() {
+    return usersCollection.where('type', isEqualTo: 'Supervisor').snapshots();
+  }
+  
+// Fetch all users of type 'Patient'
+static Stream<QuerySnapshot> readAllPatients() {
+  return usersCollection
+      .where('type', isEqualTo: 'Patient')
+      .snapshots();
+}
 // Delete a supervision relationship
   static Future<Map<String, dynamic>> deleteSupervision({
     required String supervisorId,

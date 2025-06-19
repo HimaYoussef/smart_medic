@@ -73,8 +73,7 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
                           }
                           if (!patientSnapshot.hasData ||
                               !patientSnapshot.data!.exists) {
-                            return const Center(
-                                child: Text('Patient not found'));
+                            return const SizedBox.shrink(); // Skip this log
                           }
 
                           final patientData = patientSnapshot.data!.data()

@@ -170,6 +170,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "Add_Supervisor_validatorText2": MessageLookupByLibrary.simpleMessage(
       "يرجى إدخال بريد المشرف الإلكتروني",
     ),
+    "Admin_Profile_Patient_Data": MessageLookupByLibrary.simpleMessage(
+      "اضغط هنا لعرض المرضى في النظام",
+    ),
+    "Admin_Profile_Patient_Data_Display": MessageLookupByLibrary.simpleMessage(
+      "بيانات المرضى",
+    ),
+    "Admin_Profile_Supervisor_Data": MessageLookupByLibrary.simpleMessage(
+      "اضغط هنا لعرض المشرفين في النظام",
+    ),
+    "Admin_Profile_Supervisor_Data_Display":
+        MessageLookupByLibrary.simpleMessage("بيانات المشرفين"),
     "Awareness_view_Awareness": MessageLookupByLibrary.simpleMessage("التوعية"),
     "Awareness_view_description1": MessageLookupByLibrary.simpleMessage(
       "خلال جائحة كوفيد-19، واجه الشباب صعوبات نفسية متزايدة، وكانت الفتيات الأكثر تأثرًا.",
@@ -335,6 +346,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Login_Welcome_Back": MessageLookupByLibrary.simpleMessage("مرحبًا بعودتك"),
     "Login_password": MessageLookupByLibrary.simpleMessage("أدخل كلمة المرور"),
+    "Nav_bar_Awar": MessageLookupByLibrary.simpleMessage(
+      "يمكنك الوصول إلى محتوى التوعية الصحية هنا.",
+    ),
+    "Nav_bar_Home": MessageLookupByLibrary.simpleMessage(
+      "هذه هي صفحة الرئيسية لإدارة أدويتك.",
+    ),
+    "Nav_bar_Logs": MessageLookupByLibrary.simpleMessage(
+      "اعرض سجلات أدويتك هنا.",
+    ),
+    "Nav_bar_Profile": MessageLookupByLibrary.simpleMessage(
+      "قم بإدارة إعدادات ملفك الشخصي هنا.",
+    ),
     "Patient_Logs_View_Error_loading_logs":
         MessageLookupByLibrary.simpleMessage("حدث خطأ أثناء تحميل السجلات"),
     "Patient_Logs_View_No_logs_available": MessageLookupByLibrary.simpleMessage(
@@ -343,6 +366,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Patient_Logs_View_No_valid_logs_available":
         MessageLookupByLibrary.simpleMessage("لا توجد سجلات صالحة متاحة"),
     "Patient_Logs_View_logs": MessageLookupByLibrary.simpleMessage("السجلات"),
+    "Patient_Main_view_Empty_Icon": MessageLookupByLibrary.simpleMessage(
+      "اضغط هنا لإضافة دواء",
+    ),
     "Patient_Main_view_Error_loading_medications":
         MessageLookupByLibrary.simpleMessage("حدث خطأ أثناء تحميل الأدوية"),
     "Patient_Main_view_Home": MessageLookupByLibrary.simpleMessage("الرئيسية"),
@@ -361,9 +387,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "Patient_Profile_view_Profile": MessageLookupByLibrary.simpleMessage(
       "الملف الشخصي",
     ),
+    "Patient_Profile_view_Sign_out_of_your_account":
+        MessageLookupByLibrary.simpleMessage("اضغط هنا لتسجيل الخروج من حسابك"),
     "Patient_Profile_view_Supervisor": MessageLookupByLibrary.simpleMessage(
       "المشرف",
     ),
+    "Patient_Profile_view_Switch_between_languages":
+        MessageLookupByLibrary.simpleMessage("اضغط هنا لتغيير اللغة"),
+    "Patient_Profile_view_Tap_here_to_edit_your_profile_information":
+        MessageLookupByLibrary.simpleMessage(
+          "اضغط هنا لتعديل معلومات ملفك الشخصي",
+        ),
+    "Patient_Profile_view_Toggle_between_light_and_dark_themes":
+        MessageLookupByLibrary.simpleMessage(
+          "اضغط هنا للتبديل بين الوضع الفاتح والداكن",
+        ),
+    "Patient_Profile_view_View_or_manage_your_supervisors":
+        MessageLookupByLibrary.simpleMessage("اضغط هنا لإضافة المشرف الخاص بك"),
     "Refill_Medicine_Enter_The_Num_of_pills_added":
         MessageLookupByLibrary.simpleMessage("أدخل عدد الحبوب المضافة"),
     "Refill_Medicine_Head": MessageLookupByLibrary.simpleMessage(
@@ -382,6 +422,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Super_Visor_type_Family": MessageLookupByLibrary.simpleMessage("عائلة"),
     "Super_Visor_type_Neighbor": MessageLookupByLibrary.simpleMessage("جار"),
     "Super_Visor_type_choose": MessageLookupByLibrary.simpleMessage("اختر"),
+    "Supervision_view_Add_Supervisor": MessageLookupByLibrary.simpleMessage(
+      "اضغط هنا لإضافة مشرف جديد",
+    ),
     "Supervision_view_Error_loading_supervisors":
         MessageLookupByLibrary.simpleMessage("حدث خطأ أثناء تحميل المشرفين"),
     "Supervision_view_Head": MessageLookupByLibrary.simpleMessage("المشرفون"),

@@ -420,6 +420,46 @@ class S {
     );
   }
 
+  /// `This is the Home tab to manage your medications.`
+  String get Nav_bar_Home {
+    return Intl.message(
+      'This is the Home tab to manage your medications.',
+      name: 'Nav_bar_Home',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View your medication logs here.`
+  String get Nav_bar_Logs {
+    return Intl.message(
+      'View your medication logs here.',
+      name: 'Nav_bar_Logs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access health awareness content here.`
+  String get Nav_bar_Awar {
+    return Intl.message(
+      'Access health awareness content here.',
+      name: 'Nav_bar_Awar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage your profile settings here.`
+  String get Nav_bar_Profile {
+    return Intl.message(
+      'Manage your profile settings here.',
+      name: 'Nav_bar_Profile',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Pills`
   String get Add_New_Medicine_Pills {
     return Intl.message(
@@ -1229,6 +1269,16 @@ class S {
     );
   }
 
+  /// `Tap here to add a medication`
+  String get Patient_Main_view_Empty_Icon {
+    return Intl.message(
+      'Tap here to add a medication',
+      name: 'Patient_Main_view_Empty_Icon',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Awareness`
   String get Awareness_view_Awareness {
     return Intl.message(
@@ -1369,6 +1419,16 @@ class S {
     );
   }
 
+  /// `Tap here to add a new supervisor`
+  String get Supervision_view_Add_Supervisor {
+    return Intl.message(
+      'Tap here to add a new supervisor',
+      name: 'Supervision_view_Add_Supervisor',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Profile`
   String get Patient_Profile_view_Profile {
     return Intl.message(
@@ -1424,6 +1484,96 @@ class S {
     return Intl.message(
       'Log out',
       name: 'Patient_Profile_view_Log_out',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click Here To Edit Your Profile`
+  String get Patient_Profile_view_Tap_here_to_edit_your_profile_information {
+    return Intl.message(
+      'Click Here To Edit Your Profile',
+      name: 'Patient_Profile_view_Tap_here_to_edit_your_profile_information',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click Here To Toggle Between Dark & Light Mode`
+  String get Patient_Profile_view_Toggle_between_light_and_dark_themes {
+    return Intl.message(
+      'Click Here To Toggle Between Dark & Light Mode',
+      name: 'Patient_Profile_view_Toggle_between_light_and_dark_themes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click Here To Add Your Supervisor`
+  String get Patient_Profile_view_View_or_manage_your_supervisors {
+    return Intl.message(
+      'Click Here To Add Your Supervisor',
+      name: 'Patient_Profile_view_View_or_manage_your_supervisors',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click Here To Change Your Language`
+  String get Patient_Profile_view_Switch_between_languages {
+    return Intl.message(
+      'Click Here To Change Your Language',
+      name: 'Patient_Profile_view_Switch_between_languages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click Here To Log out From Your Acoount`
+  String get Patient_Profile_view_Sign_out_of_your_account {
+    return Intl.message(
+      'Click Here To Log out From Your Acoount',
+      name: 'Patient_Profile_view_Sign_out_of_your_account',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click Here To Display The Supervisors in the System`
+  String get Admin_Profile_Supervisor_Data {
+    return Intl.message(
+      'Click Here To Display The Supervisors in the System',
+      name: 'Admin_Profile_Supervisor_Data',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click Here To Display The Patient in the System`
+  String get Admin_Profile_Patient_Data {
+    return Intl.message(
+      'Click Here To Display The Patient in the System',
+      name: 'Admin_Profile_Patient_Data',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Patients Data`
+  String get Admin_Profile_Patient_Data_Display {
+    return Intl.message(
+      'Patients Data',
+      name: 'Admin_Profile_Patient_Data_Display',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Supervisors Data`
+  String get Admin_Profile_Supervisor_Data_Display {
+    return Intl.message(
+      'Supervisors Data',
+      name: 'Admin_Profile_Supervisor_Data_Display',
       desc: '',
       args: [],
     );

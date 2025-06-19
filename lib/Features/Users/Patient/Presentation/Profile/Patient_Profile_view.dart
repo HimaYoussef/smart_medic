@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_medic/Features/Auth/Presentation/view/login.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Supervision_view.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
@@ -10,11 +11,12 @@ import 'package:smart_medic/core/utils/Style.dart';
 import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../main.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart'; // Import ShowcaseView
 
 class PatientProfileView extends StatefulWidget {
   const PatientProfileView({super.key});
 
-  @override 
+  @override
   State<PatientProfileView> createState() => _PatientProfileViewState();
 }
 
@@ -24,9 +26,25 @@ class _PatientProfileViewState extends State<PatientProfileView> {
   Map<String, dynamic>? userProfile;
   bool _isLoading = true;
 
+  // 🔑 Showcase Keys
+  final GlobalKey _editKey = GlobalKey();
+  final GlobalKey _darkModeKey = GlobalKey();
+  final GlobalKey _supervisorKey = GlobalKey();
+  final GlobalKey _languageKey = GlobalKey();
+  final GlobalKey _logoutKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ShowCaseWidget.of(context).startShowCase([
+        _editKey,
+        _darkModeKey,
+        _supervisorKey,
+        _languageKey,
+        _logoutKey,
+      ]);
+    });
     _getUser();
   }
 
@@ -67,7 +85,7 @@ class _PatientProfileViewState extends State<PatientProfileView> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => RoleSelectionScreen(),
+        builder: (context) => LoginScreen(),
       ),
     );
   }
@@ -75,11 +93,10 @@ class _PatientProfileViewState extends State<PatientProfileView> {
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
-    
 
     return Scaffold(
       appBar: AppBar(
-        title:  Text(S.of(context).Patient_Profile_view_Profile),
+        title: Text(S.of(context).Patient_Profile_view_Profile),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -93,7 +110,10 @@ class _PatientProfileViewState extends State<PatientProfileView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : user == null
-              ?  Center(child: Text(S.of(context).Patient_Profile_view_Please_log_in_to_view_your_profile))
+              ? Center(
+                  child: Text(S
+                      .of(context)
+                      .Patient_Profile_view_Please_log_in_to_view_your_profile))
               : Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -150,23 +170,42 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                                 ],
                               ),
                             ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.edit,
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? AppColors.mainColorDark
-                                    : AppColors.mainColor,
+                            // Edit Button with Showcase
+                            Showcase(
+                              key: _editKey,
+                              tooltipBackgroundColor:
+                                  Theme.of(context).primaryColor,
+                              textColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.white
+                                  : AppColors.black,
+                              descTextStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
                               ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const Edit_Profile(),
-                                  ),
-                                ).then((_) =>
-                                    _getUser()); // Refresh profile after edit
-                              },
+                              tooltipPadding: EdgeInsets.all(10),
+                              description: S
+                                  .of(context)
+                                  .Patient_Profile_view_Tap_here_to_edit_your_profile_information,
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.edit,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? AppColors.mainColorDark
+                                      : AppColors.mainColor,
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const Edit_Profile(),
+                                    ),
+                                  ).then((_) =>
+                                      _getUser()); // Refresh profile after edit
+                                },
+                              ),
                             ),
                           ],
                         ),
@@ -189,89 +228,173 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                         ),
                         child: Column(
                           children: [
-                            // Dark Mode Toggle
-                            ListTile(
-                              leading: Icon(
-                                Icons.dark_mode,
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? AppColors.mainColorDark
-                                    : AppColors.mainColor,
+                            // Dark Mode Toggle with Showcase
+                            Showcase(
+                              key: _darkModeKey,
+                              tooltipBackgroundColor:
+                                  Theme.of(context).primaryColor,
+                              textColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.white
+                                  : AppColors.black,
+                              descTextStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
                               ),
-                              title:  Text(S.of(context).Patient_Profile_view_Dark_Mode),
-                              trailing: ValueListenableBuilder<ThemeMode>(
-                                valueListenable: MainApp.themeNotifier,
-                                builder: (context, currentMode, child) {
-                                  return Switch(
-                                    value: currentMode == ThemeMode.dark,
-                                    onChanged: (value) {
-                                      MainApp.themeNotifier.value = value
-                                          ? ThemeMode.dark
-                                          : ThemeMode.light;
-                                    },
+                              tooltipPadding: EdgeInsets.all(10),
+
+                              // title:
+                              //     S.of(context).Patient_Profile_view_Dark_Mode,
+                              description: S
+                                  .of(context)
+                                  .Patient_Profile_view_Toggle_between_light_and_dark_themes,
+                              child: ListTile(
+                                leading: Icon(
+                                  Icons.dark_mode,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? AppColors.mainColorDark
+                                      : AppColors.mainColor,
+                                ),
+                                title: Text(S
+                                    .of(context)
+                                    .Patient_Profile_view_Dark_Mode),
+                                trailing: ValueListenableBuilder<ThemeMode>(
+                                  valueListenable: MainApp.themeNotifier,
+                                  builder: (context, currentMode, child) {
+                                    return Switch(
+                                      value: currentMode == ThemeMode.dark,
+                                      onChanged: (value) {
+                                        MainApp.themeNotifier.value = value
+                                            ? ThemeMode.dark
+                                            : ThemeMode.light;
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            const Divider(),
+                            // Supervisor Section with Showcase
+                            Showcase(
+                              key: _supervisorKey,
+                              tooltipBackgroundColor:
+                                  Theme.of(context).primaryColor,
+                              textColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.white
+                                  : AppColors.black,
+                              descTextStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              tooltipPadding: EdgeInsets.all(10),
+                              description: S
+                                  .of(context)
+                                  .Patient_Profile_view_View_or_manage_your_supervisors,
+                              child: ListTile(
+                                leading: Icon(
+                                  Icons.supervisor_account,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? AppColors.mainColorDark
+                                      : AppColors.mainColor,
+                                ),
+                                title: Text(S
+                                    .of(context)
+                                    .Patient_Profile_view_Supervisor),
+                                trailing: const Icon(Icons.arrow_forward_ios,
+                                    size: 16),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SupervisorsScreen(),
+                                    ),
                                   );
                                 },
                               ),
                             ),
                             const Divider(),
-                            // Supervisor Section
-                            ListTile(
-                              leading: Icon(
-                                Icons.supervisor_account,
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? AppColors.mainColorDark
-                                    : AppColors.mainColor,
+                            // Language Change Option with Showcase
+                            Showcase(
+                              key: _languageKey,
+                              tooltipBackgroundColor:
+                                  Theme.of(context).primaryColor,
+                              textColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.white
+                                  : AppColors.black,
+                              descTextStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
                               ),
-                              title:  Text(S.of(context).Patient_Profile_view_Supervisor),
-                              trailing:
-                                  const Icon(Icons.arrow_forward_ios, size: 16),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const SupervisorsScreen(),
-                                  ),
-                                );
-                              },
+                              tooltipPadding: EdgeInsets.all(10),
+
+                              // title: S
+                              //     .of(context)
+                              //     .Patient_Profile_view_Change_Language,
+                              description: S
+                                  .of(context)
+                                  .Patient_Profile_view_Switch_between_languages,
+                              child: ListTile(
+                                leading: Icon(
+                                  Icons.language,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? AppColors.mainColorDark
+                                      : AppColors.mainColor,
+                                ),
+                                title: Text(S
+                                    .of(context)
+                                    .Patient_Profile_view_Change_Language),
+                                trailing: const Icon(Icons.arrow_forward_ios,
+                                    size: 16),
+                                onTap: () {
+                                  if (localeProvider.locale.languageCode ==
+                                      'en') {
+                                    localeProvider
+                                        .setLocale(const Locale('ar'));
+                                  } else {
+                                    localeProvider
+                                        .setLocale(const Locale('en'));
+                                  }
+                                },
+                              ),
                             ),
                             const Divider(),
-                            // Language Change Option
-                            ListTile(
-                              leading: Icon(
-                                Icons.language,
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? AppColors.mainColorDark
-                                    : AppColors.mainColor,
+                            // Log out with Showcase
+                            Showcase(
+                              key: _logoutKey,
+                              tooltipBackgroundColor:
+                                  Theme.of(context).primaryColor,
+                              textColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.white
+                                  : AppColors.black,
+                              descTextStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
                               ),
-                              title:  Text(S.of(context).Patient_Profile_view_Change_Language),
-                              trailing:
-                                  const Icon(Icons.arrow_forward_ios, size: 16),
-                              onTap: () {
-                                if (localeProvider.locale.languageCode ==
-                                    'en') {
-                                  localeProvider.setLocale(const Locale('ar'));
-                                } else {
-                                  localeProvider.setLocale(const Locale('en'));
-                                }
-                              },
-                            ),
-                            const Divider(),
-                            // Log out
-                            ListTile(
-                              leading: Icon(
-                                Icons.logout,
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? AppColors.mainColorDark
-                                    : AppColors.mainColor,
+                              tooltipPadding: EdgeInsets.all(10),
+                              description: S
+                                  .of(context)
+                                  .Patient_Profile_view_Sign_out_of_your_account,
+                              child: ListTile(
+                                leading: Icon(
+                                  Icons.logout,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? AppColors.mainColorDark
+                                      : AppColors.mainColor,
+                                ),
+                                title: Text(
+                                    S.of(context).Patient_Profile_view_Log_out),
+                                trailing: const Icon(Icons.arrow_forward_ios,
+                                    size: 16),
+                                onTap: _signOut,
                               ),
-                              title:  Text(S.of(context).Patient_Profile_view_Log_out),
-                              trailing:
-                                  const Icon(Icons.arrow_forward_ios, size: 16),
-                              onTap: _signOut,
                             ),
                           ],
                         ),

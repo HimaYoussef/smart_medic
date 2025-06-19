@@ -6,8 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:smart_medic/Features/Auth/Presentation/view/login.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
+import 'package:smart_medic/Features/Users/Maintainer/Maintainer_view.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
 import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
 import 'package:smart_medic/LocalProvider.dart';
@@ -16,6 +18,7 @@ import 'package:smart_medic/generated/l10n.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
 import 'Theme/themes.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +42,7 @@ Future<void> main() async {
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => LocaleProvider(),
+      create: (BuildContext context) => LocaleProvider(),
       child: const MainApp(),
     ),
   );
@@ -62,28 +65,30 @@ class MainApp extends StatelessWidget {
           providers: [
             BlocProvider(create: (context) => SignUpCubit()),
           ],
-          child: MaterialApp(
-            locale: localeProvider.locale,
-            localizationsDelegates: const [
-              S.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: S.delegate.supportedLocales,
-            debugShowCheckedModeBanner: false,
-            theme: AppThemes.lightTheme,
-            darkTheme: AppThemes.darkTheme,
-            themeMode: currentMode,
-            home: const AuthCheck(),
-            builder: (context, child) {
-              return Directionality(
-                textDirection: localeProvider.locale.languageCode == 'ar'
-                    ? TextDirection.rtl
-                    : TextDirection.ltr,
-                child: child!,
-              );
-            },
+          child: ShowCaseWidget(
+            builder: (context) => MaterialApp(
+              locale: localeProvider.locale,
+              localizationsDelegates: const [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: S.delegate.supportedLocales,
+              debugShowCheckedModeBanner: false,
+              theme: AppThemes.lightTheme,
+              darkTheme: AppThemes.darkTheme,
+              themeMode: currentMode,
+              home: const AuthCheck(),
+              builder: (context, child) {
+                return Directionality(
+                  textDirection: localeProvider.locale.languageCode == 'ar'
+                      ? TextDirection.rtl
+                      : TextDirection.ltr,
+                  child: child!,
+                );
+              },
+            ),
           ),
         );
       },
@@ -106,7 +111,7 @@ class AuthCheck extends StatelessWidget {
         }
 
         if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-          return RoleSelectionScreen();
+          return LoginScreen();
         }
 
         User user = snapshot.data!;
@@ -123,7 +128,7 @@ class AuthCheck extends StatelessWidget {
             if (userSnapshot.hasError ||
                 !userSnapshot.hasData ||
                 userSnapshot.data == null) {
-              return RoleSelectionScreen();
+              return LoginScreen();
             }
 
             String userType =
@@ -134,8 +139,10 @@ class AuthCheck extends StatelessWidget {
               return const PatientHomeView();
             } else if (userType == 'supervisor') {
               return const SupervisorHomeView();
+            } else if (userType == 'maintainer') {
+              return const MaintainerView();
             } else {
-              return RoleSelectionScreen();
+              return LoginScreen();
             }
           },
         );

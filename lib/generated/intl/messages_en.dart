@@ -170,6 +170,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "Add_Supervisor_validatorText2": MessageLookupByLibrary.simpleMessage(
       "Please Enter the Email of the Supervisor",
     ),
+    "Admin_Profile_Patient_Data": MessageLookupByLibrary.simpleMessage(
+      "Click Here To Display The Patient in the System",
+    ),
+    "Admin_Profile_Patient_Data_Display": MessageLookupByLibrary.simpleMessage(
+      "Patients Data",
+    ),
+    "Admin_Profile_Supervisor_Data": MessageLookupByLibrary.simpleMessage(
+      "Click Here To Display The Supervisors in the System",
+    ),
+    "Admin_Profile_Supervisor_Data_Display":
+        MessageLookupByLibrary.simpleMessage("Supervisors Data"),
     "Awareness_view_Awareness": MessageLookupByLibrary.simpleMessage(
       "Awareness",
     ),
@@ -331,6 +342,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "Login_password": MessageLookupByLibrary.simpleMessage(
       "Enter your Password",
     ),
+    "Nav_bar_Awar": MessageLookupByLibrary.simpleMessage(
+      "Access health awareness content here.",
+    ),
+    "Nav_bar_Home": MessageLookupByLibrary.simpleMessage(
+      "This is the Home tab to manage your medications.",
+    ),
+    "Nav_bar_Logs": MessageLookupByLibrary.simpleMessage(
+      "View your medication logs here.",
+    ),
+    "Nav_bar_Profile": MessageLookupByLibrary.simpleMessage(
+      "Manage your profile settings here.",
+    ),
     "Patient_Logs_View_Error_loading_logs":
         MessageLookupByLibrary.simpleMessage("Error loading logs"),
     "Patient_Logs_View_No_logs_available": MessageLookupByLibrary.simpleMessage(
@@ -339,6 +362,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Patient_Logs_View_No_valid_logs_available":
         MessageLookupByLibrary.simpleMessage("No valid logs available"),
     "Patient_Logs_View_logs": MessageLookupByLibrary.simpleMessage("Logs"),
+    "Patient_Main_view_Empty_Icon": MessageLookupByLibrary.simpleMessage(
+      "Tap here to add a medication",
+    ),
     "Patient_Main_view_Error_loading_medications":
         MessageLookupByLibrary.simpleMessage("Error loading medications"),
     "Patient_Main_view_Home": MessageLookupByLibrary.simpleMessage("Home"),
@@ -357,9 +383,27 @@ class MessageLookup extends MessageLookupByLibrary {
     "Patient_Profile_view_Profile": MessageLookupByLibrary.simpleMessage(
       "Profile",
     ),
+    "Patient_Profile_view_Sign_out_of_your_account":
+        MessageLookupByLibrary.simpleMessage(
+          "Click Here To Log out From Your Acoount",
+        ),
     "Patient_Profile_view_Supervisor": MessageLookupByLibrary.simpleMessage(
       "Supervisor",
     ),
+    "Patient_Profile_view_Switch_between_languages":
+        MessageLookupByLibrary.simpleMessage(
+          "Click Here To Change Your Language",
+        ),
+    "Patient_Profile_view_Tap_here_to_edit_your_profile_information":
+        MessageLookupByLibrary.simpleMessage("Click Here To Edit Your Profile"),
+    "Patient_Profile_view_Toggle_between_light_and_dark_themes":
+        MessageLookupByLibrary.simpleMessage(
+          "Click Here To Toggle Between Dark & Light Mode",
+        ),
+    "Patient_Profile_view_View_or_manage_your_supervisors":
+        MessageLookupByLibrary.simpleMessage(
+          "Click Here To Add Your Supervisor",
+        ),
     "Refill_Medicine_Enter_The_Num_of_pills_added":
         MessageLookupByLibrary.simpleMessage("Enter The Num of pills added"),
     "Refill_Medicine_Head": MessageLookupByLibrary.simpleMessage(
@@ -386,6 +430,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Neighbor",
     ),
     "Super_Visor_type_choose": MessageLookupByLibrary.simpleMessage("Choose"),
+    "Supervision_view_Add_Supervisor": MessageLookupByLibrary.simpleMessage(
+      "Tap here to add a new supervisor",
+    ),
     "Supervision_view_Error_loading_supervisors":
         MessageLookupByLibrary.simpleMessage("Error loading supervisors"),
     "Supervision_view_Head": MessageLookupByLibrary.simpleMessage(

@@ -5,11 +5,29 @@ import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Add_Supe
 import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/SupervisorCard.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/generated/l10n.dart';
+import 'package:showcaseview/showcaseview.dart'; // Import showcaseview
 
 import '../../../../../../Services/firebaseServices.dart';
 
-class SupervisorsScreen extends StatelessWidget {
+class SupervisorsScreen extends StatefulWidget {
   const SupervisorsScreen({super.key});
+
+  @override
+  _SupervisorsScreenState createState() => _SupervisorsScreenState();
+}
+
+class _SupervisorsScreenState extends State<SupervisorsScreen> {
+  // Define a GlobalKey for the FloatingActionButton showcase
+  final GlobalKey _fabKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // Trigger the showcase after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ShowCaseWidget.of(context).startShowCase([_fabKey]);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,18 +97,14 @@ class SupervisorsScreen extends StatelessWidget {
                     }
                     if (!supervisorSnapshot.hasData ||
                         !supervisorSnapshot.data!.exists) {
-                      return const SizedBox(
-                        height: 100,
-                        child: Center(child: Text('Supervisor not found')),
-                      );
+                      return const SizedBox.shrink(); // Skip this log
                     }
 
                     var supervisorData =
                         supervisorSnapshot.data!.data() as Map<String, dynamic>;
                     String name = supervisorData['name'] ?? 'Unknown';
                     String email = supervisorData['email'] ?? 'Unknown';
-                    String type = supervision['type'] ??
-                        'Unknown'; // Fetch type from supervision
+                    String type = supervision['type'] ?? 'Unknown';
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12.0),
@@ -121,16 +135,31 @@ class SupervisorsScreen extends StatelessWidget {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const Add_SuperVisor(),
-            ),
-          );
-        },
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Showcase(
+        key: _fabKey,
+        tooltipBackgroundColor: Theme.of(context).primaryColor,
+        textColor: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.white
+            : AppColors.black,
+        descTextStyle: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+        ),
+        tooltipPadding: EdgeInsets.all(10),
+        description: S
+            .of(context)
+            .Add_Supervisor_Add_Supervisor, // Description for the showcase
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Add_SuperVisor(),
+              ),
+            );
+          },
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }
