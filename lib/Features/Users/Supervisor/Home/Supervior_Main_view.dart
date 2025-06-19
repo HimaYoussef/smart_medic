@@ -40,7 +40,7 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Supervision'),
+        title:  Text('Supervision'),
         centerTitle: true,
         elevation: 0,
         actions: [
