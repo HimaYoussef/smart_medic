@@ -22,9 +22,11 @@ class _nameState extends State<Supervisor_Awareness_View> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context), // Back navigation
         ),
-        title:  Text(
-           S.of(context).Awareness_view_Awareness,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
+        title: Text(
+          S.of(context).Awareness_view_Awareness,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
@@ -38,20 +40,28 @@ class _nameState extends State<Supervisor_Awareness_View> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+             _buildAwarenessCard(
+                  title: S.of(context).Awareness_view_title3,
+                  description: S.of(context).Awareness_view_description3,
+              ),
+              const SizedBox(height: 12), // Space between cards
+             _buildAwarenessCard(
+                  title: S.of(context).Awareness_view_title4,
+                  description: S.of(context).Awareness_view_description4,
+              ),
+              const SizedBox(height: 12), // Space between cards
             _buildAwarenessCard(
-              title: S.of(context).Awareness_view_title1,
-              description:
-                 S.of(context).Awareness_view_description1,
-            ),
-            const SizedBox(height: 12), // Space between cards
-            _buildAwarenessCard(
-              title: S.of(context).Awareness_view_title2,
-              description:
-                  S.of(context).Awareness_view_description2,
-            ),
-          ],
+                  title: S.of(context).Awareness_view_title2,
+                  description: S.of(context).Awareness_view_description2,
+              ),
+              const SizedBox(height: 12), // Space between cards
+            
+              const SizedBox(height: 60),
+            ],
+          ),
         ),
       ),
     );

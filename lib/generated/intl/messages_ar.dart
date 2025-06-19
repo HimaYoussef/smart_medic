@@ -188,11 +188,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "Awareness_view_description2": MessageLookupByLibrary.simpleMessage(
       "سواء كنت تحاول فقدان الوزن أو زيادته أو الحفاظ عليه، من المهم أن تعرف عدد السعرات التي تحتاجها يوميًا.",
     ),
+    "Awareness_view_description3": MessageLookupByLibrary.simpleMessage(
+      "إذا وصف لك الطبيب مضادًا حيويًا، من المهم أن تنهي الكورس كاملًا. حتى لو شعرت بتحسن بعد بضعة أيام، فإن التوقف مبكرًا يمكن أن يؤدي إلى عودة العدوى — أقوى من قبل. الصندوق الذكي يتتبع عدد الأيام المتبقية ويذكّرك حتى تتناول آخر حبة. إنها طريقة بسيطة لحماية نفسك من المرض مستقبلاً. لنعالج العدوى بالشكل الصحيح من أول مرة.",
+    ),
+    "Awareness_view_description4": MessageLookupByLibrary.simpleMessage(
+      "العديد من كبار السن يتناولون أكثر من دواء يوميًا — وهذا أمر طبيعي، لكنه يحتاج إلى عناية. بعض الأدوية لا تتفاعل جيدًا مع بعضها. الصندوق الطبي الذكي والتطبيق يساعدانك على تنظيم كل شيء لتأخذ الأدوية الصحيحة في الوقت المناسب. وإذا شعرت بأي شيء غير طبيعي، اتصل بطبيبك فورًا. البقاء على اطلاع هو أحد أفضل طرق الحفاظ على صحتك.",
+    ),
     "Awareness_view_title1": MessageLookupByLibrary.simpleMessage(
       "الصحة النفسية",
     ),
     "Awareness_view_title2": MessageLookupByLibrary.simpleMessage(
       "السعرات الحرارية اليومية",
+    ),
+    "Awareness_view_title3": MessageLookupByLibrary.simpleMessage(
+      "أنهِ كورس المضاد الحيوي بالكامل — حتى لو شعرت بتحسن",
+    ),
+    "Awareness_view_title4": MessageLookupByLibrary.simpleMessage(
+      "هل تتناول عدة أدوية؟ احرص على سلامتك",
     ),
     "EditMedicine_Add_Time": MessageLookupByLibrary.simpleMessage("إضافة وقت"),
     "EditMedicine_Bluetooth_not_connected_Data_will_be_sent_later":
@@ -387,6 +399,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Patient_Profile_view_Profile": MessageLookupByLibrary.simpleMessage(
       "الملف الشخصي",
     ),
+    "Patient_Profile_view_Rewards": MessageLookupByLibrary.simpleMessage(
+      "الهدايا",
+    ),
     "Patient_Profile_view_Sign_out_of_your_account":
         MessageLookupByLibrary.simpleMessage("اضغط هنا لتسجيل الخروج من حسابك"),
     "Patient_Profile_view_Supervisor": MessageLookupByLibrary.simpleMessage(
@@ -404,6 +419,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "Patient_Profile_view_View_or_manage_your_supervisors":
         MessageLookupByLibrary.simpleMessage("اضغط هنا لإضافة المشرف الخاص بك"),
+    "Patient_Profile_view_reward": MessageLookupByLibrary.simpleMessage(
+      "اضغط هنا لمراجعة تقدمك",
+    ),
     "Refill_Medicine_Enter_The_Num_of_pills_added":
         MessageLookupByLibrary.simpleMessage("أدخل عدد الحبوب المضافة"),
     "Refill_Medicine_Head": MessageLookupByLibrary.simpleMessage(

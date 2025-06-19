@@ -17,7 +17,8 @@ class PatientAwarenessView extends StatelessWidget {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-          ),        ),
+          ),
+        ),
         centerTitle: true,
         actions: [
           Image.asset(
@@ -29,36 +30,44 @@ class PatientAwarenessView extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
-          children: [
-            _buildAwarenessCard(
-                title: S.of(context).Awareness_view_title1,
-                              description: S.of(context).Awareness_view_description1,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildAwarenessCard(
+                  title: S.of(context).Awareness_view_title3,
+                  description: S.of(context).Awareness_view_description3,
+                  context: context),
+              const SizedBox(height: 12), // Space between cards
+              _buildAwarenessCard(
+                  title: S.of(context).Awareness_view_title4,
+                  description: S.of(context).Awareness_view_description4,
+                  context: context),
+              const SizedBox(height: 12), // Space between cards
+              _buildAwarenessCard(
+                  title: S.of(context).Awareness_view_title2,
+                  description: S.of(context).Awareness_view_description2,
+                  context: context),
+              const SizedBox(height: 12), // Space between cards
 
-                context: context
-            ),
-            const SizedBox(height: 12), // Space between cards
-            _buildAwarenessCard(
-                title: S.of(context).Awareness_view_title2,
-                             description: S.of(context).Awareness_view_description2,
-
-              context: context
-            ),
-          ],
+              const SizedBox(height: 60),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildAwarenessCard(
-      {required String title, required String description, required BuildContext context}) {
+      {required String title,
+      required String description,
+      required BuildContext context}) {
     return Container(
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
             ? AppColors.cointainerDarkColor
-            : AppColors.mainColor,// Card background color
+            : AppColors.mainColor, // Card background color
         borderRadius: BorderRadius.circular(12), // Rounded corners
       ),
       child: Column(

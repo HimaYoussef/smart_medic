@@ -54,9 +54,7 @@ class CustomBoxIcon extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => addNewMedicine(
-                      compNum: index + 1,
-                    ),
+                    builder: (context) => addNewMedicine(compNum: index+1,),
                   ),
                 );
               },

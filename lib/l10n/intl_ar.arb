@@ -144,6 +144,13 @@
     "Awareness_view_description1": "خلال جائحة كوفيد-19، واجه الشباب صعوبات نفسية متزايدة، وكانت الفتيات الأكثر تأثرًا.",
     "Awareness_view_title2": "السعرات الحرارية اليومية",
     "Awareness_view_description2": "سواء كنت تحاول فقدان الوزن أو زيادته أو الحفاظ عليه، من المهم أن تعرف عدد السعرات التي تحتاجها يوميًا.",
+    
+      "Awareness_view_title3": "أنهِ كورس المضاد الحيوي بالكامل — حتى لو شعرت بتحسن",
+        "Awareness_view_description3": "إذا وصف لك الطبيب مضادًا حيويًا، من المهم أن تنهي الكورس كاملًا. حتى لو شعرت بتحسن بعد بضعة أيام، فإن التوقف مبكرًا يمكن أن يؤدي إلى عودة العدوى — أقوى من قبل. الصندوق الذكي يتتبع عدد الأيام المتبقية ويذكّرك حتى تتناول آخر حبة. إنها طريقة بسيطة لحماية نفسك من المرض مستقبلاً. لنعالج العدوى بالشكل الصحيح من أول مرة.",
+   "Awareness_view_title4": "هل تتناول عدة أدوية؟ احرص على سلامتك",
+    "Awareness_view_description4": "العديد من كبار السن يتناولون أكثر من دواء يوميًا — وهذا أمر طبيعي، لكنه يحتاج إلى عناية. بعض الأدوية لا تتفاعل جيدًا مع بعضها. الصندوق الطبي الذكي والتطبيق يساعدانك على تنظيم كل شيء لتأخذ الأدوية الصحيحة في الوقت المناسب. وإذا شعرت بأي شيء غير طبيعي، اتصل بطبيبك فورًا. البقاء على اطلاع هو أحد أفضل طرق الحفاظ على صحتك.",
+
+
 
     "Patient_Logs_View_logs": "السجلات",
     "Patient_Logs_View_Error_loading_logs": "حدث خطأ أثناء تحميل السجلات",
@@ -165,11 +172,15 @@
     "Patient_Profile_view_Supervisor": "المشرف",
     "Patient_Profile_view_Change_Language": "تغيير اللغة",
     "Patient_Profile_view_Log_out": "تسجيل الخروج",
+        "Patient_Profile_view_Rewards":"الهدايا",
+
     "Patient_Profile_view_Tap_here_to_edit_your_profile_information": "اضغط هنا لتعديل معلومات ملفك الشخصي",
     "Patient_Profile_view_Toggle_between_light_and_dark_themes": "اضغط هنا للتبديل بين الوضع الفاتح والداكن",
     "Patient_Profile_view_View_or_manage_your_supervisors": "اضغط هنا لإضافة المشرف الخاص بك",
     "Patient_Profile_view_Switch_between_languages": "اضغط هنا لتغيير اللغة",
     "Patient_Profile_view_Sign_out_of_your_account": "اضغط هنا لتسجيل الخروج من حسابك",
+  "Patient_Profile_view_reward": "اضغط هنا لمراجعة تقدمك",
+
    
 
      "Admin_Profile_Supervisor_Data": "اضغط هنا لعرض المشرفين في النظام",

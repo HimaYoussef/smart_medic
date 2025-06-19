@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/core/widgets/build_text_field.dart';
 import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../Services/firebaseServices.dart';
 import '../../../../../core/widgets/Custom_button.dart';
@@ -17,10 +18,115 @@ class Refill_Medicine extends StatefulWidget {
 }
 
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-final TextEditingController _NumofPillsController = TextEditingController();
+final TextEditingController _numOfPillsController = TextEditingController();
 
 class _nameState extends State<Refill_Medicine> {
   User? user = FirebaseAuth.instance.currentUser;
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _numOfPillsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refillMedicine() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      QuerySnapshot medSnapshot = await FirebaseFirestore.instance
+          .collection('medications')
+          .where('patientId', isEqualTo: user!.uid)
+          .where('compartmentNumber', isEqualTo: widget.compartmentNum)
+          .get();
+
+      if (medSnapshot.docs.isNotEmpty) {
+        String medId = medSnapshot.docs.first.id;
+        int pillsNow = medSnapshot.docs.first['pillsLeft'];
+        int addedPills = int.parse(_numOfPillsController.text);
+
+        // Check if total pills exceed 50
+        if (pillsNow + addedPills > 50) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Total pills cannot exceed 50. Current: $pillsNow, Adding: $addedPills.',
+                style: TextStyle(color: AppColors.white),
+              ),
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.mainColorDark
+                  : AppColors.mainColor,
+              duration: Duration(seconds: 3),
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        await SmartMedicalDb.updateMedicine(
+          medicineId: medId,
+          updates: {
+            'pillsLeft': pillsNow + addedPills,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          },
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Medicine refilled successfully! Total pills: ${pillsNow + addedPills}',
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'No medicine found for this compartment.',
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
+      _numOfPillsController.clear();
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'An error occurred. Please try again.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,50 +179,17 @@ class _nameState extends State<Refill_Medicine> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    TextFormField(
+                    CustomTextField(
                       keyboardType: TextInputType.number,
-                      controller: _NumofPillsController,
-                      decoration:  InputDecoration(
-                        hintText: S.of(context).Refill_Medicine_Enter_The_Num_of_pills_added,
-                      ),
+                      readOnly: false,
+                      controller: _numOfPillsController,
                       textInputAction: TextInputAction.done,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return S.of(context).Refill_Medicine_Please_enter_the_number_of_pills;
-                        }
-                        return null;
-                      },
+                      onFieldSubmitted: (_) => _refillMedicine(),
                     ),
                     const SizedBox(height: 55.0),
                     CustomButton(
                       text: 'Refill',
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                          // Update pillsLeft in Firestore for compartment 1
-                          QuerySnapshot medSnapshot = await FirebaseFirestore
-                              .instance
-                              .collection('medications')
-                              .where('patientId', isEqualTo: user!.uid)
-                              .where('compartmentNumber', isEqualTo: widget.compartmentNum)
-                              .get();
-
-                          if (medSnapshot.docs.isNotEmpty) {
-                            String medId = medSnapshot.docs.first.id;
-                            int pillsNow = medSnapshot.docs.first['pillsLeft'];
-                            await SmartMedicalDb.updateMedicine(
-                              medicineId: medId ,
-                              updates: {
-                                'pillsLeft':
-                                int.parse(_NumofPillsController.text)+pillsNow,
-                                'lastUpdated': FieldValue.serverTimestamp(),
-                              },
-                            );
-                          }
-                          _NumofPillsController.text='';
-                          Navigator.pop(context);
-                        }
-                      },
+                      onPressed: _refillMedicine,
                     ),
                   ],
                 ),

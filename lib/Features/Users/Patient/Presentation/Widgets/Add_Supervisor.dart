@@ -21,7 +21,7 @@ class Add_SuperVisor extends StatefulWidget {
 
 class _Add_SuperVisor extends State<Add_SuperVisor> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _SuperVisorEmailController =
+  final TextEditingController _superVisorEmailController =
       TextEditingController();
 
   late String _SuperVisor_Type;
@@ -41,29 +41,46 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
     setState(() {
       _isLoading = true;
     });
+    try {
+      var result = await SmartMedicalDb.addSupervisor(
+        email: _superVisorEmailController.text.trim(),
+        type: _SuperVisor_Type,
+        patientId: user!.uid,
+      );
 
-    var result = await SmartMedicalDb.addSupervisor(
-      email: _SuperVisorEmailController.text.trim(),
-      type: _SuperVisor_Type,
-      patientId: user!.uid,
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (result['success']) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             result['message'],
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
         ),
       );
-      Navigator.pop(context);
-    } else {
-      showErrorDialog(context, result['message']);
+      if (result['success']) {
+        _superVisorEmailController.clear();
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'An error occurred. Please try again.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -130,7 +147,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                       ),
                       const SizedBox(height: 15),
                       CustomTextField(
-                        controller: _SuperVisorEmailController,
+                      controller: _superVisorEmailController,
                         readOnly: false,
                         keyboardType: TextInputType.emailAddress,
                         validatorText:
@@ -171,10 +188,10 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                         ),
                       ),
                       const Gap(30),
-                      if (_isLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else
-                        CustomButton(
+                      _isLoading
+                       ? const Center(child: CircularProgressIndicator())
+                      
+                       : CustomButton(
                           text: S.of(context).Add_Supervisor_Supervisor_Add,
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
@@ -206,7 +223,7 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
 
   @override
   void dispose() {
-    _SuperVisorEmailController.dispose();
+    _superVisorEmailController.dispose();
     super.dispose();
   }
 }

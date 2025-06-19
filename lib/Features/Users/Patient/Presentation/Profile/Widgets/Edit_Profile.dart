@@ -4,18 +4,18 @@ import 'package:gap/gap.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/Custom_button.dart';
 import 'package:smart_medic/generated/l10n.dart';
-import '../../../../../Services/firebaseServices.dart';
-import '../../../../../core/widgets/BuildText.dart';
-import '../../../../../core/widgets/build_text_field.dart';
+import '../../../../../../../Services/firebaseServices.dart';
+import '../../../../../../../core/widgets/BuildText.dart';
+import '../../../../../../../core/widgets/build_text_field.dart';
 
 class Edit_Profile extends StatefulWidget {
   const Edit_Profile({super.key});
 
   @override
-  State<Edit_Profile> createState() => _Edit_Profile();
+  State<Edit_Profile> createState() => _EditProfileState();
 }
 
-class _Edit_Profile extends State<Edit_Profile> {
+class _EditProfileState extends State<Edit_Profile> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _profileNameController = TextEditingController();
   final TextEditingController _profileEmailController = TextEditingController();
@@ -31,24 +31,32 @@ class _Edit_Profile extends State<Edit_Profile> {
 
   Future<void> _loadProfile() async {
     if (user != null) {
-      var result = await SmartMedicalDb.getPatientProfile(user!.uid);
-      if (result['success']) {
-        setState(() {
-          _profileNameController.text = result['data']['name'] ?? user!.displayName ?? '';
-          _profileEmailController.text = result['data']['email'] ?? user!.email ?? '';
-          _profileAgeController.text = result['data']['age']?.toString() ?? '';
-          _isLoading = false;
-        });
-      } else {
+      try {
+        var result = await SmartMedicalDb.getPatientProfile(user!.uid);
+        if (result['success']) {
+          setState(() {
+            _profileNameController.text = result['data']['name'] ?? user!.displayName ?? '';
+            _profileEmailController.text = result['data']['email'] ?? user!.email ?? '';
+            _profileAgeController.text = result['data']['age']?.toString() ?? '';
+            _isLoading = false;
+          });
+        } else {
+          throw Exception(result['message']);
+        }
+      } catch (e) {
         setState(() {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              result['message'],
+              'Failed to load profile: ${e.toString()}',
               style: TextStyle(color: AppColors.white),
             ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+            duration: Duration(seconds: 3),
           ),
         );
       }
@@ -56,50 +64,124 @@ class _Edit_Profile extends State<Edit_Profile> {
       setState(() {
         _isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No user is signed in.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 
   Future<void> _updateProfile() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-      setState(() {
-        _isLoading = true;
-      });
+    final name = _profileNameController.text.trim();
+    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(name)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Name must contain only letters and spaces.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
 
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
       var result = await SmartMedicalDb.updateUserProfile(
         userId: user!.uid,
         updates: {
-          'name': _profileNameController.text,
-          'email': _profileEmailController.text,
+          'name': name,
+          'email': _profileEmailController.text.trim(),
           'age': int.parse(_profileAgeController.text),
         },
       );
 
       if (result['success']) {
-        // Update Firebase Auth profile
-        await user!.updateDisplayName(_profileNameController.text);
-        if (_profileEmailController.text != user!.email) {
-          await user!.updateEmail(_profileEmailController.text);
+        await user!.updateDisplayName(name);
+        if (_profileEmailController.text.trim() != user!.email) {
+          await user!.updateEmail(_profileEmailController.text.trim());
         }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Profile updated successfully!',
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+            duration: Duration(seconds: 3),
+          ),
+        );
+
+        _profileNameController.clear();
+        _profileEmailController.clear();
+        _profileAgeController.clear();
+        Navigator.pop(context);
+      } else {
+        throw Exception(result['message']);
       }
-
-      setState(() {
-        _isLoading = false;
-      });
-
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'email-already-in-use':
+          errorMessage = 'This email is already in use.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email address.';
+          break;
+        default:
+          errorMessage = 'An error occurred: ${e.message}';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            result['message'],
+            errorMessage,
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
         ),
       );
-
-      if (result['success']) {
-        Navigator.pop(context);
-      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to update profile: ${e.toString()}',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -109,9 +191,12 @@ class _Edit_Profile extends State<Edit_Profile> {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).brightness == Brightness.dark
-              ? AppColors.white
-              : AppColors.black,),
+          child: Icon(
+            Icons.arrow_back_ios_new,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.white
+                : AppColors.black,
+          ),
         ),
         actions: [
           Image.asset(

@@ -106,7 +106,53 @@ class _EditMedicineState extends State<EditMedicine> {
     return num != null && num > 0 && num <= 4;
   }
 
+  void _showLoadingOverlay(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  void _hideLoadingOverlay(BuildContext context) {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _updateMedicine() async {
+    if (_isLoading) return;
+
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please fill all required fields correctly.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+
+    int pillsLeft = int.parse(_pillsController.text);
+    if (pillsLeft > 50) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Total pills cannot exceed 50.',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
     if (_scheduleType == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -114,6 +160,9 @@ class _EditMedicineState extends State<EditMedicine> {
             S.of(context).EditMedicine_Please_select_a_schedule_type,
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -128,6 +177,9 @@ class _EditMedicineState extends State<EditMedicine> {
                 .EditMedicine_Please_select_all_times_for_daily_schedule,
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -141,6 +193,9 @@ class _EditMedicineState extends State<EditMedicine> {
                 .EditMedicine_Please_select_a_time_for_every_X_days_schedule,
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -154,6 +209,9 @@ class _EditMedicineState extends State<EditMedicine> {
                 .EditMedicine_Please_select_at_least_one_day_for_specific_days_schedule,
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -167,6 +225,9 @@ class _EditMedicineState extends State<EditMedicine> {
             'Please select a common time for the selected days',
             style: TextStyle(color: AppColors.white),
           ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
         ),
       );
       return;
@@ -175,6 +236,7 @@ class _EditMedicineState extends State<EditMedicine> {
       setState(() {
         _isLoading = true;
       });
+      _showLoadingOverlay(context);
 
       Map<String, dynamic> updates = {
         'name': _medNameController.text,
@@ -279,12 +341,16 @@ class _EditMedicineState extends State<EditMedicine> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  "Failed to send ${med['name']} to Arduino: $e",
+                  'Error updating medication: $e',
                   style: TextStyle(color: AppColors.white),
                 ),
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.mainColorDark
+                    : AppColors.mainColor,
               ),
             );
           }
+          _hideLoadingOverlay(context);
           await SmartMedicalDb.updateMedicationSyncStatus(
             medId: med['id'],
             syncStatus: 'Pending',

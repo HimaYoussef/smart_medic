@@ -1329,6 +1329,46 @@ class S {
     );
   }
 
+  /// `Always Finish Your Antibiotics—Even If You Feel Better`
+  String get Awareness_view_title3 {
+    return Intl.message(
+      'Always Finish Your Antibiotics—Even If You Feel Better',
+      name: 'Awareness_view_title3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If your doctor gives you antibiotics, it’s important to finish the full course. Even if you feel better after a few days, stopping early can cause the infection to return—stronger than before. Your smart box keeps track of how many days are left and reminds you until the last pill. It’s a simple way to protect yourself from future illness. Let’s treat the infection right the first time.`
+  String get Awareness_view_description3 {
+    return Intl.message(
+      'If your doctor gives you antibiotics, it’s important to finish the full course. Even if you feel better after a few days, stopping early can cause the infection to return—stronger than before. Your smart box keeps track of how many days are left and reminds you until the last pill. It’s a simple way to protect yourself from future illness. Let’s treat the infection right the first time.',
+      name: 'Awareness_view_description3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are You Taking Multiple Medications? Stay Safe`
+  String get Awareness_view_title4 {
+    return Intl.message(
+      'Are You Taking Multiple Medications? Stay Safe',
+      name: 'Awareness_view_title4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Many older adults take more than one medicine a day—and that’s okay, but it needs care. Some pills don’t mix well together. Your smart medical box and app help organize everything so you take the right pills at the right time. If anything ever feels off, always call your doctor. Staying informed is one of the best ways to stay healthy.`
+  String get Awareness_view_description4 {
+    return Intl.message(
+      'Many older adults take more than one medicine a day—and that’s okay, but it needs care. Some pills don’t mix well together. Your smart medical box and app help organize everything so you take the right pills at the right time. If anything ever feels off, always call your doctor. Staying informed is one of the best ways to stay healthy.',
+      name: 'Awareness_view_description4',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Logs`
   String get Patient_Logs_View_logs {
     return Intl.message(
@@ -1489,6 +1529,16 @@ class S {
     );
   }
 
+  /// `Rewards`
+  String get Patient_Profile_view_Rewards {
+    return Intl.message(
+      'Rewards',
+      name: 'Patient_Profile_view_Rewards',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Click Here To Edit Your Profile`
   String get Patient_Profile_view_Tap_here_to_edit_your_profile_information {
     return Intl.message(
@@ -1534,6 +1584,16 @@ class S {
     return Intl.message(
       'Click Here To Log out From Your Acoount',
       name: 'Patient_Profile_view_Sign_out_of_your_account',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click Here To See Review your Progress`
+  String get Patient_Profile_view_reward {
+    return Intl.message(
+      'Click Here To See Review your Progress',
+      name: 'Patient_Profile_view_reward',
       desc: '',
       args: [],
     );

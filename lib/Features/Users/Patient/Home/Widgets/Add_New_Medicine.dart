@@ -30,6 +30,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   final TextEditingController _dosageController = TextEditingController();
   final TextEditingController _numTimesController = TextEditingController();
   final TextEditingController _daysIntervalController = TextEditingController();
+
   int _scheduleType = 0;
   List<String> _times = [];
   List<TimeOfDay?> _selectedTimes = [];
@@ -50,6 +51,20 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   void initState() {
     super.initState();
     _bluetoothManager.initBluetooth();
+  }
+
+  void _showLoadingOverlay(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  void _hideLoadingOverlay(BuildContext context) {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
   }
 
   void _updateTimesList() {
@@ -778,78 +793,114 @@ in summary Your task is to analyze the image and perform the following steps in 
                       ],
                     ],
                     const SizedBox(height: 30),
-                    CustomButton(
-                      text: S.of(context).Add_New_Medicine_Submit,
-                      onPressed: () async {
-                        if (_scheduleType == 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                S
-                                    .of(context)
-                                    .Add_New_Medicine_Please_select_a_schedule_type,
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 1 &&
-                            (_selectedTimes.isEmpty ||
-                                _selectedTimes.contains(null))) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                S
-                                    .of(context)
-                                    .Add_New_Medicine_Please_select_all_times_for_daily_schedule,
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 2 &&
-                            _selectedTime == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                S
-                                    .of(context)
-                                    .Add_New_Medicine_Please_select_a_time_for_every_X_days_schedule,
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 3 &&
-                            !_bitmaskDays.contains(1)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                S
-                                    .of(context)
-                                    .Add_New_Medicine_Please_select_at_least_one_day_for_specific_days_schedule,
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_scheduleType == 3 &&
-                            _bitmaskDays.contains(1) &&
-                            _commonTimeForSpecificDays.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                S
-                                    .of(context)
-                                    .Add_New_Medicine_Please_select_a_time_for_specific_days_schedule,
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        } else if (_formKey.currentState!.validate()) {
-                          await addMedication();
-                          if (mounted) {
-                            Navigator.pop(context);
-                          }
-                        }
-                      },
-                    ),
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : CustomButton(
+                            text: S.of(context).Add_New_Medicine_Submit,
+                            onPressed: () async {
+                              if (!_formKey.currentState!.validate()) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Please fill all required fields correctly.',
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                    backgroundColor:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? AppColors.mainColorDark
+                                            : AppColors.mainColor,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              int pillsLeft = int.parse(_pillsController.text);
+                              if (pillsLeft > 50) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Total pills cannot exceed 50.',
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                    backgroundColor:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? AppColors.mainColorDark
+                                            : AppColors.mainColor,
+                                  ),
+                                );
+                                return;
+                              }
+                              if (_scheduleType == 0) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_a_schedule_type,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                  ),
+                                );
+                              } else if (_scheduleType == 1 &&
+                                  (_selectedTimes.isEmpty ||
+                                      _selectedTimes.contains(null))) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_all_times_for_daily_schedule,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                  ),
+                                );
+                              } else if (_scheduleType == 2 &&
+                                  _selectedTime == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_a_time_for_every_X_days_schedule,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                  ),
+                                );
+                              } else if (_scheduleType == 3 &&
+                                  !_bitmaskDays.contains(1)) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_at_least_one_day_for_specific_days_schedule,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                  ),
+                                );
+                              } else if (_scheduleType == 3 &&
+                                  _bitmaskDays.contains(1) &&
+                                  _commonTimeForSpecificDays.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_a_time_for_specific_days_schedule,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                  ),
+                                );
+                              } else if (_formKey.currentState!.validate()) {
+                                await addMedication();
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                }
+                              }
+                            },
+                          ),
                     const SizedBox(height: 5),
                   ],
                 ),

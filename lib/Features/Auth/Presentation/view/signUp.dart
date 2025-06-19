@@ -265,7 +265,6 @@ class SignUpScreen extends StatelessWidget {
                                             email: email,
                                             password: password,
                                             type: role,
-                                            context: context,
                                           );
                                         }
                                       },

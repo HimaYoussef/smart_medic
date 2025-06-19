@@ -5,7 +5,7 @@ import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Maintainer/Patient_Data.dart';
 import 'package:smart_medic/Features/Users/Maintainer/Superviosr_Data.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Supervision_view.dart';
-import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
+import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Edit_Profile.dart';
 import 'package:smart_medic/LocalProvider.dart';
 import 'package:smart_medic/Services/firebaseServices.dart';
 import 'package:smart_medic/core/utils/Colors.dart';

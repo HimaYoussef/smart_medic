@@ -40,11 +40,20 @@ class LogItem extends StatelessWidget {
           // Display checkbox or clock icon based on the task status.
           if (isChecked != null) ...[
             const Spacer(),
-            Icon(
-              isChecked! ? Icons.check_box : Icons.access_time,
-              color: Colors.white,
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color:Colors.white,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Icon(
+                isChecked! ? Icons.check : Icons.close_rounded,
+                color: Colors.grey,
+                size: 15,
+              ),
             ),
           ],
+
         ],
       ),
     );

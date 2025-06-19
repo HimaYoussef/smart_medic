@@ -1,18 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:smart_medic/Services/rewardsService.dart';
+
+import 'notificationService.dart';
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-final FirebaseStorage _storage = FirebaseStorage.instance;
 final CollectionReference usersCollection = _firestore.collection("users");
-final CollectionReference smartMedicalBoxCollection =
-    _firestore.collection("smartMedicalBox");
-final CollectionReference medicationsCollection =
-    _firestore.collection("medications");
+final CollectionReference smartMedicalBoxCollection = _firestore.collection("smartMedicalBox");
+final CollectionReference medicationsCollection = _firestore.collection("medications");
 final CollectionReference logsCollection = _firestore.collection("logs");
-final CollectionReference notificationsCollection =
-    _firestore.collection("notifications");
-final CollectionReference supervisionCollection =
-    _firestore.collection('supervision');
+final CollectionReference notificationsCollection = _firestore.collection("notifications");
+final CollectionReference supervisionCollection = _firestore.collection('supervision');
 
 class SmartMedicalDb {
   // Add User
@@ -31,6 +30,8 @@ class SmartMedicalDb {
         "email": email,
         "type": type,
         "createdAt": FieldValue.serverTimestamp(),
+        'currentStreak': 0,
+        'lastDoseStatus': '',
       };
 
       await documentReferencer.set(data);
@@ -52,8 +53,9 @@ class SmartMedicalDb {
   }
 
   // Delete User
-  static Future<Map<String, dynamic>> deleteUser(
-      {required String userId}) async {
+  static Future<Map<String, dynamic>> deleteUser({
+    required String userId,
+  }) async {
     try {
       DocumentReference documentReferencer = usersCollection.doc(userId);
       await documentReferencer.delete();
@@ -88,76 +90,6 @@ class SmartMedicalDb {
     }
   }
 
-  // // Add a new supervisor
-  // static Future<Map<String, dynamic>> addSupervisor({
-  //   required String email,
-  //   required String type,
-  //   required String patientId,
-  // }) async {
-  //   try {
-  //     QuerySnapshot userQuery = await usersCollection
-  //         .where('email', isEqualTo: email)
-  //         .where('type', isEqualTo: 'Supervisor')
-  //         .limit(1)
-  //         .get();
-
-  //     if (userQuery.docs.isEmpty) {
-  //       return {
-  //         'success': false,
-  //         'message':
-  //             'Supervisor not found. Please ensure they are registered as a supervisor.',
-  //       };
-  //     }
-
-  //     var supervisorDoc = userQuery.docs.first;
-  //     String supervisorId = supervisorDoc.id;
-  //     String supervisorName = supervisorDoc['name'] ?? 'Unknown';
-
-  //     QuerySnapshot existingSupervisor = await supervisionCollection
-  //         .where('patientId', isEqualTo: patientId)
-  //         .where('supervisorId', isEqualTo: supervisorId)
-  //         .limit(1)
-  //         .get();
-
-  //     if (existingSupervisor.docs.isNotEmpty) {
-  //       return {
-  //         'success': false,
-  //         'message': 'This supervisor is already added for the patient.',
-  //       };
-  //     }
-
-  //     DocumentReference supervisorRef = supervisionCollection.doc(supervisorId);
-  //     await supervisorRef.set({
-  //       'supervisorId': supervisorId,
-  //       'name': supervisorName,
-  //       'email': email,
-  //       'type': type,
-  //       'patientId': patientId,
-  //       'createdAt': FieldValue.serverTimestamp(),
-  //       'updatedAt': FieldValue.serverTimestamp(),
-  //     }, SetOptions(merge: true));
-
-  //     await usersCollection
-  //         .doc(patientId)
-  //         .collection('supervisors')
-  //         .doc(supervisorId)
-  //         .set({
-  //       'supervisorId': supervisorId,
-  //       'addedAt': FieldValue.serverTimestamp(),
-  //     }, SetOptions(merge: true));
-
-  //     return {
-  //       'success': true,
-  //       'message': 'Supervisor added successfully',
-  //       'supervisorId': supervisorId,
-  //     };
-  //   } catch (e) {
-  //     return {
-  //       'success': false,
-  //       'message': 'Error adding supervisor: $e',
-  //     };
-  //   }
-  // }
   // Add a new supervisor
   static Future<Map<String, dynamic>> addSupervisor({
     required String email,
@@ -165,66 +97,50 @@ class SmartMedicalDb {
     required String patientId,
   }) async {
     try {
-      // Find the supervisor by email and type
-      QuerySnapshot supervisorQuery = await usersCollection
+      QuerySnapshot userQuery = await usersCollection
           .where('email', isEqualTo: email)
           .where('type', isEqualTo: 'Supervisor')
           .limit(1)
           .get();
 
-      if (supervisorQuery.docs.isEmpty) {
+      if (userQuery.docs.isEmpty) {
         return {
           'success': false,
-          'message':
-              'Supervisor not found. Please ensure they are registered as a supervisor.',
+          'message': 'Supervisor not found. Please ensure they are registered as a supervisor.',
         };
       }
 
-      var supervisorDoc = supervisorQuery.docs.first;
+      var supervisorDoc = userQuery.docs.first;
       String supervisorId = supervisorDoc.id;
       String supervisorName = supervisorDoc['name'] ?? 'Unknown';
 
-      // Fetch the patient's document
-      DocumentSnapshot patientDoc = await usersCollection.doc(patientId).get();
-      if (!patientDoc.exists) {
-        return {
-          'success': false,
-          'message': 'Patient not found.',
-        };
-      }
-      String patientName = patientDoc['name'] ?? 'Unknown';
-
-      // Check if the supervision relationship already exists
-      QuerySnapshot existingSupervision = await supervisionCollection
-          .where('supervisorId', isEqualTo: supervisorId)
+      // التحقق من وجود علاقة مسبقة
+      QuerySnapshot existingSupervisor = await supervisionCollection
           .where('patientId', isEqualTo: patientId)
+          .where('supervisorId', isEqualTo: supervisorId)
           .limit(1)
           .get();
 
-      if (existingSupervision.docs.isNotEmpty) {
+      if (existingSupervisor.docs.isNotEmpty) {
         return {
           'success': false,
           'message': 'This supervisor is already added for the patient.',
         };
       }
 
-      // Create a new document in supervision collection
-      DocumentReference supervisionRef =
-          supervisionCollection.doc(); // Generate unique ID
-      String supervisionId = supervisionRef.id;
-
-      await supervisionRef.set({
-        'supervisionId': supervisionId,
+      // إنشاء document جديد بـ ID فريد
+      DocumentReference supervisorRef = supervisionCollection.doc();
+      await supervisorRef.set({
         'supervisorId': supervisorId,
-        'patientId': patientId,
-        'supervisorName': supervisorName,
-        'patientName': patientName,
+        'name': supervisorName,
+        'email': email,
         'type': type,
+        'patientId': patientId,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      // Add to the patient's supervisors subcollection
+      // إضافة السجل في subcollection تحت المريض
       await usersCollection
           .doc(patientId)
           .collection('supervisors')
@@ -237,7 +153,7 @@ class SmartMedicalDb {
       return {
         'success': true,
         'message': 'Supervisor added successfully',
-        'supervisionId': supervisionId,
+        'supervisorId': supervisorId,
       };
     } catch (e) {
       return {
@@ -358,51 +274,74 @@ class SmartMedicalDb {
         .where('patientId', isEqualTo: patientId)
         .snapshots();
   }
-
-  // Read patients supervised by a specific supervisor
-  static Stream<QuerySnapshot> readPatientsForSupervisor(String supervisorId) {
-    return supervisionCollection
-        .where('supervisorId', isEqualTo: supervisorId)
-        .snapshots();
-  }
-
-// Fetch all users of type 'Supervisor'
+  // Fetch all users of type 'Supervisor'
   static Stream<QuerySnapshot> readAllSupervisors() {
     return usersCollection.where('type', isEqualTo: 'Supervisor').snapshots();
   }
   
-// Fetch all users of type 'Patient'
 static Stream<QuerySnapshot> readAllPatients() {
   return usersCollection
       .where('type', isEqualTo: 'Patient')
       .snapshots();
 }
-// Delete a supervision relationship
+  // Read patients supervised by a specific supervisor
+  static Stream<List<Map<String, dynamic>>> readPatientsForSupervisor(String supervisorId) async* {
+    // جلب البيانات من supervision collection
+    await for (QuerySnapshot supervisionSnapshot in supervisionCollection
+        .where('supervisorId', isEqualTo: supervisorId)
+        .snapshots()) {
+      List<Map<String, dynamic>> patientsWithDetails = [];
+
+      // جلب بيانات كل مريض من users collection
+      List<Future<Map<String, dynamic>>> futures = supervisionSnapshot.docs.map((doc) async {
+        String patientId = doc['patientId'];
+        Map<String, dynamic> supervisionData = doc.data() as Map<String, dynamic>;
+        supervisionData['id'] = doc.id; // إضافة ID الـ document
+
+        try {
+          DocumentSnapshot patientDoc = await FirebaseFirestore.instance.collection('users').doc(patientId).get();
+          if (patientDoc.exists) {
+            Map<String, dynamic> patientData = patientDoc.data() as Map<String, dynamic>;
+            return {
+              ...supervisionData,
+              'patientEmail': patientData['email'] ?? 'No email',
+              'patientName': patientData['name'] ?? 'Unknown',
+            };
+          } else {
+            return {
+              ...supervisionData,
+              'patientEmail': 'No email',
+              'patientName': 'Unknown',
+            };
+          }
+        } catch (e) {
+          print('Error fetching patient details for $patientId: $e');
+          return {
+            ...supervisionData,
+            'patientEmail': 'No email',
+            'patientName': 'Unknown',
+          };
+        }
+      }).toList();
+
+      // الانتظار لجلب كل البيانات
+      List<Map<String, dynamic>> results = await Future.wait(futures);
+      patientsWithDetails.addAll(results);
+
+      yield patientsWithDetails; // إرجاع القائمة المحدثة
+    }
+  }
+
+  // Delete a supervisor
   static Future<Map<String, dynamic>> deleteSupervision({
     required String supervisorId,
     required String patientId,
   }) async {
     try {
-      // Find the supervision document
-      QuerySnapshot supervisionQuery = await supervisionCollection
-          .where('supervisorId', isEqualTo: supervisorId)
-          .where('patientId', isEqualTo: patientId)
-          .limit(1)
-          .get();
+      // Delete supervisor document
+      await supervisionCollection.doc(supervisorId).delete();
 
-      if (supervisionQuery.docs.isEmpty) {
-        return {
-          'success': false,
-          'message': 'Supervision relationship not found.',
-        };
-      }
-
-      String supervisionId = supervisionQuery.docs.first.id;
-
-      // Delete the supervision document
-      await supervisionCollection.doc(supervisionId).delete();
-
-      // Remove from the patient's supervisors subcollection
+      // Remove supervisor from patient's supervisors sub-collection
       await usersCollection
           .doc(patientId)
           .collection('supervisors')
@@ -425,7 +364,7 @@ static Stream<QuerySnapshot> readAllPatients() {
   static Future<Map<String, dynamic>> getSupervisor(String supervisorId) async {
     try {
       DocumentSnapshot doc =
-          await supervisionCollection.doc(supervisorId).get();
+      await supervisionCollection.doc(supervisorId).get();
       if (doc.exists) {
         return {
           'success': true,
@@ -631,29 +570,108 @@ static Stream<QuerySnapshot> readAllPatients() {
     required int minutesMidnight,
   }) async {
     try {
-      DocumentReference documentReferencer = logsCollection.doc(logId);
 
-      Map<String, dynamic> data = <String, dynamic>{
+      await logsCollection.doc(logId).set({
         'patientId': patientId,
         'medicationId': medicationId,
         'status': status,
-        'spo2': spo2 ?? 0.0,
-        'heartRate': heartRate ?? 0,
+        'spo2': spo2,
+        'heartRate': heartRate,
         'dayOfYear': dayOfYear,
         'minutesMidnight': minutesMidnight,
-        'timestamp': FieldValue.serverTimestamp(),
-      };
+        'timestamp': Timestamp.now(),
+      });
 
-      await documentReferencer.set(data);
-      return {
-        'success': true,
-        'message': 'Log added successfully',
-      };
+      // Handle currentStreak for rewards
+      DocumentReference userRef = usersCollection.doc(patientId);
+      DocumentSnapshot userDoc = await userRef.get();
+      int currentStreak = userDoc.exists ? (userDoc.data() as Map<String, dynamic>)['currentStreak'] ?? 0 : 0;
+
+      if (status == 'taken') {
+        currentStreak++;
+      } else if (status == 'missed') {
+        currentStreak = 0;
+      }
+
+      await userRef.set({
+        'currentStreak': currentStreak,
+        'lastDoseStatus': status ?? '',
+      }, SetOptions(merge: true));
+
+      // Check for reward eligibility
+      await RewardsService().checkRewardEligibility(patientId, currentStreak);
+
+      if (medicationId !=null && status == "missed") {
+        DocumentSnapshot medicationDoc = await medicationsCollection.doc(medicationId).get();
+
+        if (!medicationDoc.exists) {
+          return {
+            'success': false,
+            'message': 'Medication not found for ID: $medicationId',
+          };
+        }
+        var medicationData = medicationDoc.data() as Map<String, dynamic>;
+        int missedCount = medicationData['missedCount'] ?? 0;
+        String name = medicationData['name'] ?? 'Unknown Medicine';
+
+        await medicationsCollection.doc(medicationId).update({
+          'missedCount': missedCount + 1,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        });
+
+        if (missedCount  >= 2) {
+          DocumentSnapshot userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(patientId)
+              .get();
+          String patientName = userDoc.exists
+              ? (userDoc.data() as Map<String, dynamic>)['name'] ?? 'Unknown Patient'
+              : 'Unknown Patient';
+
+          QuerySnapshot supervisors = await FirebaseFirestore.instance
+              .collection('supervision')
+              .where('patientId', isEqualTo: patientId)
+              .get();
+
+          for (var supervisor in supervisors.docs) {
+            String supervisorId = supervisor['supervisorId'];
+            await SmartMedicalDb.addNotification(
+              notificationId: DateTime.now().millisecondsSinceEpoch.toString(),
+              patientId: patientId,
+              supervisorId: supervisorId,
+              message: '$patientName missed 3 doses of $name',
+            );
+          }
+
+          await logsCollection.doc(DateTime.now().millisecondsSinceEpoch.toString()).set({
+            'patientId': patientId,
+            'medicationId': medicationId,
+            'status': 'supervisor_notified',
+            'spo2': null,
+            'heartRate': null,
+            'dayOfYear': dayOfYear,
+            'minutesMidnight': minutesMidnight,
+            'timestamp': Timestamp.now(),
+          });
+
+          await medicationsCollection.doc(medicationId).update({
+            'missedCount': 0,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          });
+
+          // Add notification to queue for supervisor
+          LocalNotificationService.notificationQueue.add({
+            'id': logId.hashCode,
+            'title': 'Patient Alert',
+            'body': '$patientName missed 3 doses of $name',
+            'payload': 'supervisor|$logId,$patientId',
+          });
+        }
+      }
+
+      return {'success': true, 'message': 'Log added successfully'};
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Error adding log: $e',
-      };
+      return {'success': false, 'message': 'Error adding log: $e'};
     }
   }
 
@@ -674,7 +692,7 @@ static Stream<QuerySnapshot> readAllPatients() {
   }) async {
     try {
       DocumentReference documentReferencer =
-          notificationsCollection.doc(notificationId);
+      notificationsCollection.doc(notificationId);
 
       Map<String, dynamic> data = {
         "patientId": patientId,
@@ -699,9 +717,40 @@ static Stream<QuerySnapshot> readAllPatients() {
 
   // Read Notifications
   static Stream<QuerySnapshot> readNotifications(String supervisorId) {
-    return notificationsCollection
-        .where("supervisorId", isEqualTo: supervisorId)
-        .orderBy("timestamp", descending: true)
+    return FirebaseFirestore.instance
+        .collection('notifications')
+        .where('supervisorId', isEqualTo: supervisorId)
+        .where('status', isEqualTo: 'sent')
         .snapshots();
+  }
+
+  static Stream<QuerySnapshot> readNotificationsForPatient(String patientId) {
+    return FirebaseFirestore.instance
+        .collection('notifications')
+        .where('patientId', isEqualTo: patientId)
+        .snapshots();
+  }
+
+
+
+  static Future<Map<String, dynamic>> markRewardAsUsed(String rewardId) async {
+    try {
+      await FirebaseFirestore.instance.collection('rewards').doc(rewardId).update({
+        'status': 'used',
+      });
+      return {'success': true, 'message': 'Reward marked as used'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error marking reward as used: $e'};
+    }
+  }
+
+  Future<void> initializeUserFields() async {
+    QuerySnapshot users = await FirebaseFirestore.instance.collection('users').get();
+    for (var user in users.docs) {
+      await user.reference.set({
+        'currentStreak': 0,
+        'lastDoseStatus': '',
+      }, SetOptions(merge: true));
+    }
   }
 }

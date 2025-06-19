@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_medic/Features/Auth/Presentation/view/resetPass.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view/signUp.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Maintainer/Maintainer_view.dart';
+import 'package:smart_medic/core/widgets/build_text_field.dart';
 import 'package:smart_medic/generated/l10n.dart';
 import '../../../../core/widgets/Custom_button.dart';
 import '../../../Users/Patient/Home/nav_bar.dart';
@@ -12,6 +15,8 @@ import '../../../../core/utils/Colors.dart';
 import '../view_model/Cubits/LoginCubit/login_cubit.dart';
 
 class LoginScreen extends StatelessWidget {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final String? role; // Make role optional
@@ -37,18 +42,64 @@ class LoginScreen extends StatelessWidget {
               pushAndRemoveUntil(context, const MaintainerView());
             }
           } else if (state is Failed) {
+            // Show error with option to resend verification email if needed
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
                   state.errorMessage,
                   style: TextStyle(color: AppColors.white),
                 ),
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.mainColorDark
+                    : AppColors.mainColor,
+                duration: Duration(seconds: 3),
+                action: state.errorMessage == 'Email not verified yet'
+                    ? SnackBarAction(
+                        label: 'Resend',
+                        textColor: AppColors.white,
+                        onPressed: () async {
+                          try {
+                            await FirebaseAuth.instance.currentUser
+                                ?.sendEmailVerification();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Verification email resent. Check your inbox.',
+                                  style: TextStyle(color: AppColors.white),
+                                ),
+                                backgroundColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Failed to resend verification email.',
+                                  style: TextStyle(color: AppColors.white),
+                                ),
+                                backgroundColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        },
+                      )
+                    : null,
               ),
             );
           }
         },
         builder: (context, state) {
-          final cubit = context.read<LoginCubit>();
+          final cubit = context.watch<LoginCubit>();
+          final isLoading = state is Loading;
           return Scaffold(
             body: Stack(
               children: [
@@ -103,134 +154,130 @@ class LoginScreen extends StatelessWidget {
                             ],
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Center(
-                                child: Container(
-                                  width: 64,
-                                  height: 64,
-                                  decoration: BoxDecoration(
+                              Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Center(
+                                      child: Container(
+                                        width: 64,
+                                        height: 64,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? AppColors.mainColorDark
+                                              : AppColors.mainColor,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: Icon(
+                                          Icons.medical_services,
+                                          color: AppColors.white,
+                                          size: 30,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    Center(
+                                      child: Text(
+                                        S.of(context).Login_Welcome_Back,
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 32),
+                                    CustomTextField(
+                                      controller: _emailController,
+                                      keyboardType: TextInputType.emailAddress,
+                                      readOnly: false,
+                                      labelText: S.of(context).Login_Email,
+                                      textInputAction: TextInputAction.next,
+                                    ),
+                                    const SizedBox(height: 24),
+                                    CustomTextField(
+                                      controller: _passwordController,
+                                      keyboardType: TextInputType.text,
+                                      readOnly: false,
+                                      labelText: S.of(context).Login_password,
+                                      obscureText: !cubit.isPasswordVisible,
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          cubit.isPasswordVisible
+                                              ? Icons.visibility_off
+                                              : Icons.visibility,
+                                          color: Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          context
+                                              .read<LoginCubit>()
+                                              .togglePasswordVisibility();
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    isLoading
+                                        ? const Center(
+                                            child: CircularProgressIndicator())
+                                        : CustomButton(
+                                            text: S.of(context).Login_SIGN_IN,
+                                            onPressed: () {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                context
+                                                    .read<LoginCubit>()
+                                                    .login(
+                                                      email: _emailController
+                                                          .text
+                                                          .trim(),
+                                                      pass: _passwordController
+                                                          .text,
+                                                    );
+                                              }
+                                            },
+                                          ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              GestureDetector(
+                                onTap: () {
+                                  pushTo(context, const ResetPassPage());
+                                },
+                                child: Text(
+                                  "Forgot Password?",
+                                  style: TextStyle(
                                     color: Theme.of(context).brightness ==
                                             Brightness.dark
                                         ? AppColors.mainColorDark
                                         : AppColors.mainColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Icon(
-                                    Icons.medical_services,
-                                    color: AppColors.white,
-                                    size: 30,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 24),
-                              Center(
+                              GestureDetector(
+                                onTap: () {
+                                  pushTo(context, RoleSelectionScreen());
+                                },
                                 child: Text(
-                                  S.of(context).Login_Welcome_Back,
+                                  S.of(context).Login_Dont_have_an_account,
                                   style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? AppColors.mainColorDark
+                                        : AppColors.mainColor,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 32),
-                              TextFormField(
-                                keyboardType: TextInputType.emailAddress,
-                                controller: _emailController,
-                                decoration: InputDecoration(
-                                  border: UnderlineInputBorder(),
-                                  labelText: S.of(context).Login_Email,
-                                  labelStyle: TextStyle(color: Colors.grey),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              TextField(
-                                controller: _passwordController,
-                                obscureText: !context
-                                    .watch<LoginCubit>()
-                                    .isPasswordVisible,
-                                decoration: InputDecoration(
-                                  border: const UnderlineInputBorder(),
-                                  labelText: S.of(context).Login_password,
-                                  labelStyle:
-                                      const TextStyle(color: Colors.grey),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      context
-                                              .watch<LoginCubit>()
-                                              .isPasswordVisible
-                                          ? Icons.visibility_off
-                                          : Icons.visibility,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      cubit.togglePasswordVisibility();
-                                    },
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              state is Loading
-                                  ? const Center(
-                                      child: CircularProgressIndicator())
-                                  : CustomButton(
-                                      text: S.of(context).Login_SIGN_IN,
-                                      onPressed: () async {
-                                        final email =
-                                            _emailController.text.trim();
-                                        final password =
-                                            _passwordController.text;
-                                        if (email.isEmpty || password.isEmpty) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                S.of(context).Login_SnackBar,
-                                                style: TextStyle(
-                                                    color: AppColors.white),
-                                              ),
-                                            ),
-                                          );
-                                          return;
-                                        }
-                                        await cubit.login(
-                                          email: email,
-                                          pass: password,
-                                          context: context,
-                                        );
-                                      },
-                                    ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RoleSelectionScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          S.of(context).Login_Dont_have_an_account,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? AppColors.mainColorDark
-                                    : AppColors.mainColor,
-                          ),
-                        ),
-                      ),
+                      )
                     ],
                   ),
-                ),
+                )
               ],
             ),
           );

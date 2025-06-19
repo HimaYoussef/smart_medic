@@ -1,10 +1,7 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_medic/Services/firebaseServices.dart';
-import 'package:smart_medic/generated/l10n.dart';
 
 part 'login_state.dart';
 
@@ -19,54 +16,54 @@ class LoginCubit extends Cubit<LoginState> {
 
   String role = "";
 
-  Future<void> login({
-    required String email,
-    required String pass,
-    required BuildContext context,
-  }) async {
+  Future<bool> _isEmailVerified(User? user) async {
+    if (user == null) return false;
+    await user.reload();
+    return user.emailVerified;
+  }
+
+  Future<void> login({required String email, required String pass}) async {
     emit(Loading());
     try {
-      // Proceed with Firebase authentication for non-static accounts
+      // Sign in with Firebase
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: pass,
       );
-
       final user = userCredential.user;
       if (user == null) {
-        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage1));
+        emit(Failed(errorMessage: 'User not found after sign-in'));
         return;
       }
-
-      await user.reload();
       if (!user.emailVerified) {
-        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage2));
+        emit(Failed(errorMessage: 'Email not verified'));
         return;
       }
-
-      final userData = await SmartMedicalDb.getUserById(user.uid);
-
-      if (userData == null) {
-        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage3));
-        return;
-      }
-      // final actualRole = userData['type'];
-      
-      role = userData['type'];
+      // Success case: email is verified
       emit(Success());
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage4));
-      } else if (e.code == 'wrong-password') {
-        emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage5));
-      } else {
-        emit(Failed(
-          errorMessage: e.message ?? S.of(context).login_cubit_errorMessage6,
-        ));
+      String errorMessage;
+      switch (e.code) {
+        case 'invalid-credential':
+          errorMessage = 'Invalid email or password';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password';
+          break;
+        case 'user-not-found':
+          errorMessage = 'User not found';
+          break;
+        case 'user-disabled':
+          errorMessage = 'User account is disabled';
+          break;
+        default:
+          errorMessage = 'Authentication failed';
       }
+      emit(Failed(errorMessage: errorMessage));
+      log('FirebaseAuthException: ${e.code} - ${e.message}');
     } catch (e) {
-      emit(Failed(errorMessage: S.of(context).login_cubit_errorMessage7));
-      print("Error: $e");
+      emit(Failed(errorMessage: 'Unexpected error occurred'));
+      log('Error: $e');
     }
   }
 

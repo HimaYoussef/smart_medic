@@ -190,11 +190,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "Awareness_view_description2": MessageLookupByLibrary.simpleMessage(
       "Whether you\'re trying to lose weight, gain weight, or stick to your current weight, it\'s important to know how many calories you need to eat each day.",
     ),
+    "Awareness_view_description3": MessageLookupByLibrary.simpleMessage(
+      "If your doctor gives you antibiotics, it’s important to finish the full course. Even if you feel better after a few days, stopping early can cause the infection to return—stronger than before. Your smart box keeps track of how many days are left and reminds you until the last pill. It’s a simple way to protect yourself from future illness. Let’s treat the infection right the first time.",
+    ),
+    "Awareness_view_description4": MessageLookupByLibrary.simpleMessage(
+      "Many older adults take more than one medicine a day—and that’s okay, but it needs care. Some pills don’t mix well together. Your smart medical box and app help organize everything so you take the right pills at the right time. If anything ever feels off, always call your doctor. Staying informed is one of the best ways to stay healthy.",
+    ),
     "Awareness_view_title1": MessageLookupByLibrary.simpleMessage(
       "Mental Health",
     ),
     "Awareness_view_title2": MessageLookupByLibrary.simpleMessage(
       "Daily Calorie",
+    ),
+    "Awareness_view_title3": MessageLookupByLibrary.simpleMessage(
+      "Always Finish Your Antibiotics—Even If You Feel Better",
+    ),
+    "Awareness_view_title4": MessageLookupByLibrary.simpleMessage(
+      "Are You Taking Multiple Medications? Stay Safe",
     ),
     "EditMedicine_Add_Time": MessageLookupByLibrary.simpleMessage("Add Time"),
     "EditMedicine_Bluetooth_not_connected_Data_will_be_sent_later":
@@ -383,6 +395,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Patient_Profile_view_Profile": MessageLookupByLibrary.simpleMessage(
       "Profile",
     ),
+    "Patient_Profile_view_Rewards": MessageLookupByLibrary.simpleMessage(
+      "Rewards",
+    ),
     "Patient_Profile_view_Sign_out_of_your_account":
         MessageLookupByLibrary.simpleMessage(
           "Click Here To Log out From Your Acoount",
@@ -404,6 +419,9 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Click Here To Add Your Supervisor",
         ),
+    "Patient_Profile_view_reward": MessageLookupByLibrary.simpleMessage(
+      "Click Here To See Review your Progress",
+    ),
     "Refill_Medicine_Enter_The_Num_of_pills_added":
         MessageLookupByLibrary.simpleMessage("Enter The Num of pills added"),
     "Refill_Medicine_Head": MessageLookupByLibrary.simpleMessage(

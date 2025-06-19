@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Auth/Presentation/view/login.dart';
 import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
 import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Supervision_view.dart';
-import 'package:smart_medic/Features/Users/Patient/Presentation/Widgets/Edit_Profile.dart';
+import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Edit_Profile.dart';
+import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/rewardsView.dart';
 import 'package:smart_medic/LocalProvider.dart';
 import 'package:smart_medic/Services/firebaseServices.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
@@ -32,6 +33,7 @@ class _PatientProfileViewState extends State<PatientProfileView> {
   final GlobalKey _supervisorKey = GlobalKey();
   final GlobalKey _languageKey = GlobalKey();
   final GlobalKey _logoutKey = GlobalKey();
+  final GlobalKey _Rewardkey = GlobalKey();
 
   @override
   void initState() {
@@ -41,6 +43,7 @@ class _PatientProfileViewState extends State<PatientProfileView> {
         _editKey,
         _darkModeKey,
         _supervisorKey,
+        _Rewardkey,
         _languageKey,
         _logoutKey,
       ]);
@@ -311,6 +314,48 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                                     MaterialPageRoute(
                                       builder: (context) =>
                                           const SupervisorsScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const Divider(),
+
+                            // Rewards Section
+                            Showcase(
+                              key: _Rewardkey,
+                              tooltipBackgroundColor:
+                                  Theme.of(context).primaryColor,
+                              textColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.white
+                                  : AppColors.black,
+                              descTextStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              tooltipPadding: EdgeInsets.all(10),
+                              description:
+                                  S.of(context).Patient_Profile_view_reward,
+                              child: ListTile(
+                                leading: Icon(
+                                  Icons.card_giftcard,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? AppColors.mainColorDark
+                                      : AppColors.mainColor,
+                                ),
+                                title:  Text(S
+                                    .of(context)
+                                    .Patient_Profile_view_Rewards),
+                                trailing: const Icon(Icons.arrow_forward_ios,
+                                    size: 16),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          RewardsView(patientId: user!.uid),
                                     ),
                                   );
                                 },

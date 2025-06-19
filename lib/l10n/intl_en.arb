@@ -140,6 +140,10 @@
     "Awareness_view_description1":"During the COVID-19 pandemic, young people experienced spikes in mental health difficulties, with girls taking a harder hit.",
     "Awareness_view_title2":"Daily Calorie",
     "Awareness_view_description2":"Whether you're trying to lose weight, gain weight, or stick to your current weight, it's important to know how many calories you need to eat each day.",
+    "Awareness_view_title3":"Always Finish Your Antibiotics—Even If You Feel Better",
+    "Awareness_view_description3":"If your doctor gives you antibiotics, it’s important to finish the full course. Even if you feel better after a few days, stopping early can cause the infection to return—stronger than before. Your smart box keeps track of how many days are left and reminds you until the last pill. It’s a simple way to protect yourself from future illness. Let’s treat the infection right the first time.",
+    "Awareness_view_title4":"Are You Taking Multiple Medications? Stay Safe",
+    "Awareness_view_description4":"Many older adults take more than one medicine a day—and that’s okay, but it needs care. Some pills don’t mix well together. Your smart medical box and app help organize everything so you take the right pills at the right time. If anything ever feels off, always call your doctor. Staying informed is one of the best ways to stay healthy.",
 
     "Patient_Logs_View_logs":"Logs",
     "Patient_Logs_View_Error_loading_logs":"Error loading logs",
@@ -160,11 +164,13 @@
     "Patient_Profile_view_Supervisor":"Supervisor",
     "Patient_Profile_view_Change_Language":"Change Language",
     "Patient_Profile_view_Log_out":"Log out",
+    "Patient_Profile_view_Rewards":"Rewards",
     "Patient_Profile_view_Tap_here_to_edit_your_profile_information":"Click Here To Edit Your Profile",
     "Patient_Profile_view_Toggle_between_light_and_dark_themes":"Click Here To Toggle Between Dark & Light Mode",
     "Patient_Profile_view_View_or_manage_your_supervisors":"Click Here To Add Your Supervisor",
     "Patient_Profile_view_Switch_between_languages":"Click Here To Change Your Language",
     "Patient_Profile_view_Sign_out_of_your_account":"Click Here To Log out From Your Acoount",
+    "Patient_Profile_view_reward":"Click Here To See Review your Progress",
 
 
     "Admin_Profile_Supervisor_Data":"Click Here To Display The Supervisors in the System",

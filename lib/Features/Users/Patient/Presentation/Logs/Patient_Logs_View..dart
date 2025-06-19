@@ -44,81 +44,48 @@ class _PatientLogsViewState extends State<PatientLogsView> {
 
             if (notificationResponse.actionId == 'taken') {
               // Log the dose as taken
-              await FirebaseFirestore.instance.collection('logs').add({
-                'medicationId': medId,
-                'patientId': user!.uid,
-                'status': 'taken',
-                'timestamp': Timestamp.now(),
-              });
+              try {
+                DateTime now = DateTime.now();
+                DateTime startOfYear = DateTime(now.year, 1, 1);
+                int dayOfYear = now.difference(startOfYear).inDays + 1;
+                int minutesMidnight = now.hour * 60 + now.minute;
 
-              // Update pillsLeft
-              DocumentReference medRef = FirebaseFirestore.instance
-                  .collection('medications')
-                  .doc(medId);
-              DocumentSnapshot medDoc = await medRef.get();
-              int pillsLeft =
-                  (medDoc.data() as Map<String, dynamic>)['pillsLeft'] ?? 0;
-              await medRef.update({'pillsLeft': pillsLeft - dosage});
+                await SmartMedicalDb.addLog(
+                  logId: DateTime.now().millisecondsSinceEpoch.toString(),
+                  patientId: user!.uid,
+                  medicationId: medId,
+                  status: 'taken',
+                  spo2: null,
+                  heartRate: null,
+                  dayOfYear: dayOfYear,
+                  minutesMidnight: minutesMidnight,
+                );
 
-              // Cancel any pending missed dose checks for this medication
-              await LocalNotificationService.cancelNotification(
-                  'missed_$medId'.hashCode);
-            } else if (notificationResponse.actionId == 'snooze') {
-              print(
-                  'Snooze action triggered for notification: ${notificationResponse.payload}');
-              // Extract the original time from the payload
-              var parts = time.split(':');
-              int hour = int.parse(parts[0]);
-              int minute = int.parse(parts[1].split(' ')[0]);
-              String period = parts[1].split(' ')[1];
-              if (period == 'PM' && hour != 12) hour += 12;
-              if (period == 'AM' && hour == 12) hour = 0;
-
-              int newHour = hour;
-              int newMinute = minute + 10;
-              if (newMinute >= 60) {
-                newHour = (newHour + 1) % 24;
-                newMinute -= 60;
+                // Update pillsLeft
+                DocumentReference medRef = FirebaseFirestore.instance
+                    .collection('medications')
+                    .doc(medId);
+                DocumentSnapshot medDoc = await medRef.get();
+                int pillsLeft =
+                    (medDoc.data() as Map<String, dynamic>)['pillsLeft'] ?? 0;
+                await medRef.update({
+                  'pillsLeft': pillsLeft - dosage,
+                  'lastUpdated': FieldValue.serverTimestamp(),
+                });
+              } catch (e) {
+                print('Error handling taken action: $e');
               }
-
-              const AndroidNotificationDetails android =
-                  AndroidNotificationDetails(
-                'medicine_channel',
-                'Medicine Reminders',
-                importance: Importance.max,
-                priority: Priority.high,
-                actions: [
-                  AndroidNotificationAction('taken', 'Taken'),
-                  AndroidNotificationAction('snooze', 'Snooze (10 mins)'),
-                ],
-              );
-              const NotificationDetails details =
-                  NotificationDetails(android: android);
-
-              var snoozeTime =
-                  tz.TZDateTime.now(LocalNotificationService.localTimeZone!)
-                      .add(Duration(minutes: 10));
-              print('Scheduling snooze notification at: $snoozeTime');
-
-              await LocalNotificationService.flutterLocalNotificationsPlugin
-                  .zonedSchedule(
-                notificationResponse.id!,
-                'Snoozed: Time to take your medicine',
-                'Rescheduled for ${newHour % 12 == 0 ? 12 : newHour % 12}:${newMinute.toString().padLeft(2, '0')} ${newHour >= 12 ? 'PM' : 'AM'}',
-                snoozeTime,
-                details,
-                androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-                payload: notificationResponse.payload,
-                matchDateTimeComponents: DateTimeComponents.time,
-              );
-              print('Snooze notification scheduled successfully');
+            } else if (notificationResponse.actionId == 'snooze') {
+              print('Snooze action triggered for notification: $payload');
+              await LocalNotificationService.rescheduleNotification(payload);
+            } else if (notificationResponse.actionId == 'ignore') {
+              print('Ignore action triggered for notification: $payload');
             }
           }
-        } else if (payload.startsWith('missed_check')) {
-          await LocalNotificationService.handleMissedDose(payload);
         }
       }
-    });
+    }
+    );
   }
 
   // Helper function to format time from minutesMidnight or timestamp
