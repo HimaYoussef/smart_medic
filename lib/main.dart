@@ -73,14 +73,6 @@ Future<void> main() async {
     "checkNotificationsTask",
     frequency: const Duration(minutes: 15),
   );
-
-  // runApp(
-  //   ChangeNotifierProvider(
-  //     create: (BuildContext context) => LocaleProvider(),
-      
-  //     child: const MainApp(),
-  //   ),
-  // );
   runApp(
     MultiProvider(
       providers: [
