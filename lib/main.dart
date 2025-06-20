@@ -13,6 +13,7 @@ import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
 import 'package:smart_medic/LocalProvider.dart';
 import 'package:smart_medic/Services/firebaseServices.dart';
 import 'package:smart_medic/Services/notificationService.dart';
+import 'package:smart_medic/ShowcaseProvider.dart';
 import 'package:smart_medic/generated/l10n.dart';
 import 'package:workmanager/workmanager.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
@@ -73,9 +74,19 @@ Future<void> main() async {
     frequency: const Duration(minutes: 15),
   );
 
+  // runApp(
+  //   ChangeNotifierProvider(
+  //     create: (BuildContext context) => LocaleProvider(),
+      
+  //     child: const MainApp(),
+  //   ),
+  // );
   runApp(
-    ChangeNotifierProvider(
-      create: (BuildContext context) => LocaleProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => LocaleProvider()),
+        ChangeNotifierProvider(create: (context) => ShowcaseProvider()),
+      ],
       child: const MainApp(),
     ),
   );

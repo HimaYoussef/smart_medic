@@ -155,6 +155,116 @@ class S {
     );
   }
 
+  /// `Email not verified yet`
+  String get Login_Email_not_verified_yet {
+    return Intl.message(
+      'Email not verified yet',
+      name: 'Login_Email_not_verified_yet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resend`
+  String get Login_Resend {
+    return Intl.message('Resend', name: 'Login_Resend', desc: '', args: []);
+  }
+
+  /// `Verification email resent. Check your inbox.`
+  String get Login_Verification_email_resent_Check_your_inbox {
+    return Intl.message(
+      'Verification email resent. Check your inbox.',
+      name: 'Login_Verification_email_resent_Check_your_inbox',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to resend verification email`
+  String get Login_Failed_to_resend_verification_email {
+    return Intl.message(
+      'Failed to resend verification email',
+      name: 'Login_Failed_to_resend_verification_email',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Forgot Password?`
+  String get Login_Forgot_Password {
+    return Intl.message(
+      'Forgot Password?',
+      name: 'Login_Forgot_Password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password reset email sent! Please check your inbox.`
+  String get resetPass_Password_reset_email_sent_Please_check_your_inbox {
+    return Intl.message(
+      'Password reset email sent! Please check your inbox.',
+      name: 'resetPass_Password_reset_email_sent_Please_check_your_inbox',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset Your Password`
+  String get resetPass_Reset_Your_Password {
+    return Intl.message(
+      'Reset Your Password',
+      name: 'resetPass_Reset_Your_Password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remember your password? Sign in now`
+  String get resetPass_Remember_your_password_Sign_in_now {
+    return Intl.message(
+      'Remember your password? Sign in now',
+      name: 'resetPass_Remember_your_password_Sign_in_now',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Welcome Back`
+  String get resetPass_Welcome_Back {
+    return Intl.message(
+      'Welcome Back',
+      name: 'resetPass_Welcome_Back',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter a valid email`
+  String get resetPass_Please_enter_a_valid_email {
+    return Intl.message(
+      'Please enter a valid email',
+      name: 'resetPass_Please_enter_a_valid_email',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter your Email`
+  String get resetPass_Enter_your_Email {
+    return Intl.message(
+      'Enter your Email',
+      name: 'resetPass_Enter_your_Email',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset`
+  String get resetPass_Reset {
+    return Intl.message('Reset', name: 'resetPass_Reset', desc: '', args: []);
+  }
+
   /// `Account created successfully!`
   String get signUp_SnackBar {
     return Intl.message(
@@ -1599,6 +1709,61 @@ class S {
     );
   }
 
+  /// `Rewards`
+  String get rewardsView_Rewards {
+    return Intl.message(
+      'Rewards',
+      name: 'rewardsView_Rewards',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error loading Rewards`
+  String get rewardsView_Error_loading_Rewards {
+    return Intl.message(
+      'Error loading Rewards',
+      name: 'rewardsView_Error_loading_Rewards',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `your streak`
+  String get rewardsView_your_streak {
+    return Intl.message(
+      'your streak',
+      name: 'rewardsView_your_streak',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No rewards available`
+  String get rewardsView_No_rewards_available {
+    return Intl.message(
+      'No rewards available',
+      name: 'rewardsView_No_rewards_available',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rewards has been used`
+  String get rewardsView_Rewards_has_been_used {
+    return Intl.message(
+      'Rewards has been used',
+      name: 'rewardsView_Rewards_has_been_used',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use`
+  String get rewardsView_Use {
+    return Intl.message('Use', name: 'rewardsView_Use', desc: '', args: []);
+  }
+
   /// `Click Here To Display The Supervisors in the System`
   String get Admin_Profile_Supervisor_Data {
     return Intl.message(
@@ -1634,6 +1799,26 @@ class S {
     return Intl.message(
       'Supervisors Data',
       name: 'Admin_Profile_Supervisor_Data_Display',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No patients found.`
+  String get Patient_Data_No_patients_found {
+    return Intl.message(
+      'No patients found.',
+      name: 'Patient_Data_No_patients_found',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No supervisors found.`
+  String get Superviosr_Data_No_supervisors_found {
+    return Intl.message(
+      'No supervisors found.',
+      name: 'Superviosr_Data_No_supervisors_found',
       desc: '',
       args: [],
     );
@@ -1844,6 +2029,36 @@ class S {
     return Intl.message('Edit', name: 'Edit_Profile_Edit', desc: '', args: []);
   }
 
+  /// `No user is signed in.`
+  String get Edit_Profile_No_user_is_signed_in {
+    return Intl.message(
+      'No user is signed in.',
+      name: 'Edit_Profile_No_user_is_signed_in',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name must contain only letters and spaces.`
+  String get Edit_Profile_Name_must_contain_only_letters_and_spaces {
+    return Intl.message(
+      'Name must contain only letters and spaces.',
+      name: 'Edit_Profile_Name_must_contain_only_letters_and_spaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile updated successfully!`
+  String get Edit_Profile_Profile_updated_successfully {
+    return Intl.message(
+      'Profile updated successfully!',
+      name: 'Edit_Profile_Profile_updated_successfully',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Edit Supervisor`
   String get Edit_Supervisor_Head {
     return Intl.message(
@@ -1934,6 +2149,36 @@ class S {
     );
   }
 
+  /// `Supervision`
+  String get Supervision_Supervision {
+    return Intl.message(
+      'Supervision',
+      name: 'Supervision_Supervision',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No patients found`
+  String get Supervision_No_patients_found {
+    return Intl.message(
+      'No patients found',
+      name: 'Supervision_No_patients_found',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error loading patients`
+  String get Supervision_Error_loading_patients {
+    return Intl.message(
+      'Error loading patients',
+      name: 'Supervision_Error_loading_patients',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Profile`
   String get Supervisor_Profile_view_Profile {
     return Intl.message(
@@ -1982,6 +2227,258 @@ class S {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Please Enter A valid email`
+  String get build_text_field_validatorText1 {
+    return Intl.message(
+      'Please Enter A valid email',
+      name: 'build_text_field_validatorText1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password must be at least 6 characters`
+  String get build_text_field_validatorText2 {
+    return Intl.message(
+      'Password must be at least 6 characters',
+      name: 'build_text_field_validatorText2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password must include uppercase, lowercase, and digits`
+  String get build_text_field_validatorText3 {
+    return Intl.message(
+      'Password must include uppercase, lowercase, and digits',
+      name: 'build_text_field_validatorText3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please Enter Your Age`
+  String get build_text_field_validatorText4 {
+    return Intl.message(
+      'Please Enter Your Age',
+      name: 'build_text_field_validatorText4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please Enter a valid Age`
+  String get build_text_field_validatorText5 {
+    return Intl.message(
+      'Please Enter a valid Age',
+      name: 'build_text_field_validatorText5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Value must be greater than 0`
+  String get build_text_field_validatorText6 {
+    return Intl.message(
+      'Value must be greater than 0',
+      name: 'build_text_field_validatorText6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New password and confirmation do not match.`
+  String get changePassPage_New_password_and_confirmation_do_not_match {
+    return Intl.message(
+      'New password and confirmation do not match.',
+      name: 'changePassPage_New_password_and_confirmation_do_not_match',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `no-user`
+  String get changePassPage_no_user {
+    return Intl.message(
+      'no-user',
+      name: 'changePassPage_no_user',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No user is signed in.`
+  String get changePassPage_No_user_is_signed_in {
+    return Intl.message(
+      'No user is signed in.',
+      name: 'changePassPage_No_user_is_signed_in',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password changed successfully!`
+  String get changePassPage_Password_changed_successfully {
+    return Intl.message(
+      'Password changed successfully!',
+      name: 'changePassPage_Password_changed_successfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An unexpected error occurred.`
+  String get changePassPage_An_unexpected_error_occurred {
+    return Intl.message(
+      'An unexpected error occurred.',
+      name: 'changePassPage_An_unexpected_error_occurred',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change Password`
+  String get changePassPage_Change_Password {
+    return Intl.message(
+      'Change Password',
+      name: 'changePassPage_Change_Password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current Password`
+  String get changePassPage_Current_Password {
+    return Intl.message(
+      'Current Password',
+      name: 'changePassPage_Current_Password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter your current password`
+  String get changePassPage_Please_enter_your_current_password {
+    return Intl.message(
+      'Please enter your current password',
+      name: 'changePassPage_Please_enter_your_current_password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter Current Password`
+  String get changePassPage_Enter_Current_Password {
+    return Intl.message(
+      'Enter Current Password',
+      name: 'changePassPage_Enter_Current_Password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New Password`
+  String get changePassPage_New_Password {
+    return Intl.message(
+      'New Password',
+      name: 'changePassPage_New_Password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enter a valid new password (at least 6 characters)`
+  String
+  get changePassPage_Please_enter_a_valid_new_password_at_least_6_characters {
+    return Intl.message(
+      'Please enter a valid new password (at least 6 characters)',
+      name:
+          'changePassPage_Please_enter_a_valid_new_password_at_least_6_characters',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter New Password`
+  String get changePassPage_Enter_New_Password {
+    return Intl.message(
+      'Enter New Password',
+      name: 'changePassPage_Enter_New_Password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm New Password`
+  String get changePassPage_Confirm_New_Password {
+    return Intl.message(
+      'Confirm New Password',
+      name: 'changePassPage_Confirm_New_Password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please confirm your new password`
+  String get changePassPage_Please_confirm_your_new_password {
+    return Intl.message(
+      'Please confirm your new password',
+      name: 'changePassPage_Please_confirm_your_new_password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete Medicine`
+  String get CustomBoxFilled_Delete_Medicine {
+    return Intl.message(
+      'Delete Medicine',
+      name: 'CustomBoxFilled_Delete_Medicine',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel`
+  String get CustomBoxFilled_Cancel {
+    return Intl.message(
+      'Cancel',
+      name: 'CustomBoxFilled_Cancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alert!!`
+  String get CustomBoxIcon_Alert {
+    return Intl.message(
+      'Alert!!',
+      name: 'CustomBoxIcon_Alert',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to add a new medication?`
+  String get CustomBoxIcon_Are_you_sure_you_want_to_add_a_new_medication {
+    return Intl.message(
+      'Are you sure you want to add a new medication?',
+      name: 'CustomBoxIcon_Are_you_sure_you_want_to_add_a_new_medication',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes`
+  String get CustomBoxIcon_yes {
+    return Intl.message('Yes', name: 'CustomBoxIcon_yes', desc: '', args: []);
+  }
+
+  /// `No`
+  String get CustomBoxIcon_No {
+    return Intl.message('No', name: 'CustomBoxIcon_No', desc: '', args: []);
   }
 }
 

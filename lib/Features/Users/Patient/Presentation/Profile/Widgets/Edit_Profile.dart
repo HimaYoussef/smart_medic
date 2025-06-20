@@ -67,7 +67,7 @@ class _EditProfileState extends State<Edit_Profile> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'No user is signed in.',
+            S.of(context).Edit_Profile_No_user_is_signed_in,
             style: TextStyle(color: AppColors.white),
           ),
           backgroundColor: Theme.of(context).brightness == Brightness.dark
@@ -89,7 +89,7 @@ class _EditProfileState extends State<Edit_Profile> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Name must contain only letters and spaces.',
+            S.of(context).Edit_Profile_Name_must_contain_only_letters_and_spaces,
             style: TextStyle(color: AppColors.white),
           ),
           backgroundColor: Theme.of(context).brightness == Brightness.dark
@@ -124,7 +124,7 @@ class _EditProfileState extends State<Edit_Profile> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Profile updated successfully!',
+              S.of(context).Edit_Profile_Profile_updated_successfully,
               style: TextStyle(color: AppColors.white),
             ),
             backgroundColor: Theme.of(context).brightness == Brightness.dark

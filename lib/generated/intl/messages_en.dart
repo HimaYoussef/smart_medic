@@ -208,6 +208,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "Awareness_view_title4": MessageLookupByLibrary.simpleMessage(
       "Are You Taking Multiple Medications? Stay Safe",
     ),
+    "CustomBoxFilled_Cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+    "CustomBoxFilled_Delete_Medicine": MessageLookupByLibrary.simpleMessage(
+      "Delete Medicine",
+    ),
+    "CustomBoxIcon_Alert": MessageLookupByLibrary.simpleMessage("Alert!!"),
+    "CustomBoxIcon_Are_you_sure_you_want_to_add_a_new_medication":
+        MessageLookupByLibrary.simpleMessage(
+          "Are you sure you want to add a new medication?",
+        ),
+    "CustomBoxIcon_No": MessageLookupByLibrary.simpleMessage("No"),
+    "CustomBoxIcon_yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "EditMedicine_Add_Time": MessageLookupByLibrary.simpleMessage("Add Time"),
     "EditMedicine_Bluetooth_not_connected_Data_will_be_sent_later":
         MessageLookupByLibrary.simpleMessage(
@@ -297,6 +308,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "Edit_Profile_Email": MessageLookupByLibrary.simpleMessage("Email"),
     "Edit_Profile_Head": MessageLookupByLibrary.simpleMessage("Edit Profile"),
     "Edit_Profile_Name": MessageLookupByLibrary.simpleMessage("Name"),
+    "Edit_Profile_Name_must_contain_only_letters_and_spaces":
+        MessageLookupByLibrary.simpleMessage(
+          "Name must contain only letters and spaces.",
+        ),
+    "Edit_Profile_No_user_is_signed_in": MessageLookupByLibrary.simpleMessage(
+      "No user is signed in.",
+    ),
+    "Edit_Profile_Profile_updated_successfully":
+        MessageLookupByLibrary.simpleMessage("Profile updated successfully!"),
     "Edit_Profile_labelText1": MessageLookupByLibrary.simpleMessage(
       "Please Enter Your Name",
     ),
@@ -345,11 +365,26 @@ class MessageLookup extends MessageLookupByLibrary {
       "Don’t have an account? SIGN UP",
     ),
     "Login_Email": MessageLookupByLibrary.simpleMessage("Enter your Email"),
+    "Login_Email_not_verified_yet": MessageLookupByLibrary.simpleMessage(
+      "Email not verified yet",
+    ),
+    "Login_Failed_to_resend_verification_email":
+        MessageLookupByLibrary.simpleMessage(
+          "Failed to resend verification email",
+        ),
+    "Login_Forgot_Password": MessageLookupByLibrary.simpleMessage(
+      "Forgot Password?",
+    ),
     "Login_Head": MessageLookupByLibrary.simpleMessage("login"),
+    "Login_Resend": MessageLookupByLibrary.simpleMessage("Resend"),
     "Login_SIGN_IN": MessageLookupByLibrary.simpleMessage("SIGN IN"),
     "Login_SnackBar": MessageLookupByLibrary.simpleMessage(
       "Please fill in all fields.",
     ),
+    "Login_Verification_email_resent_Check_your_inbox":
+        MessageLookupByLibrary.simpleMessage(
+          "Verification email resent. Check your inbox.",
+        ),
     "Login_Welcome_Back": MessageLookupByLibrary.simpleMessage("Welcome Back"),
     "Login_password": MessageLookupByLibrary.simpleMessage(
       "Enter your Password",
@@ -365,6 +400,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Nav_bar_Profile": MessageLookupByLibrary.simpleMessage(
       "Manage your profile settings here.",
+    ),
+    "Patient_Data_No_patients_found": MessageLookupByLibrary.simpleMessage(
+      "No patients found.",
     ),
     "Patient_Logs_View_Error_loading_logs":
         MessageLookupByLibrary.simpleMessage("Error loading logs"),
@@ -448,6 +486,17 @@ class MessageLookup extends MessageLookupByLibrary {
       "Neighbor",
     ),
     "Super_Visor_type_choose": MessageLookupByLibrary.simpleMessage("Choose"),
+    "Superviosr_Data_No_supervisors_found":
+        MessageLookupByLibrary.simpleMessage("No supervisors found."),
+    "Supervision_Error_loading_patients": MessageLookupByLibrary.simpleMessage(
+      "Error loading patients",
+    ),
+    "Supervision_No_patients_found": MessageLookupByLibrary.simpleMessage(
+      "No patients found",
+    ),
+    "Supervision_Supervision": MessageLookupByLibrary.simpleMessage(
+      "Supervision",
+    ),
     "Supervision_view_Add_Supervisor": MessageLookupByLibrary.simpleMessage(
       "Tap here to add a new supervisor",
     ),
@@ -473,6 +522,65 @@ class MessageLookup extends MessageLookupByLibrary {
     "Supervisor_Profile_view_Profile": MessageLookupByLibrary.simpleMessage(
       "Profile",
     ),
+    "build_text_field_validatorText1": MessageLookupByLibrary.simpleMessage(
+      "Please Enter A valid email",
+    ),
+    "build_text_field_validatorText2": MessageLookupByLibrary.simpleMessage(
+      "Password must be at least 6 characters",
+    ),
+    "build_text_field_validatorText3": MessageLookupByLibrary.simpleMessage(
+      "Password must include uppercase, lowercase, and digits",
+    ),
+    "build_text_field_validatorText4": MessageLookupByLibrary.simpleMessage(
+      "Please Enter Your Age",
+    ),
+    "build_text_field_validatorText5": MessageLookupByLibrary.simpleMessage(
+      "Please Enter a valid Age",
+    ),
+    "build_text_field_validatorText6": MessageLookupByLibrary.simpleMessage(
+      "Value must be greater than 0",
+    ),
+    "changePassPage_An_unexpected_error_occurred":
+        MessageLookupByLibrary.simpleMessage("An unexpected error occurred."),
+    "changePassPage_Change_Password": MessageLookupByLibrary.simpleMessage(
+      "Change Password",
+    ),
+    "changePassPage_Confirm_New_Password": MessageLookupByLibrary.simpleMessage(
+      "Confirm New Password",
+    ),
+    "changePassPage_Current_Password": MessageLookupByLibrary.simpleMessage(
+      "Current Password",
+    ),
+    "changePassPage_Enter_Current_Password":
+        MessageLookupByLibrary.simpleMessage("Enter Current Password"),
+    "changePassPage_Enter_New_Password": MessageLookupByLibrary.simpleMessage(
+      "Enter New Password",
+    ),
+    "changePassPage_New_Password": MessageLookupByLibrary.simpleMessage(
+      "New Password",
+    ),
+    "changePassPage_New_password_and_confirmation_do_not_match":
+        MessageLookupByLibrary.simpleMessage(
+          "New password and confirmation do not match.",
+        ),
+    "changePassPage_No_user_is_signed_in": MessageLookupByLibrary.simpleMessage(
+      "No user is signed in.",
+    ),
+    "changePassPage_Password_changed_successfully":
+        MessageLookupByLibrary.simpleMessage("Password changed successfully!"),
+    "changePassPage_Please_confirm_your_new_password":
+        MessageLookupByLibrary.simpleMessage(
+          "Please confirm your new password",
+        ),
+    "changePassPage_Please_enter_a_valid_new_password_at_least_6_characters":
+        MessageLookupByLibrary.simpleMessage(
+          "Please enter a valid new password (at least 6 characters)",
+        ),
+    "changePassPage_Please_enter_your_current_password":
+        MessageLookupByLibrary.simpleMessage(
+          "Please enter your current password",
+        ),
+    "changePassPage_no_user": MessageLookupByLibrary.simpleMessage("no-user"),
     "login_cubit_errorMessage1": MessageLookupByLibrary.simpleMessage(
       "Login failed. User is null.",
     ),
@@ -493,6 +601,40 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "login_cubit_errorMessage7": MessageLookupByLibrary.simpleMessage(
       "Unexpected error occurred",
+    ),
+    "resetPass_Enter_your_Email": MessageLookupByLibrary.simpleMessage(
+      "Enter your Email",
+    ),
+    "resetPass_Password_reset_email_sent_Please_check_your_inbox":
+        MessageLookupByLibrary.simpleMessage(
+          "Password reset email sent! Please check your inbox.",
+        ),
+    "resetPass_Please_enter_a_valid_email":
+        MessageLookupByLibrary.simpleMessage("Please enter a valid email"),
+    "resetPass_Remember_your_password_Sign_in_now":
+        MessageLookupByLibrary.simpleMessage(
+          "Remember your password? Sign in now",
+        ),
+    "resetPass_Reset": MessageLookupByLibrary.simpleMessage("Reset"),
+    "resetPass_Reset_Your_Password": MessageLookupByLibrary.simpleMessage(
+      "Reset Your Password",
+    ),
+    "resetPass_Welcome_Back": MessageLookupByLibrary.simpleMessage(
+      "Welcome Back",
+    ),
+    "rewardsView_Error_loading_Rewards": MessageLookupByLibrary.simpleMessage(
+      "Error loading Rewards",
+    ),
+    "rewardsView_No_rewards_available": MessageLookupByLibrary.simpleMessage(
+      "No rewards available",
+    ),
+    "rewardsView_Rewards": MessageLookupByLibrary.simpleMessage("Rewards"),
+    "rewardsView_Rewards_has_been_used": MessageLookupByLibrary.simpleMessage(
+      "Rewards has been used",
+    ),
+    "rewardsView_Use": MessageLookupByLibrary.simpleMessage("Use"),
+    "rewardsView_your_streak": MessageLookupByLibrary.simpleMessage(
+      "your streak",
     ),
     "signUp_Already_have_an_account_SIGN_IN":
         MessageLookupByLibrary.simpleMessage(

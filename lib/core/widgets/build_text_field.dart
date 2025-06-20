@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../../core/functions/email_validation.dart';
 import '../../../../../../core/utils/Colors.dart';
 
@@ -56,16 +57,16 @@ class CustomTextField extends StatelessWidget {
           return validatorText;
         }
         if (keyboardType == TextInputType.emailAddress && !emailValidate(value)) {
-          return 'Please Enter A valid email';
+          return  S.of(context).build_text_field_validatorText1;
         }
         if (obscureText && value.length < 6) {
-          return 'Password must be at least 6 characters';
+          return  S.of(context).build_text_field_validatorText2;
         }
         if (obscureText && !RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$').hasMatch(value)) {
-          return 'Password must include uppercase, lowercase, and digits';
+          return  S.of(context).build_text_field_validatorText3;
         }
-        if (labelText == 'Please Enter Your Age' && (int.tryParse(value) == null || int.parse(value) <= 0 || int.parse(value) > 99)) {
-          return 'Please Enter a valid Age';
+        if (labelText ==  S.of(context).build_text_field_validatorText4 && (int.tryParse(value) == null || int.parse(value) <= 0 || int.parse(value) > 99)) {
+          return  S.of(context).build_text_field_validatorText5;
         }
         if (maxValue != null && keyboardType == TextInputType.number) {
           int? parsedValue = int.tryParse(value);
@@ -73,7 +74,7 @@ class CustomTextField extends StatelessWidget {
             return 'Value must be less than or equal to $maxValue';
           }
           if (parsedValue <= 0) {
-            return 'Value must be greater than 0';
+            return  S.of(context).build_text_field_validatorText6;
           }
         }
         return null;

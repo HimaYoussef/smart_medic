@@ -40,6 +40,7 @@ class LoginCubit extends Cubit<LoginState> {
         return;
       }
       // Success case: email is verified
+
       emit(Success());
     } on FirebaseAuthException catch (e) {
       String errorMessage;

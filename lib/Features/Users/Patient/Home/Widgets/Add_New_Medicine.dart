@@ -456,7 +456,10 @@ in summary Your task is to analyze the image and perform the following steps in 
                         ),
                         const SizedBox(width: 10),
                         FloatingActionButton(
-                          backgroundColor: AppColors.mainColor,
+                          backgroundColor:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? AppColors.mainColorDark
+                                  : AppColors.mainColor,
                           onPressed:
                               _isLoading ? null : _showImageSourceOptions,
                           tooltip:

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../core/widgets/BuildText.dart';
 import '../../../../../core/widgets/Custom_button.dart';
 import '../../../../../core/widgets/build_text_field.dart';
@@ -15,9 +16,11 @@ class ChangePassPage extends StatefulWidget {
 
 class _ChangePassPageState extends State<ChangePassPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isLoading = false;
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
@@ -44,7 +47,9 @@ class _ChangePassPageState extends State<ChangePassPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'New password and confirmation do not match.',
+            S
+                .of(context)
+                .changePassPage_New_password_and_confirmation_do_not_match,
             style: TextStyle(color: AppColors.white),
           ),
           backgroundColor: Theme.of(context).brightness == Brightness.dark
@@ -64,8 +69,8 @@ class _ChangePassPageState extends State<ChangePassPage> {
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw FirebaseAuthException(
-          code: 'no-user',
-          message: 'No user is signed in.',
+          code: S.of(context).changePassPage_no_user,
+          message: S.of(context).changePassPage_No_user_is_signed_in,
         );
       }
 
@@ -79,7 +84,7 @@ class _ChangePassPageState extends State<ChangePassPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Password changed successfully!',
+            S.of(context).changePassPage_Password_changed_successfully,
             style: TextStyle(color: AppColors.white),
           ),
           backgroundColor: Theme.of(context).brightness == Brightness.dark
@@ -124,7 +129,7 @@ class _ChangePassPageState extends State<ChangePassPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'An unexpected error occurred.',
+            S.of(context).changePassPage_An_unexpected_error_occurred,
             style: TextStyle(color: AppColors.white),
           ),
           backgroundColor: Theme.of(context).brightness == Brightness.dark
@@ -179,21 +184,28 @@ class _ChangePassPageState extends State<ChangePassPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Gap(20),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CustomText(text: 'Change Password', fonSize: 20),
+                        CustomText(
+                            text: S.of(context).changePassPage_Change_Password,
+                            fonSize: 20),
                       ],
                     ),
                     const Gap(30),
-                    const CustomText(text: 'Current Password', fonSize: 15),
+                    CustomText(
+                        text: S.of(context).changePassPage_Current_Password,
+                        fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _currentPasswordController,
                       readOnly: false,
                       keyboardType: TextInputType.text,
-                      validatorText: 'Please enter your current password',
-                      labelText: 'Enter Current Password',
+                      validatorText: S
+                          .of(context)
+                          .changePassPage_Please_enter_your_current_password,
+                      labelText:
+                          S.of(context).changePassPage_Enter_Current_Password,
                       obscureText: _obscureCurrentPassword,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -211,15 +223,19 @@ class _ChangePassPageState extends State<ChangePassPage> {
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'New Password', fonSize: 15),
+                    CustomText(
+                        text: S.of(context).changePassPage_New_Password,
+                        fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _newPasswordController,
                       readOnly: false,
                       keyboardType: TextInputType.text,
-                      validatorText:
-                      'Please enter a valid new password (at least 6 characters)',
-                      labelText: 'Enter New Password',
+                      validatorText: S
+                          .of(context)
+                          .changePassPage_Please_enter_a_valid_new_password_at_least_6_characters,
+                      labelText:
+                          S.of(context).changePassPage_Enter_New_Password,
                       obscureText: _obscureNewPassword,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -237,14 +253,18 @@ class _ChangePassPageState extends State<ChangePassPage> {
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
-                    const CustomText(text: 'Confirm New Password', fonSize: 15),
+                    CustomText(
+                        text: S.of(context).changePassPage_Confirm_New_Password,
+                        fonSize: 15),
                     const SizedBox(height: 15),
                     CustomTextField(
                       controller: _confirmPasswordController,
                       readOnly: false,
                       keyboardType: TextInputType.text,
-                      validatorText: 'Please confirm your new password',
-                      labelText: 'Confirm New Password',
+                      validatorText:
+                          S.of(context).changePassPage_Confirm_New_Password,
+                      labelText:
+                          S.of(context).changePassPage_Confirm_New_Password,
                       obscureText: _obscureConfirmPassword,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -266,9 +286,9 @@ class _ChangePassPageState extends State<ChangePassPage> {
                     _isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : CustomButton(
-                      text: 'Change Password',
-                      onPressed: _changePassword,
-                    ),
+                            text: S.of(context).changePassPage_Change_Password,
+                            onPressed: _changePassword,
+                          ),
                   ],
                 ),
               ),

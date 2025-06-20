@@ -206,6 +206,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "Awareness_view_title4": MessageLookupByLibrary.simpleMessage(
       "هل تتناول عدة أدوية؟ احرص على سلامتك",
     ),
+    "CustomBoxFilled_Cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
+    "CustomBoxFilled_Delete_Medicine": MessageLookupByLibrary.simpleMessage(
+      "حذف الدواء",
+    ),
+    "CustomBoxIcon_Alert": MessageLookupByLibrary.simpleMessage("تنبيه!!"),
+    "CustomBoxIcon_Are_you_sure_you_want_to_add_a_new_medication":
+        MessageLookupByLibrary.simpleMessage(
+          "هل أنت متأكد أنك تريد إضافة دواء جديد؟",
+        ),
+    "CustomBoxIcon_No": MessageLookupByLibrary.simpleMessage("لا"),
+    "CustomBoxIcon_yes": MessageLookupByLibrary.simpleMessage("نعم"),
     "EditMedicine_Add_Time": MessageLookupByLibrary.simpleMessage("إضافة وقت"),
     "EditMedicine_Bluetooth_not_connected_Data_will_be_sent_later":
         MessageLookupByLibrary.simpleMessage(
@@ -299,6 +310,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "تعديل الملف الشخصي",
     ),
     "Edit_Profile_Name": MessageLookupByLibrary.simpleMessage("الاسم"),
+    "Edit_Profile_Name_must_contain_only_letters_and_spaces":
+        MessageLookupByLibrary.simpleMessage(
+          "يجب أن يحتوي الاسم على أحرف ومسافات فقط.",
+        ),
+    "Edit_Profile_No_user_is_signed_in": MessageLookupByLibrary.simpleMessage(
+      "لا يوجد مستخدم مسجل الدخول.",
+    ),
+    "Edit_Profile_Profile_updated_successfully":
+        MessageLookupByLibrary.simpleMessage("تم تحديث الملف الشخصي بنجاح!"),
     "Edit_Profile_labelText1": MessageLookupByLibrary.simpleMessage(
       "يرجى إدخال اسمك",
     ),
@@ -351,11 +371,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "Login_Email": MessageLookupByLibrary.simpleMessage(
       "أدخل بريدك الإلكتروني",
     ),
+    "Login_Email_not_verified_yet": MessageLookupByLibrary.simpleMessage(
+      "البريد الإلكتروني لم يتم التحقق منه بعد",
+    ),
+    "Login_Failed_to_resend_verification_email":
+        MessageLookupByLibrary.simpleMessage("فشل في إعادة إرسال بريد التحقق"),
+    "Login_Forgot_Password": MessageLookupByLibrary.simpleMessage(
+      "هل نسيت كلمة المرور؟",
+    ),
     "Login_Head": MessageLookupByLibrary.simpleMessage("تسجيل الدخول"),
+    "Login_Resend": MessageLookupByLibrary.simpleMessage("إعادة الإرسال"),
     "Login_SIGN_IN": MessageLookupByLibrary.simpleMessage("تسجيل الدخول"),
     "Login_SnackBar": MessageLookupByLibrary.simpleMessage(
       "يرجى ملء جميع الحقول.",
     ),
+    "Login_Verification_email_resent_Check_your_inbox":
+        MessageLookupByLibrary.simpleMessage(
+          "تمت إعادة إرسال بريد التحقق. تحقق من صندوق الوارد.",
+        ),
     "Login_Welcome_Back": MessageLookupByLibrary.simpleMessage("مرحبًا بعودتك"),
     "Login_password": MessageLookupByLibrary.simpleMessage("أدخل كلمة المرور"),
     "Nav_bar_Awar": MessageLookupByLibrary.simpleMessage(
@@ -369,6 +402,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Nav_bar_Profile": MessageLookupByLibrary.simpleMessage(
       "قم بإدارة إعدادات ملفك الشخصي هنا.",
+    ),
+    "Patient_Data_No_patients_found": MessageLookupByLibrary.simpleMessage(
+      "لم يتم العثور على أي مرضى.",
     ),
     "Patient_Logs_View_Error_loading_logs":
         MessageLookupByLibrary.simpleMessage("حدث خطأ أثناء تحميل السجلات"),
@@ -440,6 +476,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "Super_Visor_type_Family": MessageLookupByLibrary.simpleMessage("عائلة"),
     "Super_Visor_type_Neighbor": MessageLookupByLibrary.simpleMessage("جار"),
     "Super_Visor_type_choose": MessageLookupByLibrary.simpleMessage("اختر"),
+    "Superviosr_Data_No_supervisors_found":
+        MessageLookupByLibrary.simpleMessage("لم يتم العثور على أي مشرفين."),
+    "Supervision_Error_loading_patients": MessageLookupByLibrary.simpleMessage(
+      "حدث خطأ أثناء تحميل المرضى",
+    ),
+    "Supervision_No_patients_found": MessageLookupByLibrary.simpleMessage(
+      "لم يتم العثور على أي مرضى",
+    ),
+    "Supervision_Supervision": MessageLookupByLibrary.simpleMessage("الإشراف"),
     "Supervision_view_Add_Supervisor": MessageLookupByLibrary.simpleMessage(
       "اضغط هنا لإضافة مشرف جديد",
     ),
@@ -463,6 +508,63 @@ class MessageLookup extends MessageLookupByLibrary {
     "Supervisor_Profile_view_Profile": MessageLookupByLibrary.simpleMessage(
       "الملف الشخصي",
     ),
+    "build_text_field_validatorText1": MessageLookupByLibrary.simpleMessage(
+      "يرجى إدخال بريد إلكتروني صالح",
+    ),
+    "build_text_field_validatorText2": MessageLookupByLibrary.simpleMessage(
+      "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+    ),
+    "build_text_field_validatorText3": MessageLookupByLibrary.simpleMessage(
+      "يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير وأرقام",
+    ),
+    "build_text_field_validatorText4": MessageLookupByLibrary.simpleMessage(
+      "يرجى إدخال عمرك",
+    ),
+    "build_text_field_validatorText5": MessageLookupByLibrary.simpleMessage(
+      "يرجى إدخال عمر صالح",
+    ),
+    "build_text_field_validatorText6": MessageLookupByLibrary.simpleMessage(
+      "يجب أن تكون القيمة أكبر من 0",
+    ),
+    "changePassPage_An_unexpected_error_occurred":
+        MessageLookupByLibrary.simpleMessage("حدث خطأ غير متوقع."),
+    "changePassPage_Change_Password": MessageLookupByLibrary.simpleMessage(
+      "تغيير كلمة المرور",
+    ),
+    "changePassPage_Confirm_New_Password": MessageLookupByLibrary.simpleMessage(
+      "تأكيد كلمة المرور الجديدة",
+    ),
+    "changePassPage_Current_Password": MessageLookupByLibrary.simpleMessage(
+      "كلمة المرور الحالية",
+    ),
+    "changePassPage_Enter_Current_Password":
+        MessageLookupByLibrary.simpleMessage("أدخل كلمة المرور الحالية"),
+    "changePassPage_Enter_New_Password": MessageLookupByLibrary.simpleMessage(
+      "أدخل كلمة المرور الجديدة",
+    ),
+    "changePassPage_New_Password": MessageLookupByLibrary.simpleMessage(
+      "كلمة المرور الجديدة",
+    ),
+    "changePassPage_New_password_and_confirmation_do_not_match":
+        MessageLookupByLibrary.simpleMessage(
+          "كلمة المرور الجديدة وتأكيدها غير متطابقين.",
+        ),
+    "changePassPage_No_user_is_signed_in": MessageLookupByLibrary.simpleMessage(
+      "لا يوجد مستخدم مسجل الدخول.",
+    ),
+    "changePassPage_Password_changed_successfully":
+        MessageLookupByLibrary.simpleMessage("تم تغيير كلمة المرور بنجاح!"),
+    "changePassPage_Please_confirm_your_new_password":
+        MessageLookupByLibrary.simpleMessage("يرجى تأكيد كلمة المرور الجديدة"),
+    "changePassPage_Please_enter_a_valid_new_password_at_least_6_characters":
+        MessageLookupByLibrary.simpleMessage(
+          "يرجى إدخال كلمة مرور جديدة صالحة (لا تقل عن 6 أحرف)",
+        ),
+    "changePassPage_Please_enter_your_current_password":
+        MessageLookupByLibrary.simpleMessage("يرجى إدخال كلمة المرور الحالية"),
+    "changePassPage_no_user": MessageLookupByLibrary.simpleMessage(
+      "لا يوجد مستخدم",
+    ),
     "login_cubit_errorMessage1": MessageLookupByLibrary.simpleMessage(
       "فشل تسجيل الدخول. المستخدم غير موجود.",
     ),
@@ -483,6 +585,40 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "login_cubit_errorMessage7": MessageLookupByLibrary.simpleMessage(
       "حدث خطأ غير متوقع",
+    ),
+    "resetPass_Enter_your_Email": MessageLookupByLibrary.simpleMessage(
+      "أدخل بريدك الإلكتروني",
+    ),
+    "resetPass_Password_reset_email_sent_Please_check_your_inbox":
+        MessageLookupByLibrary.simpleMessage(
+          "تم إرسال بريد إعادة تعيين كلمة المرور! يرجى التحقق من صندوق الوارد.",
+        ),
+    "resetPass_Please_enter_a_valid_email":
+        MessageLookupByLibrary.simpleMessage("يرجى إدخال بريد إلكتروني صالح"),
+    "resetPass_Remember_your_password_Sign_in_now":
+        MessageLookupByLibrary.simpleMessage(
+          "تتذكر كلمة المرور؟ قم بتسجيل الدخول الآن",
+        ),
+    "resetPass_Reset": MessageLookupByLibrary.simpleMessage("إعادة تعيين"),
+    "resetPass_Reset_Your_Password": MessageLookupByLibrary.simpleMessage(
+      "إعادة تعيين كلمة المرور",
+    ),
+    "resetPass_Welcome_Back": MessageLookupByLibrary.simpleMessage(
+      "مرحبًا بعودتك",
+    ),
+    "rewardsView_Error_loading_Rewards": MessageLookupByLibrary.simpleMessage(
+      "حدث خطأ أثناء تحميل المكافآت",
+    ),
+    "rewardsView_No_rewards_available": MessageLookupByLibrary.simpleMessage(
+      "لا توجد مكافآت متاحة",
+    ),
+    "rewardsView_Rewards": MessageLookupByLibrary.simpleMessage("المكافآت"),
+    "rewardsView_Rewards_has_been_used": MessageLookupByLibrary.simpleMessage(
+      "تم استخدام المكافأة",
+    ),
+    "rewardsView_Use": MessageLookupByLibrary.simpleMessage("استخدام"),
+    "rewardsView_your_streak": MessageLookupByLibrary.simpleMessage(
+      "سلسلتك المتواصلة",
     ),
     "signUp_Already_have_an_account_SIGN_IN":
         MessageLookupByLibrary.simpleMessage("هل لديك حساب؟ تسجيل الدخول"),

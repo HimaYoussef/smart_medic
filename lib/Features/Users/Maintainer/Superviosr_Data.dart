@@ -50,7 +50,7 @@ class _SupervisorDataState extends State<SupervisorData> {
             }
 
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("No supervisors found."));
+              return Center(child: Text(S.of(context).Superviosr_Data_No_supervisors_found));
             }
 
             return SingleChildScrollView(

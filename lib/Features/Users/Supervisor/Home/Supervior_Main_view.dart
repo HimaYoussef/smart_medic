@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../Services/firebaseServices.dart';
 import '../../../../Services/notificationService.dart';
 import 'Widgets/PatientDetails.dart';
@@ -40,7 +41,7 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text('Supervision'),
+        title:  Text(S.of(context).Supervision_Supervision),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -61,13 +62,13 @@ class _SuperviorMainViewState extends State<Supervior_Main_view> {
                 stream: SmartMedicalDb.readPatientsForSupervisor(user!.uid),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading patients'));
+                    return  Center(child: Text(S.of(context).Supervision_Error_loading_patients));
                   }
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No patients found'));
+                    return  Center(child: Text(S.of(context).Supervision_No_patients_found));
                   }
 
                   final patients = snapshot.data!;

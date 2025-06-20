@@ -12,6 +12,20 @@
     "Login_SnackBar": "يرجى ملء جميع الحقول.",
     "Login_Dont_have_an_account": "ليس لديك حساب؟ سجل الآن",
 
+     "Login_Email_not_verified_yet": "البريد الإلكتروني لم يتم التحقق منه بعد",
+  "Login_Resend": "إعادة الإرسال",
+  "Login_Verification_email_resent_Check_your_inbox": "تمت إعادة إرسال بريد التحقق. تحقق من صندوق الوارد.",
+  "Login_Failed_to_resend_verification_email": "فشل في إعادة إرسال بريد التحقق",
+  "Login_Forgot_Password": "هل نسيت كلمة المرور؟",
+
+    "resetPass_Password_reset_email_sent_Please_check_your_inbox": "تم إرسال بريد إعادة تعيين كلمة المرور! يرجى التحقق من صندوق الوارد.",
+  "resetPass_Reset_Your_Password": "إعادة تعيين كلمة المرور",
+  "resetPass_Remember_your_password_Sign_in_now": "تتذكر كلمة المرور؟ قم بتسجيل الدخول الآن",
+  "resetPass_Welcome_Back": "مرحبًا بعودتك",
+  "resetPass_Please_enter_a_valid_email": "يرجى إدخال بريد إلكتروني صالح",
+  "resetPass_Enter_your_Email": "أدخل بريدك الإلكتروني",
+  "resetPass_Reset": "إعادة تعيين",
+
     "signUp_SnackBar": "تم إنشاء الحساب بنجاح ",
     "signUp_Head": "تسجيل حساب",
     "signUp_Hello": "مرحبًا",
@@ -179,14 +193,23 @@
     "Patient_Profile_view_View_or_manage_your_supervisors": "اضغط هنا لإضافة المشرف الخاص بك",
     "Patient_Profile_view_Switch_between_languages": "اضغط هنا لتغيير اللغة",
     "Patient_Profile_view_Sign_out_of_your_account": "اضغط هنا لتسجيل الخروج من حسابك",
-  "Patient_Profile_view_reward": "اضغط هنا لمراجعة تقدمك",
+    "Patient_Profile_view_reward": "اضغط هنا لمراجعة تقدمك",
 
-   
+      "rewardsView_Rewards": "المكافآت",
+  "rewardsView_Error_loading_Rewards": "حدث خطأ أثناء تحميل المكافآت",
+  "rewardsView_your_streak": "سلسلتك المتواصلة",
+  "rewardsView_No_rewards_available": "لا توجد مكافآت متاحة",
+  "rewardsView_Rewards_has_been_used": "تم استخدام المكافأة",
+  "rewardsView_Use": "استخدام",
 
      "Admin_Profile_Supervisor_Data": "اضغط هنا لعرض المشرفين في النظام",
     "Admin_Profile_Patient_Data": "اضغط هنا لعرض المرضى في النظام",
     "Admin_Profile_Patient_Data_Display": "بيانات المرضى",
-  "Admin_Profile_Supervisor_Data_Display": "بيانات المشرفين",
+    "Admin_Profile_Supervisor_Data_Display": "بيانات المشرفين",
+
+    "Patient_Data_No_patients_found": "لم يتم العثور على أي مرضى.",
+    "Superviosr_Data_No_supervisors_found": "لم يتم العثور على أي مشرفين.",
+
   
     "Add_Supervisor_Add_Supervisor": "إضافة مشرف",
     "Add_Supervisor_Name": "الاسم",
@@ -222,10 +245,56 @@
     "Edit_Supervisor_Supervisor_type": "نوع المشرف",
     "Edit_Supervisor_update": "تحديث",
 
+    "Edit_Profile_No_user_is_signed_in": "لا يوجد مستخدم مسجل الدخول.",
+    "Edit_Profile_Name_must_contain_only_letters_and_spaces": "يجب أن يحتوي الاسم على أحرف ومسافات فقط.",
+    "Edit_Profile_Profile_updated_successfully": "تم تحديث الملف الشخصي بنجاح!",
+
+      "Supervision_Supervision": "الإشراف",
+    "Supervision_No_patients_found": "لم يتم العثور على أي مرضى",
+    "Supervision_Error_loading_patients": "حدث خطأ أثناء تحميل المرضى",
+
     "Supervisor_Profile_view_Profile": "الملف الشخصي",
     "Supervisor_Profile_view_Please_log_in_to_view_your_profile": "يرجى تسجيل الدخول لعرض ملفك الشخصي",
     "Supervisor_Profile_view_Dark_Mode": "الوضع الداكن",
     "Supervisor_Profile_view_Change_Language": "تغيير اللغة",
-    "Supervisor_Profile_view_Log_out": "تسجيل الخروج"
+    "Supervisor_Profile_view_Log_out": "تسجيل الخروج",
+
+
+
+  "build_text_field_validatorText1": "يرجى إدخال بريد إلكتروني صالح",
+  "build_text_field_validatorText2": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+  "build_text_field_validatorText3": "يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير وأرقام",
+  "build_text_field_validatorText4": "يرجى إدخال عمرك",
+  "build_text_field_validatorText5": "يرجى إدخال عمر صالح",
+  "build_text_field_validatorText6": "يجب أن تكون القيمة أكبر من 0",
+
+
+  "changePassPage_New_password_and_confirmation_do_not_match": "كلمة المرور الجديدة وتأكيدها غير متطابقين.",
+  "changePassPage_no_user": "لا يوجد مستخدم",
+  "changePassPage_No_user_is_signed_in": "لا يوجد مستخدم مسجل الدخول.",
+  "changePassPage_Password_changed_successfully": "تم تغيير كلمة المرور بنجاح!",
+
+  "changePassPage_An_unexpected_error_occurred": "حدث خطأ غير متوقع.",
+  "changePassPage_Change_Password": "تغيير كلمة المرور",
+  "changePassPage_Current_Password": "كلمة المرور الحالية",
+  "changePassPage_Please_enter_your_current_password": "يرجى إدخال كلمة المرور الحالية",
+  "changePassPage_Enter_Current_Password": "أدخل كلمة المرور الحالية",
+  "changePassPage_New_Password": "كلمة المرور الجديدة",
+  "changePassPage_Please_enter_a_valid_new_password_at_least_6_characters": "يرجى إدخال كلمة مرور جديدة صالحة (لا تقل عن 6 أحرف)",
+  "changePassPage_Enter_New_Password": "أدخل كلمة المرور الجديدة",
+  "changePassPage_Confirm_New_Password": "تأكيد كلمة المرور الجديدة",
+  "changePassPage_Please_confirm_your_new_password": "يرجى تأكيد كلمة المرور الجديدة",
+
+   "CustomBoxFilled_Delete_Medicine": "حذف الدواء",
+  "CustomBoxFilled_Cancel": "إلغاء",
+
+   "CustomBoxIcon_Alert": "تنبيه!!",
+  "CustomBoxIcon_Are_you_sure_you_want_to_add_a_new_medication": "هل أنت متأكد أنك تريد إضافة دواء جديد؟",
+  "CustomBoxIcon_yes": "نعم",
+  "CustomBoxIcon_No": "لا"
+
+
+
+  
   }
   

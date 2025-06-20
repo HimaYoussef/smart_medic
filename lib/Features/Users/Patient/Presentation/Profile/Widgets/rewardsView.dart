@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/utils/Style.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../../../Services/firebaseServices.dart';
 import '../../../../../../Services/rewardsService.dart';
 
@@ -29,7 +30,7 @@ class _RewardsViewState extends State<RewardsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rewards'),
+        title:  Text(S.of(context).rewardsView_Rewards),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -52,7 +53,7 @@ class _RewardsViewState extends State<RewardsView> {
                   return const CircularProgressIndicator();
                 }
                 if (snapshot.hasError || !snapshot.hasData || !snapshot.data!['success']) {
-                  return const Text('Error loading Rewards');
+                  return  Text(S.of(context).rewardsView_Error_loading_Rewards);
                 }
                 final currentStreak = snapshot.data!['data']['currentStreak'] ?? 0;
                 final progress = currentStreak / 30.0;
@@ -83,7 +84,7 @@ class _RewardsViewState extends State<RewardsView> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'your streak',
+                     S.of(context).rewardsView_your_streak,
                       style: getbodyStyle(fontSize: 14),
                     ),
                   ],
@@ -104,10 +105,10 @@ class _RewardsViewState extends State<RewardsView> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading Rewards'));
+                    return  Center(child: Text(S.of(context).rewardsView_Error_loading_Rewards));
                   }
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text('No rewards available'));
+                    return  Center(child: Text(S.of(context).rewardsView_No_rewards_available));
                   }
 
                   final rewards = snapshot.data!.docs;
@@ -178,7 +179,7 @@ class _RewardsViewState extends State<RewardsView> {
                                   onPressed: () async {
                                     await _rewardsService.markRewardAsUsed(rewardId);
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Rewards has been used')),
+                                       SnackBar(content: Text(S.of(context).rewardsView_Rewards_has_been_used)),
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -190,7 +191,7 @@ class _RewardsViewState extends State<RewardsView> {
                                     ),
                                   ),
                                   child: Text(
-                                    'Use',
+                                    S.of(context).rewardsView_Use,
                                     style: getbodyStyle(color: AppColors.white),
                                   ),
                                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Add_New_Medicine.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 class CustomBoxIcon extends StatelessWidget {
   final int index;
@@ -37,12 +38,14 @@ class CustomBoxIcon extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Alert!!'),
-          content: const SingleChildScrollView(
+          title: Text(S.of(context).CustomBoxIcon_Alert),
+          content: SingleChildScrollView(
             child: ListBody(
               children: [
                 Text(
-                  'Are you sure you want to add a new medication?',
+                  S
+                      .of(context)
+                      .CustomBoxIcon_Are_you_sure_you_want_to_add_a_new_medication,
                   style: TextStyle(),
                 ),
               ],
@@ -54,12 +57,14 @@ class CustomBoxIcon extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => addNewMedicine(compNum: index+1,),
+                    builder: (context) => addNewMedicine(
+                      compNum: index + 1,
+                    ),
                   ),
                 );
               },
               child: Text(
-                'Yes',
+                S.of(context).CustomBoxIcon_yes,
                 style: TextStyle(color: AppColors.mainColor),
               ),
             ),
@@ -68,7 +73,7 @@ class CustomBoxIcon extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               child: Text(
-                'No',
+                S.of(context).CustomBoxIcon_No,
                 style: TextStyle(color: AppColors.mainColor),
               ),
             ),

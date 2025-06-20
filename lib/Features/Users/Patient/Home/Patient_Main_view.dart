@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Added missing import
 import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Refill_Medicine.dart';
+import 'package:smart_medic/ShowcaseProvider.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
 import 'package:smart_medic/core/widgets/CustomBoxFilled.dart';
 import 'package:smart_medic/core/widgets/CustomBoxIcon.dart';
@@ -28,7 +30,7 @@ class _PatientMainViewState extends State<PatientMainView> {
   @override
   void initState() {
     super.initState();
-    // Showcase will be started after data is loaded
+    // Showcase will be started after data is loaded in the StreamBuilder
   }
 
   @override
@@ -39,6 +41,17 @@ class _PatientMainViewState extends State<PatientMainView> {
         centerTitle: true,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: Icon(
+              Provider.of<ShowcaseProvider>(context).isShowcaseEnabled
+                  ? Icons.visibility_off
+                  : Icons.help,
+            ),
+            onPressed: () {
+              Provider.of<ShowcaseProvider>(context, listen: false)
+                  .toggleShowcase();
+            },
+          ),
           Image.asset(
             'assets/pills.png',
             width: 60,
@@ -72,7 +85,8 @@ class _PatientMainViewState extends State<PatientMainView> {
 
             // Start showcase after data is loaded and UI is built
             if (snapshot.connectionState == ConnectionState.active &&
-                !_hasStartedShowcase) {
+                !_hasStartedShowcase &&
+                Provider.of<ShowcaseProvider>(context).isShowcaseEnabled) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   // Combine compartment key with nav bar keys
@@ -111,7 +125,7 @@ class _PatientMainViewState extends State<PatientMainView> {
                       (med) => med['compartmentNumber'] == (index + 1),
                       orElse: () => {},
                     );
-                    
+
                     if (medForCompartment.isNotEmpty) {
                       // Show filled box if medication exists
                       return CustomBoxFilled(
@@ -126,8 +140,10 @@ class _PatientMainViewState extends State<PatientMainView> {
                           ),
                         ),
                       );
-                    } else if (index == 0) {
-                      // Show showcase for first empty compartment
+                    } else if (index == 0 &&
+                        Provider.of<ShowcaseProvider>(context)
+                            .isShowcaseEnabled) {
+                      // Show showcase for first empty compartment when enabled
                       return Showcase(
                         key: _firstCompartmentKey,
                         description: S.of(context).Patient_Main_view_Empty_Icon,
@@ -136,11 +152,11 @@ class _PatientMainViewState extends State<PatientMainView> {
                             Theme.of(context).brightness == Brightness.dark
                                 ? AppColors.white
                                 : AppColors.black,
-                        descTextStyle: TextStyle(
+                        descTextStyle: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
-                        tooltipPadding: EdgeInsets.all(10),
+                        tooltipPadding: const EdgeInsets.all(10),
                         child: CustomBoxIcon(index: index),
                       );
                     } else {

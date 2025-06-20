@@ -5,6 +5,7 @@ import 'package:smart_medic/Features/Users/Patient/Home/Widgets/EditMedicine.dar
 import 'package:smart_medic/Features/Users/Patient/Home/Widgets/MedicineView.dart';
 import 'package:smart_medic/Services/firebaseServices.dart';
 import 'package:smart_medic/core/utils/Colors.dart';
+import 'package:smart_medic/generated/l10n.dart';
 
 class CustomBoxFilled extends StatelessWidget {
   final String medicineName;
@@ -43,12 +44,12 @@ class CustomBoxFilled extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Medicine'),
+        title:  Text(S.of(context).CustomBoxFilled_Delete_Medicine),
         content: Text('Are you sure you want to delete "$medicineName"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child:  Text(S.of(context).CustomBoxFilled_Cancel),
           ),
           TextButton(
             onPressed: () {

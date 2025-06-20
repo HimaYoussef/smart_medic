@@ -92,9 +92,10 @@ class SignUpScreen extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? AppColors.cointainerDarkColor
-                                : AppColors.white,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppColors.cointainerDarkColor
+                                    : AppColors.white,
                             borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(
@@ -161,7 +162,8 @@ class SignUpScreen extends StatelessWidget {
                                 decoration: InputDecoration(
                                   border: const UnderlineInputBorder(),
                                   labelText: S.of(context).signUp_password,
-                                  labelStyle: const TextStyle(color: Colors.grey),
+                                  labelStyle:
+                                      const TextStyle(color: Colors.grey),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       cubit.isPasswordVisible
@@ -187,7 +189,8 @@ class SignUpScreen extends StatelessWidget {
                                   border: const UnderlineInputBorder(),
                                   labelText:
                                       S.of(context).signUp_Confirm_Password,
-                                  labelStyle: const TextStyle(color: Colors.grey),
+                                  labelStyle:
+                                      const TextStyle(color: Colors.grey),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       cubit.isConfirmPasswordVisible
@@ -207,13 +210,16 @@ class SignUpScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 20),
                               state is SignUpLoading
-                                  ? const Center(child: CircularProgressIndicator())
+                                  ? const Center(
+                                      child: CircularProgressIndicator())
                                   : CustomButton(
                                       text: S.of(context).signUp_SIGN_UP,
                                       onPressed: () async {
                                         final name = _nameController.text;
-                                        final email = _emailController.text.trim();
-                                        final password = _passwordController.text;
+                                        final email =
+                                            _emailController.text.trim();
+                                        final password =
+                                            _passwordController.text;
                                         final confirmPassword =
                                             _confirmPasswordController.text;
                                         if (email.isEmpty ||
@@ -244,7 +250,8 @@ class SignUpScreen extends StatelessWidget {
                                               ),
                                             ),
                                           );
-                                        } else if (password != confirmPassword) {
+                                        } else if (password !=
+                                            confirmPassword) {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             SnackBar(
@@ -276,14 +283,16 @@ class SignUpScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          pushTo(context, LoginScreen());
+                          ;
                         },
                         child: Text(
                           S.of(context).signUp_Already_have_an_account_SIGN_IN,
                           style: TextStyle(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? AppColors.mainColorDark
-                                : AppColors.mainColor,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
                           ),
                         ),
                       ),

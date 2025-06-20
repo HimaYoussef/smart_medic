@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_medic/generated/l10n.dart';
 import '../../../../core/widgets/Custom_button.dart';
 import '../../../../core/utils/Colors.dart';
 import '../../../../core/widgets/build_text_field.dart';
@@ -39,7 +40,7 @@ class _ResetPassPageState extends State<ResetPassPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Password reset email sent! Please check your inbox.',
+            S.of(context).resetPass_Password_reset_email_sent_Please_check_your_inbox,
             style: TextStyle(color: AppColors.white),
           ),
         ),
@@ -115,7 +116,7 @@ class _ResetPassPageState extends State<ResetPassPage> {
         children: [
           const SizedBox(height: 100),
           Text(
-            "Reset Your Password",
+            S.of(context).resetPass_Reset_Your_Password,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -134,7 +135,7 @@ class _ResetPassPageState extends State<ResetPassPage> {
                     Navigator.pop(context);
                   },
                   child: Text(
-                    "Remember your password? Sign in now",
+                  S.of(context).resetPass_Remember_your_password_Sign_in_now,
                     style: TextStyle(
                       color: Theme.of(context).brightness == Brightness.dark
                           ? AppColors.mainColorDark
@@ -173,9 +174,9 @@ class _ResetPassPageState extends State<ResetPassPage> {
           children: [
             _buildIcon(),
             const SizedBox(height: 24),
-            const Center(
+             Center(
               child: Text(
-                'Welcome Back',
+                S.of(context).resetPass_Welcome_Back,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -219,8 +220,8 @@ class _ResetPassPageState extends State<ResetPassPage> {
       controller: _emailController,
       keyboardType: TextInputType.emailAddress,
       readOnly: false,
-      validatorText: 'Please enter a valid email',
-      labelText: 'Enter your Email',
+      validatorText: S.of(context).resetPass_Please_enter_a_valid_email,
+      labelText: S.of(context).resetPass_Enter_your_Email,
       textInputAction: TextInputAction.done,
       onFieldSubmitted: (_) => sendPasswordResetEmail(),
     );
@@ -231,7 +232,7 @@ class _ResetPassPageState extends State<ResetPassPage> {
     return _isLoading
         ? const Center(child: CircularProgressIndicator())
         : CustomButton(
-      text: "Reset",
+      text: S.of(context).resetPass_Reset,
       onPressed: () => sendPasswordResetEmail(),
     );
   }

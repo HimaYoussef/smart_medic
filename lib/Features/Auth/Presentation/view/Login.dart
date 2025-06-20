@@ -54,9 +54,10 @@ class LoginScreen extends StatelessWidget {
                     ? AppColors.mainColorDark
                     : AppColors.mainColor,
                 duration: Duration(seconds: 3),
-                action: state.errorMessage == 'Email not verified yet'
+                action: state.errorMessage ==
+                        S.of(context).Login_Email_not_verified_yet
                     ? SnackBarAction(
-                        label: 'Resend',
+                        label: S.of(context).Login_Resend,
                         textColor: AppColors.white,
                         onPressed: () async {
                           try {
@@ -65,7 +66,9 @@ class LoginScreen extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Verification email resent. Check your inbox.',
+                                  S
+                                      .of(context)
+                                      .Login_Verification_email_resent_Check_your_inbox,
                                   style: TextStyle(color: AppColors.white),
                                 ),
                                 backgroundColor: Theme.of(context).brightness ==
@@ -79,7 +82,9 @@ class LoginScreen extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Failed to resend verification email.',
+                                  S
+                                      .of(context)
+                                      .Login_Failed_to_resend_verification_email,
                                   style: TextStyle(color: AppColors.white),
                                 ),
                                 backgroundColor: Theme.of(context).brightness ==
@@ -248,7 +253,7 @@ class LoginScreen extends StatelessWidget {
                                   pushTo(context, const ResetPassPage());
                                 },
                                 child: Text(
-                                  "Forgot Password?",
+                                  S.of(context).Login_Forgot_Password,
                                   style: TextStyle(
                                     color: Theme.of(context).brightness ==
                                             Brightness.dark

@@ -45,7 +45,7 @@ class _nameState extends State<PatientData> {
             }
 
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("No patients found."));
+              return  Center(child: Text(S.of(context).Patient_Data_No_patients_found));
             }
 
             return ListView.separated(
