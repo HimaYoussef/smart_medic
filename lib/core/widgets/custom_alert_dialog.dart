@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_medic/core/utils/Colors.dart';
-import 'package:smart_medic/core/utils/Style.dart';
+import '../utils/Colors.dart';
+import '../utils/Style.dart';
 
 showAlertDialog(BuildContext context,
     {String? ok, String? no, required String title, void Function()? onTap}) {

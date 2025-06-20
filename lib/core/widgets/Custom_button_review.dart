@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_medic/core/utils/Colors.dart';
+import '../utils/Colors.dart';
 
 class CustomButton extends StatelessWidget {
   const CustomButton(

@@ -4,17 +4,22 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
-import 'package:smart_medic/Features/Users/Patient/Home/nav_bar.dart';
-import 'package:smart_medic/Features/Users/Supervisor/Home/nav_bar.dart';
-import 'package:smart_medic/Services/notificationService.dart';
-import 'package:smart_medic/Services/firebaseServices.dart';
-import 'package:smart_medic/Theme/themes.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:workmanager/workmanager.dart';
-import 'Features/Auth/Presentation/view_model/Cubits/LoginCubit/login_cubit.dart';
 import 'Features/Auth/Presentation/view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
+import 'Features/Role_Selection/Role_Selection.dart';
+import 'Features/Users/Patient/Home/nav_bar.dart';
+import 'Features/Users/Supervisor/Home/nav_bar.dart';
+import 'LocalProvider.dart';
+import 'Services/firebaseServices.dart';
+import 'Services/notificationService.dart';
+import 'Theme/themes.dart';
+import 'generated/l10n.dart';
+import 'package:provider/provider.dart';
+
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -69,7 +74,12 @@ Future<void> main() async {
     frequency: const Duration(minutes: 15),
   );
 
-  runApp(const MainApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (BuildContext context) => LocaleProvider(),
+      child: const MainApp(),
+    ),
+  );
 }
 
 Future<void> initHive(String path) async {
@@ -103,26 +113,39 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return ValueListenableBuilder(
       valueListenable: themeNotifier,
       builder: (_, ThemeMode currentMode, __) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (context) => LoginCubit()),
             BlocProvider(create: (context) => SignUpCubit()),
           ],
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: AppThemes.lightTheme,
-            darkTheme: AppThemes.darkTheme,
-            themeMode: currentMode,
-            home: const AuthCheck(),
-            builder: (context, child) {
-              return Directionality(
-                textDirection: TextDirection.ltr,
-                child: child!,
-              );
-            },
+          child: ShowCaseWidget(
+            builder: (context) => MaterialApp(
+              locale: localeProvider.locale,
+              localizationsDelegates: const [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: S.delegate.supportedLocales,
+              debugShowCheckedModeBanner: false,
+              theme: AppThemes.lightTheme,
+              darkTheme: AppThemes.darkTheme,
+              themeMode: currentMode,
+              home: const AuthCheck(),
+              builder: (context, child) {
+                return Directionality(
+                  textDirection: localeProvider.locale.languageCode == 'ar'
+                      ? TextDirection.rtl
+                      : TextDirection.ltr,
+                  child: child!,
+                );
+              },
+            ),
           ),
         );
       },
@@ -144,15 +167,16 @@ class AuthCheck extends StatelessWidget {
           );
         }
 
-        if (snapshot.hasError) {
-          return RoleSelectionScreen();
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+          return const RoleSelectionScreen();
         }
 
-        if (!snapshot.hasData || snapshot.data == null) {
-          return RoleSelectionScreen();
+        final User user = snapshot.data!;
+
+        if (!user.emailVerified) {
+          return const RoleSelectionScreen();
         }
 
-        User user = snapshot.data!;
 
         return FutureBuilder<Map<String, dynamic>?>(
           future: SmartMedicalDb.getUserById(user.uid),
@@ -164,7 +188,7 @@ class AuthCheck extends StatelessWidget {
             }
 
             if (userSnapshot.hasError || !userSnapshot.hasData || userSnapshot.data == null) {
-              return RoleSelectionScreen();
+              return const RoleSelectionScreen();
             }
 
             String userType = userSnapshot.data!['type']?.toString().trim().toLowerCase() ?? 'patient';
@@ -174,7 +198,7 @@ class AuthCheck extends StatelessWidget {
             } else if (userType == 'supervisor') {
               return const SupervisorHomeView();
             } else {
-              return RoleSelectionScreen();
+              return const RoleSelectionScreen();
             }
           },
         );

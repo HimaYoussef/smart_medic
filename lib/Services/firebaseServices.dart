@@ -1,8 +1,5 @@
+import 'package:NTC/Services/rewardsService.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:smart_medic/Services/rewardsService.dart';
-
 import 'notificationService.dart';
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -74,18 +71,14 @@ class SmartMedicalDb {
   // Get User by ID
   static Future<Map<String, dynamic>?> getUserById(String userId) async {
     try {
-      print("SmartMedicalDb: Fetching user with UID: $userId");
       DocumentSnapshot userDoc = await usersCollection.doc(userId).get();
 
       if (userDoc.exists) {
-        print("SmartMedicalDb: User found - ${userDoc.data()}");
         return userDoc.data() as Map<String, dynamic>;
       } else {
-        print('User not found!');
         return null;
       }
     } catch (e) {
-      print('Error fetching user: $e');
       return null;
     }
   }
@@ -129,7 +122,7 @@ class SmartMedicalDb {
       }
 
       // إنشاء document جديد بـ ID فريد
-      DocumentReference supervisorRef = supervisionCollection.doc();
+      DocumentReference supervisorRef = supervisionCollection.doc(supervisorId);
       await supervisorRef.set({
         'supervisorId': supervisorId,
         'name': supervisorName,
@@ -274,7 +267,16 @@ class SmartMedicalDb {
         .where('patientId', isEqualTo: patientId)
         .snapshots();
   }
+  // Fetch all users of type 'Supervisor'
+  static Stream<QuerySnapshot> readAllSupervisors() {
+    return usersCollection.where('type', isEqualTo: 'Supervisor').snapshots();
+  }
 
+  static Stream<QuerySnapshot> readAllPatients() {
+    return usersCollection
+        .where('type', isEqualTo: 'Patient')
+        .snapshots();
+  }
   // Read patients supervised by a specific supervisor
   static Stream<List<Map<String, dynamic>>> readPatientsForSupervisor(String supervisorId) async* {
     // جلب البيانات من supervision collection

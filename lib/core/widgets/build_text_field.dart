@@ -41,7 +41,7 @@ class CustomTextField extends StatelessWidget {
       keyboardType: keyboardType,
       readOnly: readOnly,
       obscureText: obscureText,
-      textInputAction: textInputAction ?? TextInputAction.next, // Use provided or default
+      textInputAction: textInputAction, // Use provided or default
       style: TextStyle(
         color: Theme.of(context).brightness == Brightness.dark
             ? AppColors.white
@@ -61,10 +61,7 @@ class CustomTextField extends StatelessWidget {
         if (obscureText && value.length < 6) {
           return 'Password must be at least 6 characters';
         }
-        if (obscureText && !RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$').hasMatch(value)) {
-          return 'Password must include uppercase, lowercase, and digits';
-        }
-        if (labelText == 'Please Enter Your Age' && (int.tryParse(value) == null || int.parse(value) <= 0 || int.parse(value) > 99)) {
+        if (labelText == 'Please Enter Your Age' && (int.tryParse(value) == null || int.parse(value) <= 12 || int.parse(value) > 99)) {
           return 'Please Enter a valid Age';
         }
         if (maxValue != null && keyboardType == TextInputType.number) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_medic/Features/Users/Patient/Home/Widgets/Add_New_Medicine.dart';
-import 'package:smart_medic/core/utils/Colors.dart';
+import '../../Features/Users/Patient/Home/Widgets/Add_New_Medicine.dart';
+import '../utils/Colors.dart';
 
 class CustomBoxIcon extends StatelessWidget {
   final int index;
