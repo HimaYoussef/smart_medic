@@ -79,7 +79,7 @@ class _PatientHomeViewState extends State<PatientHomeView> {
                   ),
                   tooltipPadding: EdgeInsets.all(screenWidth * 0.025),
                   child: SizedBox(
-                    height: screenHeight * 0.03, // 3% of screen height
+                    height: screenHeight * 0.027, // 3% of screen height
                     child: const Icon(Icons.home),
                   ),
                 ),
@@ -102,7 +102,7 @@ class _PatientHomeViewState extends State<PatientHomeView> {
                   ),
                   tooltipPadding: EdgeInsets.all(screenWidth * 0.025),
                   child: SizedBox(
-                    height: screenHeight * 0.03,
+                    height: screenHeight * 0.027,
                     child: const Icon(Icons.access_time),
                   ),
                 ),
@@ -125,7 +125,7 @@ class _PatientHomeViewState extends State<PatientHomeView> {
                   ),
                   tooltipPadding: EdgeInsets.all(screenWidth * 0.025),
                   child: SizedBox(
-                    height: screenHeight * 0.03,
+                    height: screenHeight * 0.027,
                     child: const Icon(Icons.article),
                   ),
                 ),
@@ -148,7 +148,7 @@ class _PatientHomeViewState extends State<PatientHomeView> {
                   ),
                   tooltipPadding: EdgeInsets.all(screenWidth * 0.025),
                   child: SizedBox(
-                    height: screenHeight * 0.03,
+                    height: screenHeight * 0.027,
                     child: const Icon(Icons.person),
                   ),
                 ),

@@ -121,6 +121,8 @@ class _EditMedicineState extends State<EditMedicine> {
   }
 
   Future<void> _updateMedicine() async {
+    FocusScope.of(context).unfocus();
+
     if (_isLoading) return;
 
     if (!_formKey.currentState!.validate()) {
@@ -232,22 +234,26 @@ class _EditMedicineState extends State<EditMedicine> {
       );
       return;
     }
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-      _showLoadingOverlay(context);
+    setState(() {
+      _isLoading = true;
+    });
+    _showLoadingOverlay(context);
 
+    try {
       Map<String, dynamic> updates = {
         'name': _medNameController.text,
         'pillsLeft': int.parse(_pillsController.text),
         'dosage': int.parse(_dosageController.text),
         'scheduleType': _scheduleType - 1,
-        'scheduleValue': _numTimesController.text.isNotEmpty
-            ? int.parse(_numTimesController.text)
-            : (_daysIntervalController.text.isNotEmpty
-                ? int.parse(_daysIntervalController.text)
-                : 0),
+        'scheduleValue': _scheduleType == 1
+            ? (_numTimesController.text.isNotEmpty
+                ? int.parse(_numTimesController.text)
+                : 0)
+            : _scheduleType == 2
+                ? (_daysIntervalController.text.isNotEmpty
+                    ? int.parse(_daysIntervalController.text)
+                    : 0)
+                : 0,
         'times': _times,
         'bitmaskDays': _bitmaskDays,
         'compartmentNumber': widget.compartmentNumber,
@@ -259,28 +265,57 @@ class _EditMedicineState extends State<EditMedicine> {
       );
 
       if (result['success']) {
-        // Pop immediately and notify parent to refresh
-        if (mounted) {
-          Navigator.pop(context); // <--- KEY FIX
-        }
         // Now do background tasks
         await LocalNotificationService.scheduleMedicineNotifications();
         await sendAllMedicationsToArduino();
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Medicine updated successfully!',
+              style: TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
+          ),
+        );
+        _medNameController.clear();
+        _pillsController.clear();
+        _dosageController.clear();
+        _numTimesController.clear();
+        _daysIntervalController.clear();
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               result['message'],
               style: TextStyle(color: AppColors.white),
             ),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.mainColorDark
+                : AppColors.mainColor,
           ),
         );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error updating medication: $e',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+    } finally {
+      _hideLoadingOverlay(context);
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        Navigator.pop(context);
       }
     }
   }
@@ -324,7 +359,7 @@ class _EditMedicineState extends State<EditMedicine> {
       }).toList();
 
       for (var med in medications) {
-        String dataToSend = jsonEncode({"medication": med}) + "\n";
+        String dataToSend = "${jsonEncode({"medication": med})}\n";
         print("Sending data to Arduino: $dataToSend");
 
         try {
@@ -434,408 +469,381 @@ class _EditMedicineState extends State<EditMedicine> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(15),
-              child: SingleChildScrollView(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.cointainerDarkColor
-                        : AppColors.cointainerColor,
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Gap(20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CustomText(
-                                  text:
-                                      S.of(context).EditMedicine_Edit_Medicine,
-                                  fonSize: 20),
-                            ],
-                          ),
-                          const Gap(30),
-                          CustomText(
-                              text:
-                                  S.of(context).EditMedicine_Compartment_Number,
-                              fonSize: 15),
-                          const SizedBox(height: 10),
-                          CustomTextField(
-                            controller: TextEditingController(
-                                text: widget.compartmentNumber.toString()),
-                            readOnly: true,
-                            enablation: false,
-                          ),
-                          const SizedBox(height: 25),
-                          CustomText(
-                              text: S.of(context).EditMedicine_Med_Name,
-                              fonSize: 15),
-                          const SizedBox(height: 10),
-                          CustomTextField(
-                            controller: _medNameController,
-                            labelText: S.of(context).EditMedicine_labelText1,
-                            validatorText:
-                                S.of(context).EditMedicine_validatorText1,
-                            keyboardType: TextInputType.text,
-                            readOnly: false,
-                          ),
-                          const SizedBox(height: 25),
-                          const CustomText(text: 'Pills', fonSize: 15),
-                          const SizedBox(height: 10),
-                          CustomTextField(
-                            controller: _pillsController,
-                            labelText: S.of(context).EditMedicine_labelText2,
-                            keyboardType: TextInputType.number,
-                            readOnly: false,
-                            validatorText:
-                                S.of(context).EditMedicine_validatorText2,
-                          ),
-                          const SizedBox(height: 25),
-                          CustomText(
-                              text: S.of(context).EditMedicine_Dosage,
-                              fonSize: 15),
-                          const SizedBox(height: 10),
-                          CustomTextField(
-                            controller: _dosageController,
-                            labelText: S.of(context).EditMedicine_labelText3,
-                            keyboardType: TextInputType.number,
-                            readOnly: false,
-                            validatorText:
-                                S.of(context).EditMedicine_validatorText3,
-                          ),
-                          const SizedBox(height: 25),
-                          CustomText(
-                              text: S.of(context).EditMedicine_Schedule_Type,
-                              fonSize: 15),
-                          const SizedBox(height: 10),
-                          buildDropdownButton(context),
-                          const SizedBox(height: 25),
-                          if (_scheduleType == 1) ...[
-                            CustomText(
-                                text: S
-                                    .of(context)
-                                    .EditMedicine_How_many_times_per_day,
-                                fonSize: 15),
-                            const SizedBox(height: 10),
-                            CustomTextField(
-                              controller: _numTimesController,
-                              readOnly: false,
-                              labelText: S.of(context).EditMedicine_labelText4,
-                              validatorText:
-                                  S.of(context).EditMedicine_validatorText4,
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                setState(() {
-                                  _times = [];
-                                  _selectedTimes = [];
-                                  if (!_isValidNumTimes(value)) {
-                                    if (value.isNotEmpty) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            S.of(context).EditMedicine_SnackBar,
-                                            style: TextStyle(
-                                                color: AppColors.white),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                });
-                              },
-                              maxValue: 4,
-                            ),
-                            const SizedBox(height: 25),
-                            if (_numTimesController.text.isNotEmpty &&
-                                int.tryParse(_numTimesController.text) !=
-                                    null &&
-                                int.parse(_numTimesController.text) > 0 &&
-                                int.parse(_numTimesController.text) <= 4) ...[
-                              Builder(builder: (context) {
-                                int numTimes =
-                                    int.parse(_numTimesController.text);
-                                if (_selectedTimes.length != numTimes) {
-                                  _selectedTimes =
-                                      List<TimeOfDay?>.filled(numTimes, null);
-
-                                  // List<TimeOfDay?> newTimes =
-                                  //     List<TimeOfDay?>.filled(numTimes, null);
-                                  // for (int i = 0;
-                                  //     i < _selectedTimes.length && i < numTimes;
-                                  //     i++) {
-                                  //   newTimes[i] = _selectedTimes[i];
-                                  // }
-                                  // _selectedTimes = newTimes;
-                                }
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Select Times',
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 16),
+      body: Padding(
+        padding: const EdgeInsets.all(15),
+        child: SingleChildScrollView(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.cointainerDarkColor
+                  : AppColors.cointainerColor,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Gap(20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomText(
+                            text: S.of(context).EditMedicine_Edit_Medicine,
+                            fonSize: 20),
+                      ],
+                    ),
+                    const Gap(30),
+                    CustomText(
+                        text: S.of(context).EditMedicine_Compartment_Number,
+                        fonSize: 15),
+                    const SizedBox(height: 10),
+                    CustomTextField(
+                      controller: TextEditingController(
+                          text: widget.compartmentNumber.toString()),
+                      readOnly: true,
+                      enablation: false,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 25),
+                    CustomText(
+                        text: S.of(context).EditMedicine_Med_Name, fonSize: 15),
+                    const SizedBox(height: 10),
+                    CustomTextField(
+                      controller: _medNameController,
+                      labelText: S.of(context).EditMedicine_labelText1,
+                      validatorText: S.of(context).EditMedicine_validatorText1,
+                      keyboardType: TextInputType.text,
+                      readOnly: false,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 25),
+                    const CustomText(text: 'Pills', fonSize: 15),
+                    const SizedBox(height: 10),
+                    CustomTextField(
+                        controller: _pillsController,
+                        labelText: S.of(context).EditMedicine_labelText2,
+                        keyboardType: TextInputType.number,
+                        readOnly: false,
+                        validatorText:
+                            S.of(context).EditMedicine_validatorText2,
+                        textInputAction: TextInputAction.next,
+                        maxValue: 50),
+                    const SizedBox(height: 25),
+                    CustomText(
+                        text: S.of(context).EditMedicine_Dosage, fonSize: 15),
+                    const SizedBox(height: 10),
+                    CustomTextField(
+                      controller: _dosageController,
+                      labelText: S.of(context).EditMedicine_labelText3,
+                      keyboardType: TextInputType.number,
+                      readOnly: false,
+                      validatorText: S.of(context).EditMedicine_validatorText3,
+                      maxValue: 4,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 25),
+                    CustomText(
+                        text: S.of(context).EditMedicine_Schedule_Type,
+                        fonSize: 15),
+                    const SizedBox(height: 10),
+                    buildDropdownButton(context),
+                    const SizedBox(height: 25),
+                    if (_scheduleType == 1) ...[
+                      CustomText(
+                          text:
+                              S.of(context).EditMedicine_How_many_times_per_day,
+                          fonSize: 15),
+                      const SizedBox(height: 10),
+                      CustomTextField(
+                        controller: _numTimesController,
+                        readOnly: false,
+                        labelText: S.of(context).EditMedicine_labelText4,
+                        validatorText:
+                            S.of(context).EditMedicine_validatorText4,
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            _times = [];
+                            _selectedTimes = [];
+                            if (!_isValidNumTimes(value)) {
+                              if (value.isNotEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S.of(context).EditMedicine_SnackBar,
+                                      style: TextStyle(color: AppColors.white),
                                     ),
-                                    const SizedBox(height: 5),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: List.generate(numTimes, (i) {
-                                        return _selectedTimes[i] != null
-                                            ? Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Chip(
-                                                    label: Text(
-                                                        _selectedTimes[i]!
-                                                            .format(context)),
-                                                    onDeleted: () {
-                                                      setState(() {
-                                                        _selectedTimes[i] =
-                                                            null;
-                                                        _updateTimesList();
-                                                      });
-                                                    },
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                ],
-                                              )
-                                            : const SizedBox.shrink();
-                                      }),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    if (_selectedTimes
-                                            .where((time) => time != null)
-                                            .length <
-                                        _selectedTimes.length)
-                                      ActionChip(
-                                        label: Text(
-                                          _selectedTimes
-                                                  .where((time) => time != null)
-                                                  .isEmpty
-                                              ? 'Add Time'
-                                              : 'Add Another Time',
-                                          style:
-                                              TextStyle(color: AppColors.white),
-                                        ),
-                                        onPressed: () async {
-                                          TimeOfDay? time =
-                                              await showTimePicker(
-                                            context: context,
-                                            initialTime: TimeOfDay.now(),
-                                          );
-                                          if (time != null) {
-                                            setState(() {
-                                              int firstNullIndex =
-                                                  _selectedTimes.indexWhere(
-                                                      (t) => t == null);
-                                              if (firstNullIndex != -1) {
-                                                _selectedTimes[firstNullIndex] =
-                                                    time;
-                                                _updateTimesList();
-                                              }
-                                            });
-                                          }
-                                        },
-                                        backgroundColor:
-                                            Theme.of(context).brightness ==
-                                                    Brightness.dark
-                                                ? AppColors.mainColorDark
-                                                : AppColors.mainColor,
-                                      ),
-                                  ],
+                                  ),
                                 );
-                              })
-                            ],
-                          ],
-                          if (_scheduleType == 2) ...[
-                            CustomText(
-                                text: S
-                                    .of(context)
-                                    .EditMedicine_Every_how_many_days,
-                                fonSize: 15),
-                            const SizedBox(height: 10),
-                            CustomTextField(
-                              controller: _daysIntervalController,
-                              readOnly: false,
-                              keyboardType: TextInputType.number,
-                              labelText: S.of(context).EditMedicine_labelText5,
-                              validatorText:
-                                  S.of(context).EditMedicine_validatorText5,
-                              onChanged: (value) {
-                                setState(() {
-                                  _times = [];
-                                  _selectedTime = null;
-                                });
-                              },
-                            ),
-                            const SizedBox(height: 25),
-                            if (_daysIntervalController.text.isNotEmpty &&
-                                int.tryParse(_daysIntervalController.text) !=
-                                    null &&
-                                int.parse(_daysIntervalController.text) >
-                                    0) ...[
+                              }
+                            }
+                          });
+                        },
+                        maxValue: 4,
+                        textInputAction: TextInputAction.next,
+                      ),
+                      const SizedBox(height: 25),
+                      if (_numTimesController.text.isNotEmpty &&
+                          int.tryParse(_numTimesController.text) != null &&
+                          int.parse(_numTimesController.text) > 0 &&
+                          int.parse(_numTimesController.text) <= 4) ...[
+                        Builder(builder: (context) {
+                          int numTimes = int.parse(_numTimesController.text);
+                          if (_selectedTimes.length != numTimes) {
+                            _selectedTimes =
+                                List<TimeOfDay?>.filled(numTimes, null);
+                            // List<TimeOfDay?> newTimes =
+                            //     List<TimeOfDay?>.filled(numTimes, null);
+                            // for (int i = 0;
+                            //     i < _selectedTimes.length && i < numTimes;
+                            //     i++) {
+                            //   newTimes[i] = _selectedTimes[i];
+                            // }
+                            // _selectedTimes = newTimes;
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               const Text(
-                                'Select Time',
+                                'Select Times',
                                 style:
                                     TextStyle(color: Colors.grey, fontSize: 16),
                               ),
                               const SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  if (_selectedTime != null) ...[
-                                    Chip(
-                                      label:
-                                          Text(_selectedTime!.format(context)),
-                                      onDeleted: () {
-                                        setState(() {
-                                          _selectedTime = null;
-                                          _times = [];
-                                        });
-                                      },
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  ActionChip(
-                                    label: Text(
-                                      _selectedTime == null
-                                          ? 'Add Time'
-                                          : 'Change Time',
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                    onPressed: () async {
-                                      TimeOfDay? time = await showTimePicker(
-                                        context: context,
-                                        initialTime:
-                                            _selectedTime ?? TimeOfDay.now(),
-                                      );
-                                      if (time != null) {
-                                        setState(() {
-                                          _selectedTime = time;
-                                          _times = [time.format(context)];
-                                        });
-                                      }
-                                    },
-                                    backgroundColor:
-                                        Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? AppColors.mainColorDark
-                                            : AppColors.mainColor,
-                                  ),
-                                ],
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: List.generate(numTimes, (i) {
+                                  return _selectedTimes[i] != null
+                                      ? Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Chip(
+                                              label: Text(_selectedTimes[i]!
+                                                  .format(context)),
+                                              onDeleted: () {
+                                                setState(() {
+                                                  _selectedTimes[i] = null;
+                                                  _updateTimesList();
+                                                });
+                                              },
+                                            ),
+                                            const SizedBox(width: 8),
+                                          ],
+                                        )
+                                      : const SizedBox.shrink();
+                                }),
                               ),
-                            ],
-                          ],
-                          if (_scheduleType == 3) ...[
-                            CustomText(
-                                text: S
-                                    .of(context)
-                                    .EditMedicine_Select_Specific_Days,
-                                fonSize: 15),
-                            const SizedBox(height: 2),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: List.generate(7, (index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _bitmaskDays[index] =
-                                          _bitmaskDays[index] == 1 ? 0 : 1;
-                                    });
+                              const SizedBox(height: 5),
+                              if (_selectedTimes
+                                      .where((time) => time != null)
+                                      .length <
+                                  _selectedTimes.length)
+                                ActionChip(
+                                  label: Text(
+                                    _selectedTimes
+                                            .where((time) => time != null)
+                                            .isEmpty
+                                        ? 'Add Time'
+                                        : 'Add Another Time',
+                                    style: TextStyle(color: AppColors.white),
+                                  ),
+                                  onPressed: () async {
+                                    TimeOfDay? time = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay.now(),
+                                    );
+                                    if (time != null) {
+                                      setState(() {
+                                        int firstNullIndex = _selectedTimes
+                                            .indexWhere((t) => t == null);
+                                        if (firstNullIndex != -1) {
+                                          _selectedTimes[firstNullIndex] = time;
+                                          _updateTimesList();
+                                        }
+                                      });
+                                    }
                                   },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: _bitmaskDays[index] == 1
-                                          ? Theme.of(context).brightness ==
-                                                  Brightness.dark
-                                              ? AppColors.mainColorDark
-                                              : AppColors.mainColor
-                                          : Colors.grey,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    padding: const EdgeInsets.all(8),
-                                    child: Text(
-                                      daysOfWeek[index],
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-                            const SizedBox(height: 25),
-                            if (_bitmaskDays.contains(1)) ...[
-                              const CustomText(
-                                  text: 'Select Time for Selected Days',
-                                  fonSize: 15),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  if (_commonTimeForSpecificDays
-                                      .isNotEmpty) ...[
-                                    Chip(
-                                      label: Text(_commonTimeForSpecificDays),
-                                      onDeleted: () {
-                                        setState(() {
-                                          _commonTimeForSpecificDays = "";
-                                          _times = [];
-                                        });
-                                      },
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  ActionChip(
-                                    label: Text(
-                                      _commonTimeForSpecificDays.isEmpty
-                                          ? 'Add Time'
-                                          : 'Change Time',
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                    onPressed: () async {
-                                      TimeOfDay? time = await showTimePicker(
-                                        context: context,
-                                        initialTime: TimeOfDay.now(),
-                                      );
-                                      if (time != null) {
-                                        setState(() {
-                                          _commonTimeForSpecificDays =
-                                              time.format(context);
-                                          _times = [time.format(context)];
-                                        });
-                                      }
-                                    },
-                                    backgroundColor:
-                                        Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? AppColors.mainColorDark
-                                            : AppColors.mainColor,
-                                  ),
-                                ],
-                              ),
+                                  backgroundColor:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? AppColors.mainColorDark
+                                          : AppColors.mainColor,
+                                ),
                             ],
+                          );
+                        })
+                      ],
+                    ],
+                    if (_scheduleType == 2) ...[
+                      CustomText(
+                          text: S.of(context).EditMedicine_Every_how_many_days,
+                          fonSize: 15),
+                      const SizedBox(height: 10),
+                      CustomTextField(
+                          controller: _daysIntervalController,
+                          readOnly: false,
+                          keyboardType: TextInputType.number,
+                          labelText: S.of(context).EditMedicine_labelText5,
+                          validatorText:
+                              S.of(context).EditMedicine_validatorText5,
+                          onChanged: (value) {
+                            setState(() {
+                              _times = [];
+                              _selectedTime = null;
+                            });
+                          },
+                          textInputAction: TextInputAction.next,
+                          maxValue: 7),
+                      const SizedBox(height: 25),
+                      if (_daysIntervalController.text.isNotEmpty &&
+                          int.tryParse(_daysIntervalController.text) != null &&
+                          int.parse(_daysIntervalController.text) > 0) ...[
+                        const Text(
+                          'Select Time',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            if (_selectedTime != null) ...[
+                              Chip(
+                                label: Text(_selectedTime!.format(context)),
+                                onDeleted: () {
+                                  setState(() {
+                                    _selectedTime = null;
+                                    _times = [];
+                                  });
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            ActionChip(
+                              label: Text(
+                                _selectedTime == null
+                                    ? 'Add Time'
+                                    : 'Change Time',
+                                style: TextStyle(color: AppColors.white),
+                              ),
+                              onPressed: () async {
+                                TimeOfDay? time = await showTimePicker(
+                                  context: context,
+                                  initialTime: _selectedTime ?? TimeOfDay.now(),
+                                );
+                                if (time != null) {
+                                  setState(() {
+                                    _selectedTime = time;
+                                    _times = [time.format(context)];
+                                  });
+                                }
+                              },
+                              backgroundColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.mainColorDark
+                                  : AppColors.mainColor,
+                            ),
                           ],
-                          const SizedBox(height: 30),
-                          CustomButton(
-                            text: S.of(context).EditMedicine_Update,
-                            onPressed: _updateMedicine,
-                          ),
-                          const SizedBox(height: 5),
-                        ],
+                        ),
+                      ],
+                    ],
+                    if (_scheduleType == 3) ...[
+                      CustomText(
+                          text: S.of(context).EditMedicine_Select_Specific_Days,
+                          fonSize: 15),
+                      const SizedBox(height: 2),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(7, (index) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _bitmaskDays[index] =
+                                    _bitmaskDays[index] == 1 ? 0 : 1;
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: _bitmaskDays[index] == 1
+                                    ? Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? AppColors.mainColorDark
+                                        : AppColors.mainColor
+                                    : Colors.grey,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                daysOfWeek[index],
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          );
+                        }),
                       ),
+                      const SizedBox(height: 25),
+                      if (_bitmaskDays.contains(1)) ...[
+                        const CustomText(
+                            text: 'Select Time for Selected Days', fonSize: 15),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            if (_commonTimeForSpecificDays.isNotEmpty) ...[
+                              Chip(
+                                label: Text(_commonTimeForSpecificDays),
+                                onDeleted: () {
+                                  setState(() {
+                                    _commonTimeForSpecificDays = "";
+                                    _times = [];
+                                  });
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            ActionChip(
+                              label: Text(
+                                _commonTimeForSpecificDays.isEmpty
+                                    ? 'Add Time'
+                                    : 'Change Time',
+                                style: TextStyle(color: AppColors.white),
+                              ),
+                              onPressed: () async {
+                                TimeOfDay? time = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                );
+                                if (time != null) {
+                                  setState(() {
+                                    _commonTimeForSpecificDays =
+                                        time.format(context);
+                                    _times = [time.format(context)];
+                                  });
+                                }
+                              },
+                              backgroundColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.mainColorDark
+                                  : AppColors.mainColor,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                    const SizedBox(height: 30),
+                    CustomButton(
+                      text: S.of(context).EditMedicine_Update,
+                      onPressed: _updateMedicine,
                     ),
-                  ),
+                    const SizedBox(height: 5),
+                  ],
                 ),
               ),
             ),
+          ),
+        ),
+      ),
     );
   }
 

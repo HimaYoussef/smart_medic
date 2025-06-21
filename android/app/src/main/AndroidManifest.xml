@@ -1,8 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -17,8 +14,10 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/> <!-- لـ Android 13+ -->
+        <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
-        android:label="smart_medic"
+        android:label="TNC"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

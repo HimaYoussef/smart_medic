@@ -42,7 +42,7 @@ class CustomTextField extends StatelessWidget {
       keyboardType: keyboardType,
       readOnly: readOnly,
       obscureText: obscureText,
-      textInputAction: textInputAction ?? TextInputAction.next, // Use provided or default
+      textInputAction: textInputAction, // Use provided or default
       style: TextStyle(
         color: Theme.of(context).brightness == Brightness.dark
             ? AppColors.white
@@ -62,10 +62,7 @@ class CustomTextField extends StatelessWidget {
         if (obscureText && value.length < 6) {
           return  S.of(context).build_text_field_validatorText2;
         }
-        if (obscureText && !RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$').hasMatch(value)) {
-          return  S.of(context).build_text_field_validatorText3;
-        }
-        if (labelText ==  S.of(context).build_text_field_validatorText4 && (int.tryParse(value) == null || int.parse(value) <= 0 || int.parse(value) > 99)) {
+        if (labelText ==  S.of(context).build_text_field_validatorText4 && (int.tryParse(value) == null || int.parse(value) <= 12 || int.parse(value) > 99)) {
           return  S.of(context).build_text_field_validatorText5;
         }
         if (maxValue != null && keyboardType == TextInputType.number) {

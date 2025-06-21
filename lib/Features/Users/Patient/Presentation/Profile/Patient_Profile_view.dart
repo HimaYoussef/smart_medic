@@ -1,19 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Added provider import
-import 'package:smart_medic/Features/Auth/Presentation/view/login.dart';
-import 'package:smart_medic/Features/Role_Selection/Role_Selection.dart';
-import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Supervision_view.dart';
-import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/Edit_Profile.dart';
-import 'package:smart_medic/Features/Users/Patient/Presentation/Profile/Widgets/rewardsView.dart';
-import 'package:smart_medic/LocalProvider.dart';
-import 'package:smart_medic/Services/firebaseServices.dart';
-import 'package:smart_medic/ShowcaseProvider.dart'; // Import ShowcaseProvider
-import 'package:smart_medic/core/utils/Colors.dart';
-import 'package:smart_medic/core/utils/Style.dart';
-import 'package:smart_medic/generated/l10n.dart';
+import '../../../../../LocalProvider.dart';
+import '../../../../../Services/firebaseServices.dart';
+import '../../../../../core/utils/Colors.dart';
+import '../../../../../core/utils/Style.dart';
+import '../../../../../core/widgets/changePassPage.dart';
+import '../../../../../generated/l10n.dart';
 import '../../../../../main.dart';
 import 'package:showcaseview/showcaseview.dart';
+import '../../../../Auth/Presentation/view/Login.dart';
+import 'Widgets/Edit_Profile.dart';
+import 'Widgets/Supervision_view.dart';
+import 'Widgets/rewardsView.dart';
+import '../../../../../ShowcaseProvider.dart'; // Import ShowcaseProvider
 
 class PatientProfileView extends StatefulWidget {
   const PatientProfileView({super.key});
@@ -36,6 +36,7 @@ class _PatientProfileViewState extends State<PatientProfileView> {
   final GlobalKey _languageKey = GlobalKey();
   final GlobalKey _logoutKey = GlobalKey();
   final GlobalKey _rewardKey = GlobalKey();
+  final GlobalKey _changePasswordKey = GlobalKey(); // Added for Change Password
 
   @override
   void initState() {
@@ -124,9 +125,10 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                 ShowCaseWidget.of(context).startShowCase([
                   _editKey,
                   _darkModeKey,
-                  _supervisorKey,
-                  _rewardKey,
                   _languageKey,
+                  _rewardKey,
+                  _supervisorKey,
+                  _changePasswordKey,
                   _logoutKey,
                 ]);
                 setState(() {
@@ -274,10 +276,10 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                                       )
                                     : _buildDarkModeTile(),
                                 const Divider(),
-                                // Supervisor Section with Showcase
+                                // Language Change Option with Showcase
                                 showcaseProvider.isShowcaseEnabled
                                     ? Showcase(
-                                        key: _supervisorKey,
+                                        key: _languageKey,
                                         tooltipBackgroundColor:
                                             Theme.of(context).primaryColor,
                                         textColor:
@@ -293,10 +295,11 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                                             const EdgeInsets.all(10),
                                         description: S
                                             .of(context)
-                                            .Patient_Profile_view_View_or_manage_your_supervisors,
-                                        child: _buildSupervisorTile(),
+                                            .Patient_Profile_view_Switch_between_languages,
+                                        child:
+                                            _buildLanguageTile(localeProvider),
                                       )
-                                    : _buildSupervisorTile(),
+                                    : _buildLanguageTile(localeProvider),
                                 const Divider(),
                                 // Rewards Section with Showcase
                                 showcaseProvider.isShowcaseEnabled
@@ -322,10 +325,10 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                                       )
                                     : _buildRewardsTile(),
                                 const Divider(),
-                                // Language Change Option with Showcase
+                                // Supervisor Section with Showcase
                                 showcaseProvider.isShowcaseEnabled
                                     ? Showcase(
-                                        key: _languageKey,
+                                        key: _supervisorKey,
                                         tooltipBackgroundColor:
                                             Theme.of(context).primaryColor,
                                         textColor:
@@ -341,11 +344,33 @@ class _PatientProfileViewState extends State<PatientProfileView> {
                                             const EdgeInsets.all(10),
                                         description: S
                                             .of(context)
-                                            .Patient_Profile_view_Switch_between_languages,
-                                        child:
-                                            _buildLanguageTile(localeProvider),
+                                            .Patient_Profile_view_View_or_manage_your_supervisors,
+                                        child: _buildSupervisorTile(),
                                       )
-                                    : _buildLanguageTile(localeProvider),
+                                    : _buildSupervisorTile(),
+                                const Divider(),
+                                // Password Change Option with Showcase
+                                showcaseProvider.isShowcaseEnabled
+                                    ? Showcase(
+                                        key: _changePasswordKey,
+                                        tooltipBackgroundColor:
+                                            Theme.of(context).primaryColor,
+                                        textColor:
+                                            Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                                ? AppColors.white
+                                                : AppColors.black,
+                                        descTextStyle: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        tooltipPadding:
+                                            const EdgeInsets.all(10),
+                                        description:
+                                            'Change your account password here',
+                                        child: _buildChangePasswordTile(),
+                                      )
+                                    : _buildChangePasswordTile(),
                                 const Divider(),
                                 // Log out with Showcase
                                 showcaseProvider.isShowcaseEnabled
@@ -426,24 +451,23 @@ class _PatientProfileViewState extends State<PatientProfileView> {
     );
   }
 
-  // Helper method for Supervisor Tile
-  Widget _buildSupervisorTile() {
+  // Helper method for Language Tile
+  Widget _buildLanguageTile(LocaleProvider localeProvider) {
     return ListTile(
       leading: Icon(
-        Icons.supervisor_account,
+        Icons.language,
         color: Theme.of(context).brightness == Brightness.dark
             ? AppColors.mainColorDark
             : AppColors.mainColor,
       ),
-      title: Text(S.of(context).Patient_Profile_view_Supervisor),
+      title: Text(S.of(context).Patient_Profile_view_Change_Language),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SupervisorsScreen(),
-          ),
-        );
+        if (localeProvider.locale.languageCode == 'en') {
+          localeProvider.setLocale(const Locale('ar'));
+        } else {
+          localeProvider.setLocale(const Locale('en'));
+        }
       },
     );
   }
@@ -470,23 +494,46 @@ class _PatientProfileViewState extends State<PatientProfileView> {
     );
   }
 
-  // Helper method for Language Tile
-  Widget _buildLanguageTile(LocaleProvider localeProvider) {
+  // Helper method for Supervisor Tile
+  Widget _buildSupervisorTile() {
     return ListTile(
       leading: Icon(
-        Icons.language,
+        Icons.supervisor_account,
         color: Theme.of(context).brightness == Brightness.dark
             ? AppColors.mainColorDark
             : AppColors.mainColor,
       ),
-      title: Text(S.of(context).Patient_Profile_view_Change_Language),
+      title: Text(S.of(context).Patient_Profile_view_Supervisor),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
-        if (localeProvider.locale.languageCode == 'en') {
-          localeProvider.setLocale(const Locale('ar'));
-        } else {
-          localeProvider.setLocale(const Locale('en'));
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SupervisorsScreen(),
+          ),
+        );
+      },
+    );
+  }
+
+  // Helper method for Change Password Tile
+  Widget _buildChangePasswordTile() {
+    return ListTile(
+      leading: Icon(
+        Icons.lock_reset,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.mainColorDark
+            : AppColors.mainColor,
+      ),
+      title: Text(S.of(context).Patient_Profile_view_Change_password),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ChangePassPage(),
+          ),
+        );
       },
     );
   }

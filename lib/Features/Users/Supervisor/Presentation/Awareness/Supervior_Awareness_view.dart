@@ -43,22 +43,38 @@ class _nameState extends State<Supervisor_Awareness_View> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-             _buildAwarenessCard(
+              _buildAwarenessCard(
                   title: S.of(context).Awareness_view_title3,
                   description: S.of(context).Awareness_view_description3,
-              ),
+                  context: context),
               const SizedBox(height: 12), // Space between cards
-             _buildAwarenessCard(
+              _buildAwarenessCard(
                   title: S.of(context).Awareness_view_title4,
                   description: S.of(context).Awareness_view_description4,
-              ),
+                  context: context),
               const SizedBox(height: 12), // Space between cards
-            _buildAwarenessCard(
+              _buildAwarenessCard(
                   title: S.of(context).Awareness_view_title2,
                   description: S.of(context).Awareness_view_description2,
+                  context: context),
+              const SizedBox(height: 12), // Space between cards
+                _buildAwarenessCard(
+                  title: S.of(context).Awareness_view_title5,
+                  description: S.of(context).Awareness_view_description5,
+                  context: context
               ),
               const SizedBox(height: 12), // Space between cards
-            
+              _buildAwarenessCard(
+                  title: S.of(context).Awareness_view_title6,
+                  description: S.of(context).Awareness_view_description6,
+                  context: context
+              ),
+              const SizedBox(height: 12), // Space between cards
+              _buildAwarenessCard(
+                  title: S.of(context).Awareness_view_title7,
+                  description: S.of(context).Awareness_view_description7,
+                  context: context
+              ),
               const SizedBox(height: 60),
             ],
           ),
@@ -68,7 +84,7 @@ class _nameState extends State<Supervisor_Awareness_View> {
   }
 
   Widget _buildAwarenessCard(
-      {required String title, required String description}) {
+      {required String title, required String description, required BuildContext context}) {
     return Container(
       padding: const EdgeInsets.all(16),
       width: double.infinity,

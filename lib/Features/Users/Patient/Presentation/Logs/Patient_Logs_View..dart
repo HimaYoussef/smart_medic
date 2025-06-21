@@ -377,29 +377,28 @@ class _PatientLogsViewState extends State<PatientLogsView> {
                                     ConnectionState.waiting) {
                                   return const Center(
                                       child: CircularProgressIndicator());
-                                }
+                           }
                                 if (medicineSnapshot.hasError ||
                                     !medicineSnapshot.hasData ||
                                     !medicineSnapshot.data!['success']) {
-                                  return const SizedBox
-                                      .shrink(); // Skip this log
+                                  text = "Medicine: Not found";
                                 } else {
-                                  var medicineData =
-                                      medicineSnapshot.data!['data'];
-                                  text = "${medicineData['name'] ?? 'Unknown'}";
+                                  var medicineData = medicineSnapshot.data!['data'];
+                                  text = "Medicine: ${medicineData['name'] ?? 'Unknown'}";
                                   isChecked = log['status'] == 'taken';
-                                  return Column(
-                                    children: [
-                                      LogItem(
-                                        time: time,
-                                        text: text,
-                                        isChecked: isChecked,
-                                        bpm: bpm,
-                                      ),
-                                      const Divider(color: Colors.white),
-                                    ],
-                                  );
                                 }
+
+                                return Column(
+                                  children: [
+                                    LogItem(
+                                      time: time,
+                                      text: text,
+                                      isChecked: isChecked,
+                                      bpm: bpm,
+                                    ),
+                                    const Divider(color: Colors.white),
+                                  ],
+                                );
                               },
                             );
                           } else {

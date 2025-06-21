@@ -170,6 +170,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Add_Supervisor_validatorText2": MessageLookupByLibrary.simpleMessage(
       "يرجى إدخال بريد المشرف الإلكتروني",
     ),
+    "Admin_Profile_Change_Password": MessageLookupByLibrary.simpleMessage(
+      "تغيير كلمة المرور",
+    ),
     "Admin_Profile_Patient_Data": MessageLookupByLibrary.simpleMessage(
       "اضغط هنا لعرض المرضى في النظام",
     ),
@@ -194,6 +197,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "Awareness_view_description4": MessageLookupByLibrary.simpleMessage(
       "العديد من كبار السن يتناولون أكثر من دواء يوميًا — وهذا أمر طبيعي، لكنه يحتاج إلى عناية. بعض الأدوية لا تتفاعل جيدًا مع بعضها. الصندوق الطبي الذكي والتطبيق يساعدانك على تنظيم كل شيء لتأخذ الأدوية الصحيحة في الوقت المناسب. وإذا شعرت بأي شيء غير طبيعي، اتصل بطبيبك فورًا. البقاء على اطلاع هو أحد أفضل طرق الحفاظ على صحتك.",
     ),
+    "Awareness_view_description5": MessageLookupByLibrary.simpleMessage(
+      "دواؤك يعمل بشكل أفضل عند تناوله في الوقت المناسب كل يوم. تفويت جرعة قد يصعب السيطرة على حالات مثل ارتفاع ضغط الدم أو السكري. ولهذا السبب يعطيك الصندوق الذكي تذكيرات ودية. إنه يساعدك على البقاء آمنًا ويحافظ على صحتك في المسار الصحيح. ثق بالنظام — فهو هنا لدعمك.",
+    ),
+    "Awareness_view_description6": MessageLookupByLibrary.simpleMessage(
+      "أحيانًا ننسى تناول الحبوب، ولكن تفويت الدواء قد يكون خطيرًا. قد يسبب مشاكل مثل الدوخة أو ارتفاع مستوى السكر أو صعوبة في التنفس — حسب حالتك. لهذا السبب ينبهك الصندوق الذكي بلطف حتى لا تفوت أي جرعة مهمة. اتباع خطة الدواء قد يجنبك زيارة المستشفى ويجعلك تشعر بتحسن كل يوم. عادة صغيرة قد تحمي جسدك بالكامل.",
+    ),
+    "Awareness_view_description7": MessageLookupByLibrary.simpleMessage(
+      "جميعنا ننسى الأشياء من وقت لآخر. ولهذا السبب تم تصميم الصندوق الطبي الذكي ليجعل حياتك أسهل. يضيء، يصدر صوتًا، بل ويرسل رسالة إلى هاتفك عندما يحين وقت الدواء. لا حاجة لحفظ المواعيد — فقط اتبع التنبيه اللطيف. دع التقنية تتولى التذكير، وركز أنت على عيش حياتك بشكل جيد.",
+    ),
     "Awareness_view_title1": MessageLookupByLibrary.simpleMessage(
       "الصحة النفسية",
     ),
@@ -205,6 +217,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Awareness_view_title4": MessageLookupByLibrary.simpleMessage(
       "هل تتناول عدة أدوية؟ احرص على سلامتك",
+    ),
+    "Awareness_view_title5": MessageLookupByLibrary.simpleMessage(
+      "لماذا من المهم تناول دوائك في الوقت المحدد",
+    ),
+    "Awareness_view_title6": MessageLookupByLibrary.simpleMessage(
+      "ماذا يحدث إذا نسيت تناول جرعة؟",
+    ),
+    "Awareness_view_title7": MessageLookupByLibrary.simpleMessage(
+      "طرق سهلة لتتذكر تناول أدويتك",
     ),
     "CustomBoxFilled_Cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
     "CustomBoxFilled_Delete_Medicine": MessageLookupByLibrary.simpleMessage(
@@ -422,6 +443,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "Patient_Main_view_Home": MessageLookupByLibrary.simpleMessage("الرئيسية"),
     "Patient_Profile_view_Change_Language":
         MessageLookupByLibrary.simpleMessage("تغيير اللغة"),
+    "Patient_Profile_view_Change_password":
+        MessageLookupByLibrary.simpleMessage("تغيير كلمة المرور"),
     "Patient_Profile_view_Dark_Mode": MessageLookupByLibrary.simpleMessage(
       "الوضع الداكن",
     ),
@@ -495,6 +518,8 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("لم يتم العثور على مشرفين"),
     "Supervisor_Profile_view_Change_Language":
         MessageLookupByLibrary.simpleMessage("تغيير اللغة"),
+    "Supervisor_Profile_view_Change_password":
+        MessageLookupByLibrary.simpleMessage("تغيير كلمة المرور"),
     "Supervisor_Profile_view_Dark_Mode": MessageLookupByLibrary.simpleMessage(
       "الوضع الداكن",
     ),

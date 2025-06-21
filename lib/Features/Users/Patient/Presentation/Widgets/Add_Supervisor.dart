@@ -194,6 +194,8 @@ class _Add_SuperVisor extends State<Add_SuperVisor> {
                        : CustomButton(
                           text: S.of(context).Add_Supervisor_Supervisor_Add,
                           onPressed: () {
+                                                        FocusScope.of(context).unfocus();
+
                             if (_formKey.currentState!.validate()) {
                               if (_SuperVisor_Type ==
                                   S.of(context).Add_Supervisor_Choose) {

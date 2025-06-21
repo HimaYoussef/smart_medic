@@ -80,6 +80,8 @@ class _EditProfileState extends State<Edit_Profile> {
   }
 
   Future<void> _updateProfile() async {
+        FocusScope.of(context).unfocus();
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -247,6 +249,8 @@ class _EditProfileState extends State<Edit_Profile> {
                             labelText: S.of(context).Edit_Profile_labelText1,
                             validatorText:
                                 S.of(context).Edit_Profile_validatorText1,
+                                                            textInputAction: TextInputAction.next,
+
                           ),
                           const SizedBox(height: 25.0),
                           CustomText(
@@ -260,6 +264,8 @@ class _EditProfileState extends State<Edit_Profile> {
                              labelText: S.of(context).Edit_Profile_labelText2,
                             validatorText:
                                 S.of(context).Edit_Profile_validatorText2,
+                                                            textInputAction: TextInputAction.next,
+
                           ),
                           const SizedBox(height: 25),
                          CustomText(
@@ -273,6 +279,8 @@ class _EditProfileState extends State<Edit_Profile> {
                            labelText: S.of(context).Edit_Profile_labelText3,
                             validatorText:
                                 S.of(context).Edit_Profile_validatorText3,
+                                                            textInputAction: TextInputAction.done,
+
                           ),
                           const SizedBox(height: 25.0),
                           CustomButton(text: S.of(context).Edit_Profile_Edit, onPressed: _updateProfile)

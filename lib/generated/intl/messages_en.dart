@@ -170,6 +170,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Add_Supervisor_validatorText2": MessageLookupByLibrary.simpleMessage(
       "Please Enter the Email of the Supervisor",
     ),
+    "Admin_Profile_Change_Password": MessageLookupByLibrary.simpleMessage(
+      "Change Password ",
+    ),
     "Admin_Profile_Patient_Data": MessageLookupByLibrary.simpleMessage(
       "Click Here To Display The Patient in the System",
     ),
@@ -196,6 +199,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "Awareness_view_description4": MessageLookupByLibrary.simpleMessage(
       "Many older adults take more than one medicine a day—and that’s okay, but it needs care. Some pills don’t mix well together. Your smart medical box and app help organize everything so you take the right pills at the right time. If anything ever feels off, always call your doctor. Staying informed is one of the best ways to stay healthy.",
     ),
+    "Awareness_view_description5": MessageLookupByLibrary.simpleMessage(
+      "Your medicine works best when taken at the right time every day. Missing a dose can make it harder to manage conditions like high blood pressure or diabetes. That’s why your smart medical box gives you friendly reminders. It helps you stay safe and keeps your health on the right track. Trust the system—it’s here to support you.",
+    ),
+    "Awareness_view_description6": MessageLookupByLibrary.simpleMessage(
+      "Sometimes we forget to take a pill, but skipping medicine can be risky. It may cause problems like dizziness, high sugar levels, or breathing trouble—depending on your condition. That’s why your smart box alerts you gently, so you never miss an important dose. Following your medication plan can keep you out of the hospital and feeling better every day. One small habit can protect your whole body.",
+    ),
+    "Awareness_view_description7": MessageLookupByLibrary.simpleMessage(
+      "We all forget things from time to time. That’s why your smart medical box is designed to make life easier. It lights up, makes a sound, and even sends a message to your phone when it’s time for your medicine. No need to memorize anything—just follow the gentle alert. Let the technology take care of remembering, so you can focus on living well.",
+    ),
     "Awareness_view_title1": MessageLookupByLibrary.simpleMessage(
       "Mental Health",
     ),
@@ -207,6 +219,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Awareness_view_title4": MessageLookupByLibrary.simpleMessage(
       "Are You Taking Multiple Medications? Stay Safe",
+    ),
+    "Awareness_view_title5": MessageLookupByLibrary.simpleMessage(
+      "Why It’s Important to Take Your Medicine on Time",
+    ),
+    "Awareness_view_title6": MessageLookupByLibrary.simpleMessage(
+      "What Happens If You Skip a Dose?",
+    ),
+    "Awareness_view_title7": MessageLookupByLibrary.simpleMessage(
+      "Easy Ways to Remember Your Pills",
     ),
     "CustomBoxFilled_Cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "CustomBoxFilled_Delete_Medicine": MessageLookupByLibrary.simpleMessage(
@@ -420,6 +441,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "Patient_Main_view_Home": MessageLookupByLibrary.simpleMessage("Home"),
     "Patient_Profile_view_Change_Language":
         MessageLookupByLibrary.simpleMessage("Change Language"),
+    "Patient_Profile_view_Change_password":
+        MessageLookupByLibrary.simpleMessage("Change Password"),
     "Patient_Profile_view_Dark_Mode": MessageLookupByLibrary.simpleMessage(
       "Dark Mode",
     ),
@@ -509,6 +532,8 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("No supervisors found"),
     "Supervisor_Profile_view_Change_Language":
         MessageLookupByLibrary.simpleMessage("Change Language"),
+    "Supervisor_Profile_view_Change_password":
+        MessageLookupByLibrary.simpleMessage("Change password"),
     "Supervisor_Profile_view_Dark_Mode": MessageLookupByLibrary.simpleMessage(
       "Dark Mode",
     ),

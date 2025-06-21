@@ -14,32 +14,50 @@ import '../../../../core/functions/routing.dart';
 import '../../../../core/utils/Colors.dart';
 import '../view_model/Cubits/LoginCubit/login_cubit.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  final String? role;
+
+  const LoginScreen({super.key, this.role});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final String? role; // Make role optional
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
 
-  LoginScreen({super.key, this.role});
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => LoginCubit(expectedRole: role ?? ''),
+     create: (_) => LoginCubit(expectedRole: widget.role ?? ''),
       child: BlocConsumer<LoginCubit, LoginState>(
         listener: (context, state) {
-          final role = BlocProvider.of<LoginCubit>(context).role;
           if (state is AdminSuccess) {
             pushAndRemoveUntil(context, const MaintainerView());
-          }
-          if (state is Success) {
-            if (role == 'Patient') {
+          } else if (state is Success) {
+            if (state.userRole == 'Patient') {
               pushAndRemoveUntil(context, const PatientHomeView());
-            } else if (role == 'Supervisor') {
+            } else if (state.userRole == 'Supervisor') {
               pushAndRemoveUntil(context, const SupervisorHomeView());
-            } else if (role == 'Maintainer') {
-              pushAndRemoveUntil(context, const MaintainerView());
+            } else {
+              pushAndRemoveUntil(context, const RoleSelectionScreen());
             }
           } else if (state is Failed) {
             // Show error with option to resend verification email if needed
@@ -217,9 +235,7 @@ class LoginScreen extends StatelessWidget {
                                           color: Colors.grey,
                                         ),
                                         onPressed: () {
-                                          context
-                                              .read<LoginCubit>()
-                                              .togglePasswordVisibility();
+                                          cubit.togglePasswordVisibility();
                                         },
                                       ),
                                     ),
@@ -230,6 +246,8 @@ class LoginScreen extends StatelessWidget {
                                         : CustomButton(
                                             text: S.of(context).Login_SIGN_IN,
                                             onPressed: () {
+                                              FocusScope.of(context).unfocus();
+
                                               if (_formKey.currentState!
                                                   .validate()) {
                                                 context

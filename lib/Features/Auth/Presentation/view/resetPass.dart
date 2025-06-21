@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_medic/generated/l10n.dart';
@@ -25,6 +26,8 @@ class _ResetPassPageState extends State<ResetPassPage> {
 
   // Send password reset email
   Future<void> sendPasswordResetEmail() async {
+        FocusScope.of(context).unfocus();
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -36,6 +39,21 @@ class _ResetPassPageState extends State<ResetPassPage> {
     });
 
     try {
+      
+      final methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+      if (methods.isEmpty) {
+        throw FirebaseAuthException(code: 'user-not-found');
+      }
+
+      // ✅ 3. تحقق من وجود المستخدم في Firestore
+      final users = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (users.docs.isEmpty) {
+        throw FirebaseAuthException(code: 'user-not-found');
+      }
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

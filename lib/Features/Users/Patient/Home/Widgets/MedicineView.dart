@@ -9,11 +9,13 @@ class MedicineDetailsPopup {
 
     String timesText = times.join(', ');
 
-    if (scheduleType == 0) {
+     if (scheduleType == 0) {
       return 'DAILY at $timesText';
-    } else if (scheduleType == 1) {
+    }
+    else if (scheduleType == 1) {
       return 'EVERY $scheduleValue DAYS at $timesText';
-    } else if (scheduleType == 2) {
+    }
+    else if (scheduleType == 2) {
       if (bitmaskDays == null || bitmaskDays.isEmpty || bitmaskDays.length != 7) {
         return 'SPECIFIC DAYS at $timesText';
       }

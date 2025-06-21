@@ -243,6 +243,31 @@ class _SuperviorProfileViewState extends State<Supervior_Profile_view> {
                               },
                             ),
                             const Divider(),
+                            // Password Change Option
+                            ListTile(
+                              leading: Icon(
+                                Icons.lock_reset,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.mainColorDark
+                                    : AppColors.mainColor,
+                              ),
+                              title: Text(S
+                                  .of(context)
+                                  .Supervisor_Profile_view_Change_password),
+                              trailing:
+                                  const Icon(Icons.arrow_forward_ios, size: 16),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ChangePassPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                            const Divider(),
 
                             // Log out
                             ListTile(

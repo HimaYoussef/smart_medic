@@ -40,6 +40,8 @@ class _Add_new_Medicine extends State<addNewMedicine> {
   final BluetoothManager _bluetoothManager = BluetoothManager();
   File? _image;
   bool _isLoading = false;
+    bool _isImgLoading = false;
+
   final ImagePicker _picker = ImagePicker();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -124,7 +126,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
-        _isLoading = true;
+        _isImgLoading = true;
         _medNameController.clear(); // Clear previous medicine name
       });
 
@@ -146,7 +148,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
     }
 
     setState(() {
-      _isLoading = true;
+      _isImgLoading = true;
     });
 
     try {
@@ -160,14 +162,14 @@ class _Add_new_Medicine extends State<addNewMedicine> {
       }
     } finally {
       setState(() {
-        _isLoading = false;
+        _isImgLoading = false;
       });
     }
   }
 
   Future<void> _extractAndAnalyzeMedicine(File imageFile) async {
     setState(() {
-      _isLoading = true;
+      _isImgLoading = true;
     });
 
     try {
@@ -225,7 +227,7 @@ class _Add_new_Medicine extends State<addNewMedicine> {
       }
     } finally {
       setState(() {
-        _isLoading = false;
+        _isImgLoading = false;
       });
     }
   }
@@ -431,8 +433,7 @@ in summary Your task is to analyze the image and perform the following steps in 
                         fonSize: 15),
                     const SizedBox(height: 10),
                     CustomTextField(
-                      controller: TextEditingController(
-                          text: widget.compNum.toString()),
+                                          controller: TextEditingController(text: widget.compNum.toString()),
                       readOnly: true,
                       enablation: false,
                     ),
@@ -471,7 +472,7 @@ in summary Your task is to analyze the image and perform the following steps in 
                         ),
                       ],
                     ),
-                    if (_isLoading)
+                    if (_isImgLoading)
                       const Padding(
                         padding: EdgeInsets.only(top: 10),
                         child: CircularProgressIndicator(),
@@ -486,6 +487,8 @@ in summary Your task is to analyze the image and perform the following steps in 
                       readOnly: false,
                       validatorText:
                           S.of(context).Add_New_Medicine_validatorText2,
+                             textInputAction: TextInputAction.next,
+                      maxValue: 50,
                     ),
                     const SizedBox(height: 25),
                     CustomText(
@@ -499,6 +502,8 @@ in summary Your task is to analyze the image and perform the following steps in 
                       readOnly: false,
                       validatorText:
                           S.of(context).Add_New_Medicine_validatorText3,
+                           maxValue: 4,
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 25),
                     CustomText(
@@ -523,20 +528,11 @@ in summary Your task is to analyze the image and perform the following steps in 
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
                           setState(() {
-                            if (_isValidNumTimes(value)) {
-                              int numTimes = int.parse(value);
-                              List<TimeOfDay?> newTimes =
-                                  List<TimeOfDay?>.filled(numTimes, null);
-                              for (int i = 0;
-                                  i < _selectedTimes.length && i < numTimes;
-                                  i++) {
-                                newTimes[i] = _selectedTimes[i];
-                              }
-                              _selectedTimes = newTimes;
-                              _updateTimesList();
-                            } else {
+                          
                               _selectedTimes = [];
                               _times = [];
+                                                          if (!_isValidNumTimes(value)){
+
                               if (value.isNotEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -544,6 +540,9 @@ in summary Your task is to analyze the image and perform the following steps in 
                                       S.of(context).Add_New_Medicine_SnackBar,
                                       style: TextStyle(color: AppColors.white),
                                     ),
+                                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                                        ? AppColors.mainColorDark
+                                        : AppColors.mainColor,
                                   ),
                                 );
                               }
@@ -551,6 +550,8 @@ in summary Your task is to analyze the image and perform the following steps in 
                           });
                         },
                         maxValue: 4,
+                                                textInputAction: TextInputAction.next,
+
                       ),
                       const SizedBox(height: 25),
                       if (_numTimesController.text.isNotEmpty &&
@@ -657,6 +658,8 @@ in summary Your task is to analyze the image and perform the following steps in 
                             _selectedTime = null;
                           });
                         },
+                           textInputAction: TextInputAction.next,
+                        maxValue: 7,
                       ),
                       const SizedBox(height: 25),
                       if (_daysIntervalController.text.isNotEmpty &&
@@ -796,113 +799,9 @@ in summary Your task is to analyze the image and perform the following steps in 
                       ],
                     ],
                     const SizedBox(height: 30),
-                    _isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : CustomButton(
+                             CustomButton(
                             text: S.of(context).Add_New_Medicine_Submit,
-                            onPressed: () async {
-                              if (!_formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Please fill all required fields correctly.',
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                    backgroundColor:
-                                        Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? AppColors.mainColorDark
-                                            : AppColors.mainColor,
-                                  ),
-                                );
-                                return;
-                              }
-
-                              int pillsLeft = int.parse(_pillsController.text);
-                              if (pillsLeft > 50) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Total pills cannot exceed 50.',
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                    backgroundColor:
-                                        Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? AppColors.mainColorDark
-                                            : AppColors.mainColor,
-                                  ),
-                                );
-                                return;
-                              }
-                              if (_scheduleType == 0) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      S
-                                          .of(context)
-                                          .Add_New_Medicine_Please_select_a_schedule_type,
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                  ),
-                                );
-                              } else if (_scheduleType == 1 &&
-                                  (_selectedTimes.isEmpty ||
-                                      _selectedTimes.contains(null))) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      S
-                                          .of(context)
-                                          .Add_New_Medicine_Please_select_all_times_for_daily_schedule,
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                  ),
-                                );
-                              } else if (_scheduleType == 2 &&
-                                  _selectedTime == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      S
-                                          .of(context)
-                                          .Add_New_Medicine_Please_select_a_time_for_every_X_days_schedule,
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                  ),
-                                );
-                              } else if (_scheduleType == 3 &&
-                                  !_bitmaskDays.contains(1)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      S
-                                          .of(context)
-                                          .Add_New_Medicine_Please_select_at_least_one_day_for_specific_days_schedule,
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                  ),
-                                );
-                              } else if (_scheduleType == 3 &&
-                                  _bitmaskDays.contains(1) &&
-                                  _commonTimeForSpecificDays.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      S
-                                          .of(context)
-                                          .Add_New_Medicine_Please_select_a_time_for_specific_days_schedule,
-                                      style: TextStyle(color: AppColors.white),
-                                    ),
-                                  ),
-                                );
-                              } else if (_formKey.currentState!.validate()) {
-                                await addMedication();
-                                if (mounted) {
-                                  Navigator.pop(context);
-                                }
-                              }
-                            },
+                            onPressed: addMedication,
                           ),
                     const SizedBox(height: 5),
                   ],
@@ -955,7 +854,110 @@ in summary Your task is to analyze the image and perform the following steps in 
 
   User? user = FirebaseAuth.instance.currentUser;
 
-  Future<Map<String, dynamic>> addMedication() async {
+  Future<void> addMedication() async {
+    FocusScope.of(context).unfocus();
+    if (_isLoading) return;
+
+                              if (!_formKey.currentState!.validate()) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Please fill all required fields correctly.',
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                    backgroundColor:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? AppColors.mainColorDark
+                                            : AppColors.mainColor,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              if (_scheduleType == 0) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_a_schedule_type,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                     backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+                                  ),
+                                );
+                              } else if (_scheduleType == 1 &&
+                                  (_selectedTimes.isEmpty ||
+                                      _selectedTimes.contains(null))) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_all_times_for_daily_schedule,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                      backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+                                  ),
+                                );
+                                return;
+    }
+                              if (_scheduleType == 2 &&
+                                  _selectedTime == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_a_time_for_every_X_days_schedule,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                  ),
+                                );
+    }
+    if  (_scheduleType == 3 &&
+                                  !_bitmaskDays.contains(1)) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_at_least_one_day_for_specific_days_schedule,
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                  ),
+                                );
+    }
+    if (_scheduleType == 3 &&
+                                  _bitmaskDays.contains(1) &&
+                                  _commonTimeForSpecificDays.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      S
+                                          .of(context)
+                                          .Add_New_Medicine_Please_select_a_time_for_specific_days_schedule,
+                                       style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+    _showLoadingOverlay(context);
+
+    try {
     var result = await SmartMedicalDb.addMedication(
       patientId: user!.uid,
       name: _medNameController.text,
@@ -975,9 +977,22 @@ in summary Your task is to analyze the image and perform the following steps in 
     if (result['success']) {
       await LocalNotificationService.scheduleMedicineNotifications();
       await sendAllMedicationsToArduino();
-      if (mounted) {
-        Navigator.pop(context); // Ensure navigation happens
-      }
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Medicine added successfully!',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+      _medNameController.clear();
+      _pillsController.clear();
+      _dosageController.clear();
+      _numTimesController.clear();
+      _daysIntervalController.clear();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -988,8 +1003,27 @@ in summary Your task is to analyze the image and perform the following steps in 
         ),
       );
     }
-    return result;
-  }
+     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error adding medication: $e',
+            style: TextStyle(color: AppColors.white),
+          ),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.mainColorDark
+              : AppColors.mainColor,
+        ),
+      );
+    } finally {
+      _hideLoadingOverlay(context);
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }  }
 
   Future<void> sendAllMedicationsToArduino() async {
     try {

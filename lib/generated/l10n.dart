@@ -1479,6 +1479,66 @@ class S {
     );
   }
 
+  /// `Why It’s Important to Take Your Medicine on Time`
+  String get Awareness_view_title5 {
+    return Intl.message(
+      'Why It’s Important to Take Your Medicine on Time',
+      name: 'Awareness_view_title5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your medicine works best when taken at the right time every day. Missing a dose can make it harder to manage conditions like high blood pressure or diabetes. That’s why your smart medical box gives you friendly reminders. It helps you stay safe and keeps your health on the right track. Trust the system—it’s here to support you.`
+  String get Awareness_view_description5 {
+    return Intl.message(
+      'Your medicine works best when taken at the right time every day. Missing a dose can make it harder to manage conditions like high blood pressure or diabetes. That’s why your smart medical box gives you friendly reminders. It helps you stay safe and keeps your health on the right track. Trust the system—it’s here to support you.',
+      name: 'Awareness_view_description5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What Happens If You Skip a Dose?`
+  String get Awareness_view_title6 {
+    return Intl.message(
+      'What Happens If You Skip a Dose?',
+      name: 'Awareness_view_title6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sometimes we forget to take a pill, but skipping medicine can be risky. It may cause problems like dizziness, high sugar levels, or breathing trouble—depending on your condition. That’s why your smart box alerts you gently, so you never miss an important dose. Following your medication plan can keep you out of the hospital and feeling better every day. One small habit can protect your whole body.`
+  String get Awareness_view_description6 {
+    return Intl.message(
+      'Sometimes we forget to take a pill, but skipping medicine can be risky. It may cause problems like dizziness, high sugar levels, or breathing trouble—depending on your condition. That’s why your smart box alerts you gently, so you never miss an important dose. Following your medication plan can keep you out of the hospital and feeling better every day. One small habit can protect your whole body.',
+      name: 'Awareness_view_description6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Easy Ways to Remember Your Pills`
+  String get Awareness_view_title7 {
+    return Intl.message(
+      'Easy Ways to Remember Your Pills',
+      name: 'Awareness_view_title7',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We all forget things from time to time. That’s why your smart medical box is designed to make life easier. It lights up, makes a sound, and even sends a message to your phone when it’s time for your medicine. No need to memorize anything—just follow the gentle alert. Let the technology take care of remembering, so you can focus on living well.`
+  String get Awareness_view_description7 {
+    return Intl.message(
+      'We all forget things from time to time. That’s why your smart medical box is designed to make life easier. It lights up, makes a sound, and even sends a message to your phone when it’s time for your medicine. No need to memorize anything—just follow the gentle alert. Let the technology take care of remembering, so you can focus on living well.',
+      name: 'Awareness_view_description7',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Logs`
   String get Patient_Logs_View_logs {
     return Intl.message(
@@ -1709,6 +1769,16 @@ class S {
     );
   }
 
+  /// `Change Password`
+  String get Patient_Profile_view_Change_password {
+    return Intl.message(
+      'Change Password',
+      name: 'Patient_Profile_view_Change_password',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Rewards`
   String get rewardsView_Rewards {
     return Intl.message(
@@ -1799,6 +1869,16 @@ class S {
     return Intl.message(
       'Supervisors Data',
       name: 'Admin_Profile_Supervisor_Data_Display',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change Password `
+  String get Admin_Profile_Change_Password {
+    return Intl.message(
+      'Change Password ',
+      name: 'Admin_Profile_Change_Password',
       desc: '',
       args: [],
     );
@@ -2224,6 +2304,16 @@ class S {
     return Intl.message(
       'Log out',
       name: 'Supervisor_Profile_view_Log_out',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change password`
+  String get Supervisor_Profile_view_Change_password {
+    return Intl.message(
+      'Change password',
+      name: 'Supervisor_Profile_view_Change_password',
       desc: '',
       args: [],
     );

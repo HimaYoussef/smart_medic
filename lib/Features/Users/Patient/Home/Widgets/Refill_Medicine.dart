@@ -14,13 +14,12 @@ class Refill_Medicine extends StatefulWidget {
   const Refill_Medicine({super.key, required this.compartmentNum});
 
   @override
-  State<Refill_Medicine> createState() => _nameState();
+  State<Refill_Medicine> createState() => _RefillMedicineState();
 }
 
-final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-final TextEditingController _numOfPillsController = TextEditingController();
-
-class _nameState extends State<Refill_Medicine> {
+class _RefillMedicineState extends State<Refill_Medicine> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _numOfPillsController = TextEditingController();
   User? user = FirebaseAuth.instance.currentUser;
   bool _isLoading = false;
 
@@ -31,10 +30,10 @@ class _nameState extends State<Refill_Medicine> {
   }
 
   Future<void> _refillMedicine() async {
+    FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
     setState(() {
       _isLoading = true;
     });
@@ -147,7 +146,6 @@ class _nameState extends State<Refill_Medicine> {
                   ? AppColors.cointainerDarkColor
                   : AppColors.white,
             ),
-            height: 300,
             child: Form(
               key: _formKey,
               child: Padding(
@@ -180,17 +178,29 @@ class _nameState extends State<Refill_Medicine> {
                     ),
                     const SizedBox(height: 20),
                     CustomTextField(
+                      controller: _numOfPillsController,
                       keyboardType: TextInputType.number,
                       readOnly: false,
-                      controller: _numOfPillsController,
+                      validatorText: S
+                          .of(context)
+                          .Refill_Medicine_Please_enter_the_number_of_pills,
+                      labelText: S
+                          .of(context)
+                          .Refill_Medicine_Enter_The_Num_of_pills_added,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _refillMedicine(),
+                      maxValue: 50,
                     ),
-                    const SizedBox(height: 55.0),
-                    CustomButton(
-                      text: 'Refill',
-                      onPressed: _refillMedicine,
-                    ),
+                    const SizedBox(height: 55),
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : CustomButton(
+                            text: 'Refill',
+                            onPressed: _refillMedicine,
+                          ),
+                    const SizedBox(
+                      height: 8,
+                    )
                   ],
                 ),
               ),

@@ -1,27 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_medic/generated/l10n.dart';
 import '../../../../core/functions/email_validation.dart';
 import '../../../../core/functions/routing.dart';
 import '../../../../core/utils/Colors.dart';
 import '../../../../core/widgets/Custom_button.dart';
+import '../../../../generated/l10n.dart';
 import '../view_model/Cubits/SignUpCubit/sign_up_cubit.dart';
 import 'login.dart';
 
-class SignUpScreen extends StatelessWidget {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+class SignUpScreen extends StatefulWidget {
   final String role;
 
-  SignUpScreen({super.key, required this.role});
+  const SignUpScreen({super.key, required this.role});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style:  TextStyle(color: AppColors.white),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SignUpCubit(),
+      create: (_) => SignUpCubit(),
       child: BlocConsumer<SignUpCubit, SignUpState>(
         listener: (context, state) {
           if (state is SignUpSuccess) {
@@ -29,35 +55,28 @@ class SignUpScreen extends StatelessWidget {
               SnackBar(
                 content: Text(
                   S.of(context).signUp_SnackBar,
-                  style: TextStyle(color: AppColors.white),
+                  style:  TextStyle(color: AppColors.white),
                 ),
               ),
             );
-            if (role == 'Patient') {
-              pushTo(context, LoginScreen(role: 'Patient'));
-            } else if (role == 'Supervisor') {
-              pushTo(context, LoginScreen(role: 'Supervisor'));
-            }
+            pushAndRemoveUntil(
+              context,
+              LoginScreen(role: widget.role),
+            );
           } else if (state is SignUpFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  state.errorMessage,
-                  style: TextStyle(color: AppColors.white),
-                ),
-              ),
-            );
+            showErrorSnackBar(context, state.errorMessage);
           }
         },
         builder: (context, state) {
           final cubit = context.watch<SignUpCubit>();
+          final isLoading = state is SignUpLoading;
+
           return Scaffold(
             body: Stack(
               children: [
                 Column(
                   children: [
                     Expanded(
-                      flex: 1,
                       child: Container(
                         color: Theme.of(context).brightness == Brightness.dark
                             ? AppColors.mainColorDark
@@ -75,27 +94,26 @@ class SignUpScreen extends StatelessWidget {
                   ],
                 ),
                 SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 100),
-                      Text(
-                        S.of(context).signUp_Head,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 100),
+                        Text(
+                          S.of(context).signUp_Head,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.white,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        child: Container(
+                        const SizedBox(height: 20),
+                        Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? AppColors.cointainerDarkColor
-                                    : AppColors.white,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.cointainerDarkColor
+                                : AppColors.white,
                             borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(
@@ -104,205 +122,144 @@ class SignUpScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: Container(
-                                  width: 64,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? AppColors.mainColorDark
-                                        : AppColors.mainColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Icon(
-                                    Icons.medical_services,
-                                    color: AppColors.white,
-                                    size: 30,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              Center(
-                                child: Text(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                _buildIcon(context),
+                                const SizedBox(height: 24),
+                                Text(
                                   S.of(context).signUp_Hello,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 32),
-                              TextFormField(
-                                keyboardType: TextInputType.name,
-                                controller: _nameController,
-                                decoration: InputDecoration(
-                                  border: UnderlineInputBorder(),
-                                  labelText: S.of(context).signUp_Name,
-                                  labelStyle: TextStyle(color: Colors.grey),
+                                const SizedBox(height: 32),
+                                _buildTextField(_nameController, TextInputType.name, S.of(context).signUp_Name),
+                                const SizedBox(height: 24),
+                                _buildTextField(_emailController, TextInputType.emailAddress, S.of(context).signUp_Email),
+                                const SizedBox(height: 24),
+                                _buildPasswordField(
+                                  controller: _passwordController,
+                                  label: S.of(context).signUp_password,
+                                  isVisible: cubit.isPasswordVisible,
+                                  toggleVisibility: cubit.togglePasswordVisibility,
                                 ),
-                              ),
-                              const SizedBox(height: 24),
-                              TextFormField(
-                                keyboardType: TextInputType.emailAddress,
-                                controller: _emailController,
-                                decoration: InputDecoration(
-                                  border: UnderlineInputBorder(),
-                                  labelText: S.of(context).signUp_Email,
-                                  labelStyle: TextStyle(color: Colors.grey),
+                                const SizedBox(height: 24),
+                                _buildPasswordField(
+                                  controller: _confirmPasswordController,
+                                  label: S.of(context).signUp_Confirm_Password,
+                                  isVisible: cubit.isConfirmPasswordVisible,
+                                  toggleVisibility: cubit.toggleConfirmPasswordVisibility,
                                 ),
-                              ),
-                              const SizedBox(height: 24),
-                              TextField(
-                                controller: _passwordController,
-                                obscureText: !cubit.isPasswordVisible,
-                                decoration: InputDecoration(
-                                  border: const UnderlineInputBorder(),
-                                  labelText: S.of(context).signUp_password,
-                                  labelStyle:
-                                      const TextStyle(color: Colors.grey),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      cubit.isPasswordVisible
-                                          ? Icons.visibility_off
-                                          : Icons.visibility,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      cubit.togglePasswordVisibility();
-                                    },
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
-                                  ),
+                                const SizedBox(height: 20),
+                                isLoading
+                                    ? const CircularProgressIndicator()
+                                    : CustomButton(
+                                  text: S.of(context).signUp_SIGN_UP,
+                                  onPressed: () {
+                                    FocusScope.of(context).unfocus();
+                                    final name = _nameController.text.trim();
+                                    final email = _emailController.text.trim();
+                                    final pass = _passwordController.text;
+                                    final confirm = _confirmPasswordController.text;
+
+                                    if (name.isEmpty || email.isEmpty || pass.isEmpty || confirm.isEmpty) {
+                                      showErrorSnackBar(context, S.of(context).signUp_SnackBar_Please_Continue);
+                                    } else if (!emailValidate(email)) {
+                                      showErrorSnackBar(context, S.of(context).signUp_Please_enter_a_valid_email);
+                                    } else if (pass != confirm) {
+                                      showErrorSnackBar(context, S.of(context).signUp_Passwords_do_not_match);
+                                    } else {
+                                      cubit.signUp(
+                                        name: name,
+                                        email: email,
+                                        password: pass,
+                                        type: widget.role,
+                                      );
+                                    }
+                                  },
                                 ),
-                              ),
-                              const SizedBox(height: 24),
-                              TextField(
-                                controller: _confirmPasswordController,
-                                obscureText: !cubit.isConfirmPasswordVisible,
-                                decoration: InputDecoration(
-                                  border: const UnderlineInputBorder(),
-                                  labelText:
-                                      S.of(context).signUp_Confirm_Password,
-                                  labelStyle:
-                                      const TextStyle(color: Colors.grey),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      cubit.isConfirmPasswordVisible
-                                          ? Icons.visibility_off
-                                          : Icons.visibility,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      cubit.toggleConfirmPasswordVisibility();
-                                    },
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              state is SignUpLoading
-                                  ? const Center(
-                                      child: CircularProgressIndicator())
-                                  : CustomButton(
-                                      text: S.of(context).signUp_SIGN_UP,
-                                      onPressed: () async {
-                                        final name = _nameController.text;
-                                        final email =
-                                            _emailController.text.trim();
-                                        final password =
-                                            _passwordController.text;
-                                        final confirmPassword =
-                                            _confirmPasswordController.text;
-                                        if (email.isEmpty ||
-                                            password.isEmpty ||
-                                            confirmPassword.isEmpty) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                S
-                                                    .of(context)
-                                                    .signUp_SnackBar_Please_Continue,
-                                                style: TextStyle(
-                                                    color: AppColors.white),
-                                              ),
-                                            ),
-                                          );
-                                        } else if (!emailValidate(email)) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                S
-                                                    .of(context)
-                                                    .signUp_Please_enter_a_valid_email,
-                                                style: TextStyle(
-                                                    color: AppColors.white),
-                                              ),
-                                            ),
-                                          );
-                                        } else if (password !=
-                                            confirmPassword) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                S
-                                                    .of(context)
-                                                    .signUp_Passwords_do_not_match,
-                                                style: TextStyle(
-                                                    color: AppColors.white),
-                                              ),
-                                            ),
-                                          );
-                                        } else {
-                                          await BlocProvider.of<SignUpCubit>(
-                                                  context)
-                                              .signUp(
-                                            name: name,
-                                            email: email,
-                                            password: password,
-                                            type: role,
-                                          );
-                                        }
-                                      },
-                                    ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      TextButton(
-                        onPressed: () {
-                          pushTo(context, LoginScreen());
-                          ;
-                        },
-                        child: Text(
-                          S.of(context).signUp_Already_have_an_account_SIGN_IN,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? AppColors.mainColorDark
-                                    : AppColors.mainColor,
+                        const SizedBox(height: 20),
+                        TextButton(
+                          onPressed: () => pushAndRemoveUntil(context, LoginScreen()),
+                          child: Text(
+                            S.of(context).signUp_Already_have_an_account_SIGN_IN,
+                            style: TextStyle(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? AppColors.mainColorDark
+                                  : AppColors.mainColor,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildIcon(BuildContext context) {
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.mainColorDark
+            : AppColors.mainColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Icon(
+        Icons.medical_services,
+        color: AppColors.white,
+        size: 30,
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, TextInputType type, String label) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: type,
+      decoration: InputDecoration(
+        border: const UnderlineInputBorder(),
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required bool isVisible,
+    required VoidCallback toggleVisibility,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: !isVisible,
+      decoration: InputDecoration(
+        border: const UnderlineInputBorder(),
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.grey),
+        suffixIcon: IconButton(
+          icon: Icon(
+            isVisible ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey,
+          ),
+          onPressed: toggleVisibility,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
     );
   }
